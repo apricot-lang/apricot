@@ -1,0 +1,8 @@
+language: ruby
+rvm:
+  - rbx-18mode
+  - rbx-19mode
+
+notifications:
+  webhooks:
+    - http://rcmp.tenthbit.net/
