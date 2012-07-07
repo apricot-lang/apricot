@@ -2,6 +2,7 @@ require 'rational'
 
 module Thing
   class Identifier < Struct.new(:name); end
+  class Symbol < Struct.new(:name); end
   class List < Struct.new(:array); end
 end
 
@@ -106,7 +107,15 @@ class Parser
   end
 
   def parse_symbol
-    # TODO
+    next_char # skip the :
+    symbol = ""
+
+    while @char =~ IDENTIFIER
+      symbol << @char
+      next_char
+    end
+
+    Thing::Symbol.new symbol
   end
 
   def parse_number
