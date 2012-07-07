@@ -116,6 +116,8 @@ module Apricot
         next_char
       end
 
+      raise ParseError, "Empty symbol name" if symbol.empty?
+
       AST::Symbol.new(@line, symbol)
     end
 
