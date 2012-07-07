@@ -4,7 +4,12 @@ module Apricot
   class Parser
     class ParseError < StandardError; end
 
-    IDENTIFIER = /[A-Za-z0-9`~!@#\$%^&*_=+<.>\/?:'\\|-]/
+    IDENTIFIER   = /[A-Za-z0-9`~!@#\$%^&*_=+<.>\/?:'\\|-]/
+    OCTAL        = /[0-7]/
+    HEX          = /[0-9a-fA-F]/
+    DIGITS       = ('0'..'9').to_a + ('a'..'z').to_a
+    CHAR_ESCAPES = {"a" => "\a", "b" => "\b", "t" => "\t", "n" => "\n",
+                    "v" => "\v", "f" => "\f", "r" => "\r", "e" => "\e"}
 
     # @param [String] source a source program
     def initialize(source)
@@ -104,7 +109,55 @@ module Apricot
     end
 
     def parse_string
-      # TODO
+      line = @line
+      next_char # skip the opening "
+      string = ""
+
+      while @char
+        if @char == '"'
+          next_char # consume the "
+          return AST::String.new(line, string)
+        end
+
+        string << parse_string_char
+      end
+
+      # Can only reach here if we run out of chars without getting a "
+      raise ParseError, "Unexpected end of program while parsing string"
+    end
+
+    def parse_string_char
+      char = if @char == "\\"
+               next_char
+               if CHAR_ESCAPES.has_key?(@char)
+                 CHAR_ESCAPES[consume_char]
+               elsif @char =~ OCTAL
+                 char_escape_helper(8, OCTAL, 3)
+               elsif @char == 'x'
+                 next_char
+                 raise ParseError, "Invalid hex character escape" unless @char =~ HEX
+                 char_escape_helper(16, HEX, 2)
+               else
+                 consume_char
+               end
+             else
+               consume_char
+             end
+      raise ParseError, "Unexpected end of file while parsing character escape" unless char
+      char
+    end
+
+    # Parse digits in a certain base for string character escapes
+    def char_escape_helper(base, regex, n)
+      number = ""
+
+      n.times do
+        number << @char
+        break if peek_char !~ regex
+        next_char
+      end
+
+      number.to_i(base).chr
     end
 
     def parse_symbol
@@ -147,6 +200,12 @@ module Apricot
       end
 
       AST::Identifier.new(@line, identifier)
+    end
+
+    def consume_char
+      char = @char
+      next_char
+      char
     end
 
     def next_char

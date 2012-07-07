@@ -30,6 +30,9 @@ module Apricot
     class Hash < SimpleNode
     end
 
+    class String < SimpleNode
+    end
+
     class Identifier < SimpleNode
     end
 
