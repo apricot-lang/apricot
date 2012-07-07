@@ -16,6 +16,7 @@ module Apricot
     def initialize(source)
       @source = source
       @location = 0
+      @line = 1
     end
 
     # @return [Array] a list of the forms in the program
@@ -151,6 +152,7 @@ module Apricot
       @char = @source[@location,1]
       @char = nil if @char.empty?
       @location += 1 if @char
+      @line += 1 if @char == "\n"
       @char
     end
 
