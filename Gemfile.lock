@@ -1,0 +1,12 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    ansi (1.4.3)
+    rexpl (0.0.1)
+      ansi
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  rexpl
