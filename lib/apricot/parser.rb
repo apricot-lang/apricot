@@ -150,10 +150,10 @@ module Apricot
     end
 
     def next_char
+      @line += 1 if @char == "\n"
       @char = @source[@location,1]
       @char = nil if @char.empty?
       @location += 1 if @char
-      @line += 1 if @char == "\n"
       @char
     end
 
