@@ -35,7 +35,7 @@ module Apricot
 
     class Symbol < SimpleNode
     end
-    
+
     class Integer < SimpleNode
     end
 
