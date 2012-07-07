@@ -95,7 +95,12 @@ module Apricot
 
     def parse_hash
       next_char # skip the {
-      AST::Hash.new(@line, Hash[*parse_forms_until('}')])
+      forms = parse_forms_until('}')
+      raise ParseError, "Odd number of forms in key-value hash" if forms.count.odd?
+
+      hash = {}
+      forms.each_slice(2) {|key, value| hash[key] = value }
+      AST::Hash.new(@line, hash)
     end
 
     def parse_string
