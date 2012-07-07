@@ -8,7 +8,7 @@ end
 class Parser
   class ParseError < StandardError; end
 
-  IDENTIFIER = /[A-Za-z0-9`~!@#\$%^&*_=+,<.>\/?;'\\|-]/
+  IDENTIFIER = /[A-Za-z0-9`~!@#\$%^&*_=+<.>\/?'\\|-]/
 
   # @param [String] source a source program
   def initialize(source)
@@ -72,9 +72,17 @@ class Parser
     end
   end
 
+  # Skips whitespace, commas, and comments
   def skip_whitespace
-    while @char =~ /[\s,]/
-      next_char
+    while @char =~ /[\s,;]/
+      # Comments begin with a semicolon and extend to the end of the line
+      if @char == ';'
+        while @char && @char != "\n"
+          next_char
+        end
+      else
+        next_char
+      end
     end
   end
 
