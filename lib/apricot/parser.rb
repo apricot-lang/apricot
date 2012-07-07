@@ -12,11 +12,11 @@ module Apricot
 
     IDENTIFIER = /[A-Za-z0-9`~!@#\$%^&*_=+<.>\/?:'\\|-]/
 
-      # @param [String] source a source program
-      def initialize(source)
-        @source = source
-        @location = 0
-      end
+    # @param [String] source a source program
+    def initialize(source)
+      @source = source
+      @location = 0
+    end
 
     # @return [Array] a list of the forms in the program
     def parse
