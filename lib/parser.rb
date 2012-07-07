@@ -9,7 +9,7 @@ end
 class Parser
   class ParseError < StandardError; end
 
-  IDENTIFIER = /[A-Za-z0-9`~!@#\$%^&*_=+<.>\/?'\\|-]/
+  IDENTIFIER = /[A-Za-z0-9`~!@#\$%^&*_=+<.>\/?:'\\|-]/
 
   # @param [String] source a source program
   def initialize(source)
