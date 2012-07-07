@@ -5,6 +5,7 @@ Don't get excited (yet).
 ## License
 
 Copyright (c) 2012, Curtis McEnroe <programble@gmail.com>
+
 Copyright (c) 2012, Scott Olson <scott@scott-olson.org>
 
 Permission to use, copy, modify, and/or distribute this software for any
