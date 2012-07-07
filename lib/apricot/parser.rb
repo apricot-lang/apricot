@@ -1,12 +1,6 @@
-require 'rational'
+require 'apricot/ast'
 
 module Apricot
-  module AST
-    class Identifier < Struct.new(:name); end
-    class Symbol < Struct.new(:name); end
-    class List < Struct.new(:array); end
-  end
-
   class Parser
     class ParseError < StandardError; end
 
@@ -91,17 +85,17 @@ module Apricot
 
     def parse_list
       next_char # skip the (
-      AST::List.new parse_forms_until(')')
+      AST::List.new(@line, parse_forms_until(')'))
     end
 
     def parse_array
       next_char # skip the [
-      parse_forms_until(']')
+      AST::Array.new(@line, parse_forms_until(']'))
     end
 
     def parse_hash
       next_char # skip the {
-      Hash[*parse_forms_until('}')]
+      AST::Hash.new(@line, Hash[*parse_forms_until('}')])
     end
 
     def parse_string
@@ -117,7 +111,7 @@ module Apricot
         next_char
       end
 
-      AST::Symbol.new symbol
+      AST::Symbol.new(@line, symbol)
     end
 
     def parse_number
@@ -129,10 +123,10 @@ module Apricot
       end
 
       case number
-      when /^[+-]?\d+$/ then number.to_i
-      when /^([+-]?)(\d+)r(\d+)$/ then ($1 + $3).to_i($2.to_i)
-      when /^[+-]?\d+\.?\d*(?:e[+-]?\d+)?$/ then number.to_f
-      when /^([+-]?\d+)\/(\d+)$/ then Rational($1.to_i, $2.to_i)
+      when /^[+-]?\d+$/ then AST::Integer.new(@line, number.to_i)
+      when /^([+-]?)(\d+)r(\d+)$/ then AST::Integer.new(@line, ($1 + $3).to_i($2.to_i))
+      when /^[+-]?\d+\.?\d*(?:e[+-]?\d+)?$/ then AST::Float.new(@line, number.to_f)
+      when /^([+-]?\d+)\/(\d+)$/ then AST::Rational.new(@line, $1.to_i, $2.to_i)
       else raise ParseError, "Invalid number: #{number}"
       end
     end
@@ -145,7 +139,7 @@ module Apricot
         next_char
       end
 
-      AST::Identifier.new identifier
+      AST::Identifier.new(@line, identifier)
     end
 
     def next_char
