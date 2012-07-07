@@ -18,7 +18,7 @@ module Apricot
       @line = 1
     end
 
-    # @return [Array] a list of the forms in the program
+    # @return [Array<AST::Node>] a list of the forms in the program
     def parse
       program = []
       next_char
@@ -35,7 +35,7 @@ module Apricot
     private
     # Parse Lisp forms until the given character is encountered
     # @param [String] terminator the character to stop parsing at
-    # @return [Array] a list of the Lisp forms parsed
+    # @return [Array<AST::Node>] a list of the Lisp forms parsed
     def parse_forms_until(terminator)
       skip_whitespace
       forms = []
@@ -55,7 +55,7 @@ module Apricot
     end
 
     # Parse a single Lisp form
-    # @return the code representation of the form
+    # @return [AST::Node] an AST node representing the form
     def parse_form
       case @char
       when '(' then parse_list
