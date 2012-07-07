@@ -183,11 +183,19 @@ module Apricot
       end
 
       case number
-      when /^[+-]?\d+$/ then AST::Integer.new(@line, number.to_i)
-      when /^([+-]?)(\d+)r(\d+)$/ then AST::Integer.new(@line, ($1 + $3).to_i($2.to_i))
-      when /^[+-]?\d+\.?\d*(?:e[+-]?\d+)?$/ then AST::Float.new(@line, number.to_f)
-      when /^([+-]?\d+)\/(\d+)$/ then AST::Rational.new(@line, $1.to_i, $2.to_i)
-      else raise ParseError, "Invalid number: #{number}"
+      when /^[+-]?\d+$/
+        AST::Integer.new(@line, number.to_i)
+      when /^([+-]?)(\d+)r([a-zA-Z0-9]+)$/
+        sign, radix, digits = $1, $2.to_i, $3
+        raise ParseError, "Radix out of range: #{radix}" unless 2 <= radix && radix <= 36
+        raise ParseError, "Invalid digits for radix in number: #{number}" unless digits.downcase.chars.all? {|d| DIGITS[0..radix-1].include?(d) }
+        AST::Integer.new(@line, (sign + digits).to_i(radix))
+      when /^[+-]?\d+\.?\d*(?:e[+-]?\d+)?$/
+        AST::Float.new(@line, number.to_f)
+      when /^([+-]?\d+)\/(\d+)$/
+        AST::Rational.new(@line, $1.to_i, $2.to_i)
+      else
+        raise ParseError, "Invalid number: #{number}"
       end
     end
 
