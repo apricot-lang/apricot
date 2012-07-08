@@ -1,1 +1,1 @@
-%w[parser].map {|r| require "apricot/#{r}" }
+%w[ast parser].map {|r| require "apricot/#{r}" }

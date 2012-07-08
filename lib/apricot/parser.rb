@@ -1,5 +1,3 @@
-require 'apricot/ast'
-
 module Apricot
   class Parser
     class ParseError < StandardError; end
