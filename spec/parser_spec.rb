@@ -52,6 +52,56 @@ describe Apricot::Parser do
     expect { parse('12abc') }.to raise_error(Apricot::Parser::ParseError)
   end
 
+  it 'parses empty strings' do
+    parse('""').length.should == 1
+    @first.should be_a(Apricot::AST::String)
+    @first.value.should == ''
+  end
+
+  it 'parses strings' do
+    parse('"Hello, world!"').length.should == 1
+    @first.should be_a(Apricot::AST::String)
+    @first.value.should == 'Hello, world!'
+  end
+
+  it 'parses multiline strings' do
+    parse(%{"This is\na test"}).length.should == 1
+    @first.should be_a(Apricot::AST::String)
+    @first.value.should == "This is\na test"
+  end
+
+  it 'does not parse unfinished strings' do
+    expect { parse('"') }.to raise_error(Apricot::Parser::ParseError)
+  end
+
+  it 'parses strings with character escapes' do
+    parse('"\\a\\b\\t\\n\\v\\f\\r\\e\\"\\\\"').length.should == 1
+    @first.should be_a(Apricot::AST::String)
+    @first.value.should == "\a\b\t\n\v\f\r\e\"\\"
+  end
+
+  it 'parses strings with octal escapes' do
+    parse('"\\1\\01\\001"').length.should == 1
+    @first.should be_a(Apricot::AST::String)
+    @first.value.should == "\001\001\001"
+  end
+
+  it 'parses strings with hex escapes' do
+    parse('"\\x1\\x01"').length.should == 1
+    @first.should be_a(Apricot::AST::String)
+    @first.value.should == "\001\001"
+  end
+
+  it 'does not parse strings with invalid hex escapes' do
+    expect { parse('"\\x"') }.to raise_error(Apricot::Parser::ParseError)
+  end
+
+  it 'stops parsing hex/octal escapes in strings at non-hex/octal digits' do
+    parse('"\xAZ\082"').length.should == 1
+    @first.should be_a(Apricot::AST::String)
+    @first.value.should == "\x0AZ\00082"
+  end
+
   it 'parses symbols' do
     parse(':example').length.should == 1
     @first.should be_a(Apricot::AST::Symbol)
