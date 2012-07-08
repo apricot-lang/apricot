@@ -1,7 +1,19 @@
 module Apricot
-  class Parser
-    class ParseError < StandardError; end
+  class SyntaxError < StandardError
+    attr_accessor :filename, :line, :msg
 
+    def initialize(filename, line, msg)
+      @filename = filename
+      @line = line
+      @msg = msg
+    end
+
+    def to_s
+      "#{@filename}:#{@line}: #{@msg}"
+    end
+  end
+
+  class Parser
     IDENTIFIER   = /[A-Za-z0-9`~!@#\$%^&*_=+<.>\/?:'\\|-]/
     OCTAL        = /[0-7]/
     HEX          = /[0-9a-fA-F]/
@@ -10,7 +22,8 @@ module Apricot
                     "v" => "\v", "f" => "\f", "r" => "\r", "e" => "\e"}
 
     # @param [String] source a source program
-    def initialize(source)
+    def initialize(source, filename="(none)")
+      @filename = filename
       @source = source
       @location = 0
       @line = 1
@@ -49,7 +62,7 @@ module Apricot
       end
 
       # Can only reach here if we run out of chars without getting a terminator
-      raise ParseError, "Unexpected end of program, expected #{terminator}"
+      syntax_error "Unexpected end of program, expected #{terminator}"
     end
 
     # Parse a single Lisp form
@@ -68,7 +81,7 @@ module Apricot
         else
           parse_identifier
         end
-      else raise ParseError, "Unexpected character: #{@char}"
+      else syntax_error "Unexpected character: #{@char}"
       end
     end
 
@@ -99,7 +112,7 @@ module Apricot
     def parse_hash
       next_char # skip the {
       forms = parse_forms_until('}')
-      raise ParseError, "Odd number of forms in key-value hash" if forms.count.odd?
+      syntax_error "Odd number of forms in key-value hash" if forms.count.odd?
 
       hash = {}
       forms.each_slice(2) {|key, value| hash[key] = value }
@@ -121,7 +134,7 @@ module Apricot
       end
 
       # Can only reach here if we run out of chars without getting a "
-      raise ParseError, "Unexpected end of program while parsing string"
+      syntax_error "Unexpected end of program while parsing string"
     end
 
     def parse_string_char
@@ -133,7 +146,7 @@ module Apricot
                  char_escape_helper(8, OCTAL, 3)
                elsif @char == 'x'
                  next_char
-                 raise ParseError, "Invalid hex character escape" unless @char =~ HEX
+                 syntax_error "Invalid hex character escape" unless @char =~ HEX
                  char_escape_helper(16, HEX, 2)
                else
                  consume_char
@@ -141,7 +154,7 @@ module Apricot
              else
                consume_char
              end
-      raise ParseError, "Unexpected end of file while parsing character escape" unless char
+      syntax_error "Unexpected end of file while parsing character escape" unless char
       char
     end
 
@@ -167,7 +180,7 @@ module Apricot
         next_char
       end
 
-      raise ParseError, "Empty symbol name" if symbol.empty?
+      syntax_error "Empty symbol name" if symbol.empty?
 
       AST::Symbol.new(@line, symbol)
     end
@@ -185,15 +198,15 @@ module Apricot
         AST::Integer.new(@line, number.to_i)
       when /^([+-]?)(\d+)r([a-zA-Z0-9]+)$/
         sign, radix, digits = $1, $2.to_i, $3
-        raise ParseError, "Radix out of range: #{radix}" unless 2 <= radix && radix <= 36
-        raise ParseError, "Invalid digits for radix in number: #{number}" unless digits.downcase.chars.all? {|d| DIGITS[0..radix-1].include?(d) }
+        syntax_error "Radix out of range: #{radix}" unless 2 <= radix && radix <= 36
+        syntax_error "Invalid digits for radix in number: #{number}" unless digits.downcase.chars.all? {|d| DIGITS[0..radix-1].include?(d) }
         AST::Integer.new(@line, (sign + digits).to_i(radix))
       when /^[+-]?\d+\.?\d*(?:e[+-]?\d+)?$/
         AST::Float.new(@line, number.to_f)
       when /^([+-]?\d+)\/(\d+)$/
         AST::Rational.new(@line, $1.to_i, $2.to_i)
       else
-        raise ParseError, "Invalid number: #{number}"
+        syntax_error "Invalid number: #{number}"
       end
     end
 
@@ -226,6 +239,10 @@ module Apricot
       char = @source[@location,1]
       char = nil if char.empty?
       char
+    end
+
+    def syntax_error(message)
+      raise SyntaxError.new(@filename, @line, message)
     end
   end
 end

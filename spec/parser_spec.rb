@@ -49,7 +49,7 @@ describe Apricot::Parser do
   end
 
   it 'does not parse invalid numbers' do
-    expect { parse('12abc') }.to raise_error(Apricot::Parser::ParseError)
+    expect { parse('12abc') }.to raise_error(Apricot::SyntaxError)
   end
 
   it 'parses empty strings' do
@@ -71,7 +71,7 @@ describe Apricot::Parser do
   end
 
   it 'does not parse unfinished strings' do
-    expect { parse('"') }.to raise_error(Apricot::Parser::ParseError)
+    expect { parse('"') }.to raise_error(Apricot::SyntaxError)
   end
 
   it 'parses strings with character escapes' do
@@ -93,7 +93,7 @@ describe Apricot::Parser do
   end
 
   it 'does not parse strings with invalid hex escapes' do
-    expect { parse('"\\x"') }.to raise_error(Apricot::Parser::ParseError)
+    expect { parse('"\\x"') }.to raise_error(Apricot::SyntaxError)
   end
 
   it 'stops parsing hex/octal escapes in strings at non-hex/octal digits' do
@@ -109,7 +109,7 @@ describe Apricot::Parser do
   end
 
   it 'does not parse empty symbols' do
-    expect { parse(':') }.to raise_error(Apricot::Parser::ParseError)
+    expect { parse(':') }.to raise_error(Apricot::SyntaxError)
   end
 
   it 'parses empty lists' do
@@ -154,7 +154,7 @@ describe Apricot::Parser do
   end
 
   it 'does not parse invalid hashes' do
-    expect { parse('{:foo 1 :bar}') }.to raise_error(Apricot::Parser::ParseError)
+    expect { parse('{:foo 1 :bar}') }.to raise_error(Apricot::SyntaxError)
   end
 
   it 'parses multiple forms' do
