@@ -153,8 +153,8 @@ module Apricot
 
       n.times do
         number << @char
-        break if peek_char !~ regex
         next_char
+        break if @char !~ regex
       end
 
       number.to_i(base).chr
