@@ -1,58 +1,56 @@
-module Apricot
-  module AST
-    class Node
-      attr_reader :line
+module Apricot::AST
+  class Node
+    attr_reader :line
 
-      def initialize(line)
-        @line = line
-      end
-
-      def pos(g)
-        g.set_line(@line)
-      end
+    def initialize(line)
+      @line = line
     end
 
-    class SimpleNode < Node
-      attr_reader :value
-
-      def initialize(line, value)
-        super(line)
-        @value = value
-      end
+    def pos(g)
+      g.set_line(@line)
     end
+  end
 
-    class List < SimpleNode
+  class SimpleNode < Node
+    attr_reader :value
+
+    def initialize(line, value)
+      super(line)
+      @value = value
     end
+  end
 
-    class Array < SimpleNode
-    end
+  class List < SimpleNode
+  end
 
-    class Hash < SimpleNode
-    end
+  class Array < SimpleNode
+  end
 
-    class String < SimpleNode
-    end
+  class Hash < SimpleNode
+  end
 
-    class Identifier < SimpleNode
-    end
+  class String < SimpleNode
+  end
 
-    class Symbol < SimpleNode
-    end
+  class Identifier < SimpleNode
+  end
 
-    class Integer < SimpleNode
-    end
+  class Symbol < SimpleNode
+  end
 
-    class Float < SimpleNode
-    end
+  class Integer < SimpleNode
+  end
 
-    class Rational < Node
-      attr_reader :numerator, :denominator
+  class Float < SimpleNode
+  end
 
-      def initialize(line, numerator, denominator)
-        super(line)
-        @numerator = numerator
-        @denominator = denominator
-      end
+  class Rational < Node
+    attr_reader :numerator, :denominator
+
+    def initialize(line, numerator, denominator)
+      super(line)
+      @numerator = numerator
+      @denominator = denominator
     end
   end
 end
