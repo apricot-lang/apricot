@@ -25,9 +25,6 @@ module Apricot
     class List < NodeStub
     end
 
-    class Array < NodeStub
-    end
-
     class Hash < NodeStub
     end
 
@@ -36,4 +33,4 @@ module Apricot
   end
 end
 
-%w{literal}.map {|r| require "apricot/ast/#{r}" }
+%w{literal array}.map {|r| require "apricot/ast/#{r}" }
