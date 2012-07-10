@@ -127,7 +127,7 @@ module Apricot
       while @char
         if @char == '"'
           next_char # consume the "
-          return AST::String.new(line, string)
+          return AST::StringLiteral.new(line, string)
         end
 
         string << parse_string_char
@@ -182,7 +182,7 @@ module Apricot
 
       syntax_error "Empty symbol name" if symbol.empty?
 
-      AST::Symbol.new(@line, symbol)
+      AST::Literal.new(@line, symbol.to_sym)
     end
 
     def parse_number
@@ -195,16 +195,16 @@ module Apricot
 
       case number
       when /^[+-]?\d+$/
-        AST::Integer.new(@line, number.to_i)
+        AST::Literal.new(@line, number.to_i)
       when /^([+-]?)(\d+)r([a-zA-Z0-9]+)$/
         sign, radix, digits = $1, $2.to_i, $3
         syntax_error "Radix out of range: #{radix}" unless 2 <= radix && radix <= 36
         syntax_error "Invalid digits for radix in number: #{number}" unless digits.downcase.chars.all? {|d| DIGITS[0..radix-1].include?(d) }
-        AST::Integer.new(@line, (sign + digits).to_i(radix))
+        AST::Literal.new(@line, (sign + digits).to_i(radix))
       when /^[+-]?\d+\.?\d*(?:e[+-]?\d+)?$/
-        AST::Float.new(@line, number.to_f)
+        AST::Literal.new(@line, number.to_f)
       when /^([+-]?\d+)\/(\d+)$/
-        AST::Rational.new(@line, $1.to_i, $2.to_i)
+        AST::RationalLiteral.new(@line, $1.to_i, $2.to_i)
       else
         syntax_error "Invalid number: #{number}"
       end

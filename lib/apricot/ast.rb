@@ -12,7 +12,7 @@ module Apricot
       end
     end
 
-    class SimpleNode < Node
+    class NodeStub < Node
       attr_reader :value
 
       def initialize(line, value)
@@ -21,38 +21,19 @@ module Apricot
       end
     end
 
-    class List < SimpleNode
+    # TODO: Replace stubs with AST classes in lib/apricot/ast/
+    class List < NodeStub
     end
 
-    class Array < SimpleNode
+    class Array < NodeStub
     end
 
-    class Hash < SimpleNode
+    class Hash < NodeStub
     end
 
-    class String < SimpleNode
-    end
-
-    class Identifier < SimpleNode
-    end
-
-    class Symbol < SimpleNode
-    end
-
-    class Integer < SimpleNode
-    end
-
-    class Float < SimpleNode
-    end
-
-    class Rational < Node
-      attr_reader :numerator, :denominator
-
-      def initialize(line, numerator, denominator)
-        super(line)
-        @numerator = numerator
-        @denominator = denominator
-      end
+    class Identifier < NodeStub
     end
   end
 end
+
+%w{literal}.map {|r| require "apricot/ast/#{r}" }

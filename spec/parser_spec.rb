@@ -25,25 +25,25 @@ describe Apricot::Parser do
 
   it 'parses integers' do
     parse('123').length.should == 1
-    @first.should be_a(Apricot::AST::Integer)
+    @first.should be_a(Apricot::AST::Literal)
     @first.value.should == 123
   end
 
   it 'parses radix integers' do
     parse('2r10').length.should == 1
-    @first.should be_a(Apricot::AST::Integer)
+    @first.should be_a(Apricot::AST::Literal)
     @first.value.should == 2
   end
 
   it 'parses floats' do
     parse('1.23').length.should == 1
-    @first.should be_a(Apricot::AST::Float)
+    @first.should be_a(Apricot::AST::Literal)
     @first.value.should == 1.23
   end
 
   it 'parses rationals' do
     parse('12/34').length.should == 1
-    @first.should be_a(Apricot::AST::Rational)
+    @first.should be_a(Apricot::AST::RationalLiteral)
     @first.numerator.should == 12
     @first.denominator.should == 34
   end
@@ -54,19 +54,19 @@ describe Apricot::Parser do
 
   it 'parses empty strings' do
     parse('""').length.should == 1
-    @first.should be_a(Apricot::AST::String)
+    @first.should be_a(Apricot::AST::StringLiteral)
     @first.value.should == ''
   end
 
   it 'parses strings' do
     parse('"Hello, world!"').length.should == 1
-    @first.should be_a(Apricot::AST::String)
+    @first.should be_a(Apricot::AST::StringLiteral)
     @first.value.should == 'Hello, world!'
   end
 
   it 'parses multiline strings' do
     parse(%{"This is\na test"}).length.should == 1
-    @first.should be_a(Apricot::AST::String)
+    @first.should be_a(Apricot::AST::StringLiteral)
     @first.value.should == "This is\na test"
   end
 
@@ -76,19 +76,19 @@ describe Apricot::Parser do
 
   it 'parses strings with character escapes' do
     parse('"\\a\\b\\t\\n\\v\\f\\r\\e\\"\\\\"').length.should == 1
-    @first.should be_a(Apricot::AST::String)
+    @first.should be_a(Apricot::AST::StringLiteral)
     @first.value.should == "\a\b\t\n\v\f\r\e\"\\"
   end
 
   it 'parses strings with octal escapes' do
     parse('"\\1\\01\\001"').length.should == 1
-    @first.should be_a(Apricot::AST::String)
+    @first.should be_a(Apricot::AST::StringLiteral)
     @first.value.should == "\001\001\001"
   end
 
   it 'parses strings with hex escapes' do
     parse('"\\x1\\x01"').length.should == 1
-    @first.should be_a(Apricot::AST::String)
+    @first.should be_a(Apricot::AST::StringLiteral)
     @first.value.should == "\001\001"
   end
 
@@ -98,14 +98,14 @@ describe Apricot::Parser do
 
   it 'stops parsing hex/octal escapes in strings at non-hex/octal digits' do
     parse('"\xAZ\082"').length.should == 1
-    @first.should be_a(Apricot::AST::String)
+    @first.should be_a(Apricot::AST::StringLiteral)
     @first.value.should == "\x0AZ\00082"
   end
 
   it 'parses symbols' do
     parse(':example').length.should == 1
-    @first.should be_a(Apricot::AST::Symbol)
-    @first.value.should == 'example'
+    @first.should be_a(Apricot::AST::Literal)
+    @first.value.should == :example
   end
 
   it 'does not parse empty symbols' do
@@ -121,7 +121,7 @@ describe Apricot::Parser do
   it 'parses lists' do
     parse('(1 two)').length.should == 1
     @first.should be_a(Apricot::AST::List)
-    @first.value[0].should be_a(Apricot::AST::Integer)
+    @first.value[0].should be_a(Apricot::AST::Literal)
     @first.value[1].should be_a(Apricot::AST::Identifier)
   end
 
@@ -134,7 +134,7 @@ describe Apricot::Parser do
   it 'parses arrays' do
     parse('[1 two]').length.should == 1
     @first.should be_a(Apricot::AST::Array)
-    @first.value[0].should be_a(Apricot::AST::Integer)
+    @first.value[0].should be_a(Apricot::AST::Literal)
     @first.value[1].should be_a(Apricot::AST::Identifier)
   end
 
@@ -149,8 +149,8 @@ describe Apricot::Parser do
     @first.should be_a(Apricot::AST::Hash)
     @first.value.length.should == 1
     key = @first.value.keys.first
-    key.should be_a(Apricot::AST::Symbol)
-    @first.value[key].should be_a(Apricot::AST::Integer)
+    key.should be_a(Apricot::AST::Literal)
+    @first.value[key].should be_a(Apricot::AST::Literal)
   end
 
   it 'does not parse invalid hashes' do
