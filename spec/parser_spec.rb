@@ -128,14 +128,14 @@ describe Apricot::Parser do
   it 'parses empty arrays' do
     parse('[]').length.should == 1
     @first.should be_a(Apricot::AST::Array)
-    @first.value.should be_empty
+    @first.elements.should be_empty
   end
 
   it 'parses arrays' do
     parse('[1 two]').length.should == 1
     @first.should be_a(Apricot::AST::Array)
-    @first.value[0].should be_a(Apricot::AST::Literal)
-    @first.value[1].should be_a(Apricot::AST::Identifier)
+    @first.elements[0].should be_a(Apricot::AST::Literal)
+    @first.elements[1].should be_a(Apricot::AST::Identifier)
   end
 
   it 'parses empty hashes' do
