@@ -1,6 +1,6 @@
 describe Apricot::Parser do
   def parse(s)
-    @ast = described_class.new(s).parse
+    @ast = described_class.parse_string(s, "(spec)")
     @first = @ast.first
     @ast
   end
