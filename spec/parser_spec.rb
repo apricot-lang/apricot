@@ -147,10 +147,8 @@ describe Apricot::Parser do
   it 'parses hashes' do
     parse('{:example 1}').length.should == 1
     @first.should be_a(Apricot::AST::Hash)
-    @first.value.length.should == 1
-    key = @first.value.keys.first
-    key.should be_a(Apricot::AST::Literal)
-    @first.value[key].should be_a(Apricot::AST::Literal)
+    @first.value[0].should be_a(Apricot::AST::Literal)
+    @first.value[1].should be_a(Apricot::AST::Literal)
   end
 
   it 'does not parse invalid hashes' do
