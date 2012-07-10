@@ -1,17 +1,17 @@
 module Apricot::AST
   class Array < Node
-    attr_reader :value
+    attr_reader :elements
 
-    def initialize(line, value)
+    def initialize(line, elements)
       super(line)
-      @value = value
+      @elements = elements
     end
 
     def bytecode(g)
       pos(g)
 
-      @value.each {|x| x.bytecode(g) }
-      g.make_array @value.length
+      @elements.each {|e| e.bytecode(g) }
+      g.make_array @elements.length
     end
   end
 end
