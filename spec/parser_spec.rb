@@ -1,8 +1,8 @@
 describe Apricot::Parser do
   def parse(s)
     @ast = described_class.parse_string(s, "(spec)")
-    @first = @ast.first
-    @ast
+    @first = @ast.elements.first
+    @ast.elements
   end
 
   it 'parses nothing' do
@@ -157,7 +157,7 @@ describe Apricot::Parser do
 
   it 'parses multiple forms' do
     parse('foo bar').length.should == 2
-    @ast[0].should be_a(Apricot::AST::Identifier)
-    @ast[1].should be_a(Apricot::AST::Identifier)
+    @ast.elements[0].should be_a(Apricot::AST::Identifier)
+    @ast.elements[1].should be_a(Apricot::AST::Identifier)
   end
 end

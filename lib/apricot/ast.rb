@@ -30,4 +30,4 @@ module Apricot
   end
 end
 
-%w{literal array hash}.map {|r| require "apricot/ast/#{r}" }
+%w{literal array hash root script}.map {|r| require "apricot/ast/#{r}" }

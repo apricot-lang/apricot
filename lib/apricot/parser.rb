@@ -48,7 +48,7 @@ module Apricot
         skip_whitespace
       end
 
-      program
+      Apricot::AST::Root.new program
     end
 
     private
