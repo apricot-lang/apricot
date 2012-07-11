@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+file = __FILE__
+file = File.readlink(file) while File.symlink? file
+$LOAD_PATH.unshift(File.expand_path('../../lib', file))
+
+require 'apricot'
+
+evals = []
+options = Rubinius::Options.new "Usage: #{$0} [options] [program]", 20
+options.doc "OPTIONS:"
+
+options.on "-h", "--help", "Display this help" do
+  puts options
+  exit
+end
+
+file = options.parse(ARGV).first
+abort "No input file" unless file
+
+cm = Apricot::Compiler.compile file
+Rubinius.run_script cm
