@@ -23,8 +23,12 @@ module Apricot
         compiler.parser = self
       end
 
+	  def root(klass)
+		@root = klass
+	  end
+
       def run
-        @output = AST::Script.new parse
+        @output = @root.new parse
         run_next
       end
     end

@@ -15,8 +15,34 @@ options.on "-h", "--help", "Display this help" do
   exit
 end
 
-file = options.parse(ARGV).first
-abort "No input file" unless file
+options.on "-e", "CODE", "evaluate CODE and print the result" do |code|
+  evals << [:eval, code]
+end
 
-cm = Apricot::Compiler.compile file
-Rubinius.run_script cm
+options.parse(ARGV).each do |file|
+  evals << [:file, file]
+end
+
+if evals.empty?
+  if $stdin.tty?
+	require 'readline'
+	while code = Readline.readline("apr> ")
+	  cm = Apricot::Compiler.compile_string code
+	  print "=> "
+	  p Rubinius.run_script(cm)
+	end
+  else
+	evals << [:eval, STDIN.read, "(stdin)"]
+  end
+end
+
+evals.each do |type, *args|
+  case type
+  when :eval
+	cm = Apricot::Compiler.compile_string *args
+	Rubinius.run_script cm
+  when :file
+	cm = Apricot::Compiler.compile arg
+	Rubinius.run_script cm
+  end
+end
