@@ -21,6 +21,18 @@ module Apricot
     end
   end
 
+  SpecialForm.define(:'.') do |g, args|
+    # TODO: Improve exception messages
+    raise ArgumentError, "Too few arguments to ." if args.length < 2
+    raise TypeError, "Method must be identifier" unless args[1].is_a? AST::Identifier
+
+    receiver, method, margs = args[0], args[1].name, args[2..-1]
+
+    receiver.bytecode(g)
+    margs.each {|a| a.bytecode(g) }
+    g.send method, margs.length
+  end
+
   SpecialForm.define(:def) do |g, args|
     raise ArgumentError, "Too few arguments to def" if args.length < 1
     raise ArgumentError, "Too many arguments to def" if args.length > 2
