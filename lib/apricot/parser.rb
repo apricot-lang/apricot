@@ -223,7 +223,18 @@ module Apricot
         next_char
       end
 
-      AST::Identifier.new(@line, identifier.to_sym)
+      identifier = identifier.to_sym
+
+      case identifier
+      when :true
+        AST::TrueLiteral.new(@line)
+      when :false
+        AST::FalseLiteral.new(@line)
+      when :nil
+        AST::NilLiteral.new(@line)
+      else
+        AST::Identifier.new(@line, identifier)
+      end
     end
 
     def consume_char

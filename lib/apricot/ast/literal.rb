@@ -20,6 +20,27 @@ module Apricot::AST
     end
   end
 
+  class TrueLiteral < Node
+    def bytecode(g)
+      pos(g)
+      g.push_true
+    end
+  end
+
+  class FalseLiteral < Node
+    def bytecode(g)
+      pos(g)
+      g.push_false
+    end
+  end
+
+  class NilLiteral < Node
+    def bytecode(g)
+      pos(g)
+      g.push_nil
+    end
+  end
+
   class RationalLiteral < Node
     attr_reader :numerator, :denominator
 

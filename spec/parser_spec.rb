@@ -23,6 +23,13 @@ describe Apricot::Parser do
     @first.name.should == :example
   end
 
+  it 'parses true, false, and nil' do
+    parse('true false nil').length.should == 3
+    @ast.elements[0].should be_a(Apricot::AST::TrueLiteral)
+    @ast.elements[1].should be_a(Apricot::AST::FalseLiteral)
+    @ast.elements[2].should be_a(Apricot::AST::NilLiteral)
+  end
+
   it 'parses integers' do
     parse('123').length.should == 1
     @first.should be_a(Apricot::AST::Literal)
