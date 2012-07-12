@@ -20,7 +20,7 @@ describe Apricot::Parser do
   it 'parses identifiers' do
     parse('example').length.should == 1
     @first.should be_a(Apricot::AST::Identifier)
-    @first.name.should == 'example'
+    @first.name.should == :example
   end
 
   it 'parses integers' do

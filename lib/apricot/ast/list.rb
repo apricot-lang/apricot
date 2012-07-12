@@ -12,15 +12,16 @@ module Apricot::AST
 
       if @elements.empty?
         g.push_literal self
-#      else
-#        op = @elements.first
-#        args = @elements[1..-1]
-#
-#        if op.is_a?(Identifier) && special = Apricot::SpecialForm[op.name]
-#          op.bytecode(g, args)
-#        else
-#          # TODO
-#        end
+      else
+        op = @elements.first
+        args = @elements[1..-1]
+
+        if op.is_a?(Identifier) && special = Apricot::SpecialForm[op.name]
+          special.bytecode(g, args)
+        else
+          g.push_nil
+          # TODO
+        end
       end
 
       # Old hack

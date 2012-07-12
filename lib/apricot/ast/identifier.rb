@@ -10,7 +10,7 @@ module Apricot::AST
     def bytecode(g)
       pos(g)
 
-      # TODO
+      g.push_local 0
     end
   end
 end

@@ -223,7 +223,7 @@ module Apricot
         next_char
       end
 
-      AST::Identifier.new(@line, identifier)
+      AST::Identifier.new(@line, identifier.to_sym)
     end
 
     def consume_char
