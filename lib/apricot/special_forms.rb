@@ -74,4 +74,11 @@ module Apricot
       args.last.bytecode(g)
     end
   end
+
+  SpecialForm.define(:quote) do |g, args|
+    raise ArgumentError, "Too few arguments to quote" if args.length < 1
+    raise ArgumentError, "Too many arguments to quote" if args.length > 1
+
+    g.push_literal args.first
+  end
 end

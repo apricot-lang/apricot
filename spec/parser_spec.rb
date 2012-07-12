@@ -167,4 +167,14 @@ describe Apricot::Parser do
     @ast.elements[0].should be_a(Apricot::AST::Identifier)
     @ast.elements[1].should be_a(Apricot::AST::Identifier)
   end
+
+  it 'parses quoted forms' do
+    parse("'test").length.should == 1
+    @first.should be_a(Apricot::AST::List)
+    @first.elements.length.should == 2
+    @first.elements[0].should be_a(Apricot::AST::Identifier)
+    @first.elements[0].name.should == :quote
+    @first.elements[1].should be_a(Apricot::AST::Identifier)
+    @first.elements[1].name.should == :test
+  end
 end

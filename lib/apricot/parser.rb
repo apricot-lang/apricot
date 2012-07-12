@@ -14,7 +14,7 @@ module Apricot
   end
 
   class Parser
-    IDENTIFIER   = /[A-Za-z0-9`~!@#\$%^&*_=+<.>\/?:'\\|-]/
+    IDENTIFIER   = /[A-Za-z0-9`~!@#\$%^&*_=+<.>\/?:\\|-]/
     OCTAL        = /[0-7]/
     HEX          = /[0-9a-fA-F]/
     DIGITS       = ('0'..'9').to_a + ('a'..'z').to_a
@@ -77,6 +77,7 @@ module Apricot
     # @return [AST::Node] an AST node representing the form
     def parse_form
       case @char
+      when "'" then parse_quote
       when '(' then parse_list
       when '[' then parse_array
       when '{' then parse_hash
@@ -105,6 +106,13 @@ module Apricot
           next_char
         end
       end
+    end
+
+    def parse_quote
+      next_char # skip the '
+      form = parse_form
+      quote = AST::Identifier.new(@line, :quote)
+      AST::List.new(@line, [quote, form])
     end
 
     def parse_list
