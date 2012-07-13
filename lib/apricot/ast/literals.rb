@@ -8,27 +8,6 @@ module Apricot::AST
     end
   end
 
-  class TrueLiteral < Node
-    def bytecode(g)
-      pos(g)
-      g.push_true
-    end
-  end
-
-  class FalseLiteral < Node
-    def bytecode(g)
-      pos(g)
-      g.push_false
-    end
-  end
-
-  class NilLiteral < Node
-    def bytecode(g)
-      pos(g)
-      g.push_nil
-    end
-  end
-
   class IntegerLiteral < Literal
     def bytecode(g)
       pos(g)
@@ -55,6 +34,27 @@ module Apricot::AST
       pos(g)
       g.push_literal @value
       g.string_dup # Duplicate string to avoid mutating the literal
+    end
+  end
+
+  class TrueLiteral < Node
+    def bytecode(g)
+      pos(g)
+      g.push_true
+    end
+  end
+
+  class FalseLiteral < Node
+    def bytecode(g)
+      pos(g)
+      g.push_false
+    end
+  end
+
+  class NilLiteral < Node
+    def bytecode(g)
+      pos(g)
+      g.push_nil
     end
   end
 
