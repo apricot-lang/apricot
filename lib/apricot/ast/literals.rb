@@ -6,18 +6,6 @@ module Apricot::AST
       super(line)
       @value = value
     end
-
-    def bytecode(g)
-      pos(g)
-      g.push_literal(@value)
-    end
-  end
-
-  class StringLiteral < Literal
-    def bytecode(g)
-      super(g)
-      g.string_dup # Duplicate string to avoid mutating the literal
-    end
   end
 
   class TrueLiteral < Node
@@ -38,6 +26,35 @@ module Apricot::AST
     def bytecode(g)
       pos(g)
       g.push_nil
+    end
+  end
+
+  class IntegerLiteral < Literal
+    def bytecode(g)
+      pos(g)
+      g.push @value
+    end
+  end
+
+  class FloatLiteral < Literal
+    def bytecode(g)
+      pos(g)
+      g.push_unique_literal @value
+    end
+  end
+
+  class SymbolLiteral < Literal
+    def bytecode(g)
+      pos(g)
+      g.push_literal @value
+    end
+  end
+
+  class StringLiteral < Literal
+    def bytecode(g)
+      pos(g)
+      g.push_literal @value
+      g.string_dup # Duplicate string to avoid mutating the literal
     end
   end
 

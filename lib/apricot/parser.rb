@@ -195,7 +195,7 @@ module Apricot
 
       syntax_error "Empty symbol name" if symbol.empty?
 
-      AST::Literal.new(@line, symbol.to_sym)
+      AST::SymbolLiteral.new(@line, symbol.to_sym)
     end
 
     def parse_number
@@ -208,14 +208,14 @@ module Apricot
 
       case number
       when /^[+-]?\d+$/
-        AST::Literal.new(@line, number.to_i)
+        AST::IntegerLiteral.new(@line, number.to_i)
       when /^([+-]?)(\d+)r([a-zA-Z0-9]+)$/
         sign, radix, digits = $1, $2.to_i, $3
         syntax_error "Radix out of range: #{radix}" unless 2 <= radix && radix <= 36
         syntax_error "Invalid digits for radix in number: #{number}" unless digits.downcase.chars.all? {|d| DIGITS[0..radix-1].include?(d) }
-        AST::Literal.new(@line, (sign + digits).to_i(radix))
+        AST::IntegerLiteral.new(@line, (sign + digits).to_i(radix))
       when /^[+-]?\d+\.?\d*(?:e[+-]?\d+)?$/
-        AST::Literal.new(@line, number.to_f)
+        AST::FloatLiteral.new(@line, number.to_f)
       when /^([+-]?\d+)\/(\d+)$/
         AST::RationalLiteral.new(@line, $1.to_i, $2.to_i)
       else

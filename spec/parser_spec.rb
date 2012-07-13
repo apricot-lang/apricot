@@ -32,19 +32,19 @@ describe Apricot::Parser do
 
   it 'parses integers' do
     parse('123').length.should == 1
-    @first.should be_a(Apricot::AST::Literal)
+    @first.should be_a(Apricot::AST::IntegerLiteral)
     @first.value.should == 123
   end
 
   it 'parses radix integers' do
     parse('2r10').length.should == 1
-    @first.should be_a(Apricot::AST::Literal)
+    @first.should be_a(Apricot::AST::IntegerLiteral)
     @first.value.should == 2
   end
 
   it 'parses floats' do
     parse('1.23').length.should == 1
-    @first.should be_a(Apricot::AST::Literal)
+    @first.should be_a(Apricot::AST::FloatLiteral)
     @first.value.should == 1.23
   end
 
@@ -111,7 +111,7 @@ describe Apricot::Parser do
 
   it 'parses symbols' do
     parse(':example').length.should == 1
-    @first.should be_a(Apricot::AST::Literal)
+    @first.should be_a(Apricot::AST::SymbolLiteral)
     @first.value.should == :example
   end
 
@@ -128,7 +128,7 @@ describe Apricot::Parser do
   it 'parses lists' do
     parse('(1 two)').length.should == 1
     @first.should be_a(Apricot::AST::List)
-    @first.elements[0].should be_a(Apricot::AST::Literal)
+    @first.elements[0].should be_a(Apricot::AST::IntegerLiteral)
     @first.elements[1].should be_a(Apricot::AST::Identifier)
   end
 
@@ -141,7 +141,7 @@ describe Apricot::Parser do
   it 'parses arrays' do
     parse('[1 two]').length.should == 1
     @first.should be_a(Apricot::AST::Array)
-    @first.elements[0].should be_a(Apricot::AST::Literal)
+    @first.elements[0].should be_a(Apricot::AST::IntegerLiteral)
     @first.elements[1].should be_a(Apricot::AST::Identifier)
   end
 
@@ -154,8 +154,8 @@ describe Apricot::Parser do
   it 'parses hashes' do
     parse('{:example 1}').length.should == 1
     @first.should be_a(Apricot::AST::Hash)
-    @first.elements[0].should be_a(Apricot::AST::Literal)
-    @first.elements[1].should be_a(Apricot::AST::Literal)
+    @first.elements[0].should be_a(Apricot::AST::SymbolLiteral)
+    @first.elements[1].should be_a(Apricot::AST::IntegerLiteral)
   end
 
   it 'does not parse invalid hashes' do
