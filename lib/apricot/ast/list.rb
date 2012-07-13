@@ -16,22 +16,6 @@ module Apricot::AST
         op = @elements.first
         args = @elements[1..-1]
 
-        # Interop expansion
-        if op.is_a?(Identifier)
-          name = op.name.to_s
-
-          if name.start_with?('.')
-            op = Identifier.new(op.line, :'.')
-            method = Identifier.new(op.line, name[1..-1].to_sym)
-            args.insert(1, method)
-          elsif name.end_with?('.')
-            op = Identifier.new(op.line, :'.')
-            klass = Identifier.new(op.line, name[0..-2].to_sym)
-            method = Identifier.new(op.line, :new)
-            args.unshift(klass, method)
-          end
-        end
-
         if op.is_a?(Identifier) && special = Apricot::SpecialForm[op.name]
           special.bytecode(g, args)
         else
