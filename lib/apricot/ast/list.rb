@@ -26,9 +26,9 @@ module Apricot::AST
             args.insert(1, method)
           elsif name.end_with?('.')
             op = Identifier.new(op.line, :'.')
-            clazz = Identifier.new(op.line, name[0..-2].to_sym)
+            klass = Identifier.new(op.line, name[0..-2].to_sym)
             method = Identifier.new(op.line, :new)
-            args.unshift(clazz, method)
+            args.unshift(klass, method)
           end
         end
 
