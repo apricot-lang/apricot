@@ -23,9 +23,9 @@ module Apricot
         compiler.parser = self
       end
 
-	  def root(klass)
-		@root = klass
-	  end
+      def root(klass)
+        @root = klass
+      end
 
       def run
         @output = @root.new parse
