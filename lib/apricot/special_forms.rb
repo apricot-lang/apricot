@@ -40,11 +40,7 @@ module Apricot
     name = args[0].name
     value = args[1]
 
-    if value
-      value.bytecode(g)
-    else
-      g.push_nil
-    end
+    value ? value.bytecode(g) : g.push_nil
 
     g.set_local 0
     g.local_count = 1
