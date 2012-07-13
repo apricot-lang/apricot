@@ -31,24 +31,24 @@ end
 
 if evals.empty?
   if $stdin.tty?
-	require 'readline'
-	while code = Readline.readline("apr> ")
-	  cm = Apricot::Compiler.compile_string code, nil, bytecode
-	  value = Rubinius.run_script(cm)
-	  puts "=> #{value.inspect}"
-	end
+    require 'readline'
+    while code = Readline.readline("apr> ")
+      cm = Apricot::Compiler.compile_string code, nil, bytecode
+      value = Rubinius.run_script(cm)
+      puts "=> #{value.inspect}"
+    end
   else
-	evals << [:eval, STDIN.read, "(stdin)"]
+    evals << [:eval, STDIN.read, "(stdin)"]
   end
 end
 
 evals.each do |type, *args|
   case type
   when :eval
-	cm = Apricot::Compiler.compile_string args[0], args[1], bytecode
-	Rubinius.run_script cm
+    cm = Apricot::Compiler.compile_string args[0], args[1], bytecode
+    Rubinius.run_script cm
   when :file
-	cm = Apricot::Compiler.compile args[0], nil, bytecode
-	Rubinius.run_script cm
+    cm = Apricot::Compiler.compile args[0], nil, bytecode
+    Rubinius.run_script cm
   end
 end
