@@ -28,8 +28,8 @@ if evals.empty?
 	require 'readline'
 	while code = Readline.readline("apr> ")
 	  cm = Apricot::Compiler.compile_string code
-	  print "=> "
-	  p Rubinius.run_script(cm)
+	  value = Rubinius.run_script(cm)
+	  puts "=> #{value.inspect}"
 	end
   else
 	evals << [:eval, STDIN.read, "(stdin)"]
