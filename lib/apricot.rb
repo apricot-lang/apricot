@@ -1,1 +1,1 @@
-%w[ast parser compiler stages special_forms].map {|r| require "apricot/#{r}" }
+%w[ast parser compiler stages printers special_forms].map {|r| require "apricot/#{r}" }

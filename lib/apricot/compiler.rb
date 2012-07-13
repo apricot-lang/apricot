@@ -5,7 +5,7 @@ module Apricot
 
       compiler.parser.root AST::Script
       compiler.parser.input file
-      compiler.packager.print.bytecode = debug if debug
+      compiler.packager.print(BytecodePrinter) if debug
       compiler.writer.name = output || Rubinius::Compiler.compiled_name(file)
 
       compiler.run
@@ -16,7 +16,7 @@ module Apricot
 
       compiler.parser.root AST::EvalExpression
       compiler.parser.input code, file
-      compiler.packager.print.bytecode = debug if debug
+      compiler.packager.print(BytecodePrinter) if debug
 
       compiler.run
     end
