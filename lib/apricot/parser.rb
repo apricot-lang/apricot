@@ -239,11 +239,9 @@ module Apricot
         next_char
       end
 
-      begin
-        constants.map! {|x| x.to_sym }
-      rescue ArgumentError # raised by to_sym on empty strings
-        syntax_error "Invalid constant #{constants.join('::')}"
-      end
+      syntax_error "Invalid constant #{constants.join('::')}" if constants.any? {|x| x.empty? }
+
+      constants.map! {|x| x.to_sym }
 
       AST::Constant.new(@line, constants)
     end
