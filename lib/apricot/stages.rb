@@ -29,6 +29,7 @@ module Apricot
 
       def run
         @output = @root.new parse
+        @output.file = @file
         run_next
       end
     end
@@ -37,8 +38,12 @@ module Apricot
       stage :apricot_file
       next_stage Generator
 
+      def input(file)
+        @file = file
+      end
+
       def parse
-        Apricot::Parser.parse_file(@input)
+        Apricot::Parser.parse_file(@file)
       end
     end
 

@@ -34,7 +34,7 @@ if evals.empty?
     require 'readline'
     while code = Readline.readline("apr> ")
       begin
-        cm = Apricot::Compiler.compile_string code, nil, bytecode
+        cm = Apricot::Compiler.compile_string code, "(eval)", bytecode
         value = Rubinius.run_script(cm)
         puts "=> #{value.inspect}"
       rescue => e

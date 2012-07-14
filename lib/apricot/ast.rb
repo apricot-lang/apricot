@@ -14,6 +14,6 @@ module Apricot
   end
 end
 
-%w{literals identifier list array hash root script evalexpression}.map do |r|
+%w{literals identifier list array hash root containers}.map do |r|
   require "apricot/ast/#{r}"
 end
