@@ -23,7 +23,7 @@ module Apricot
 
   SpecialForm.define(:'.') do |g, args|
     raise ArgumentError, "Too few arguments to send expression, expecting (. reciever method ...)" if args.length < 2
-    raise TypeError, "Method in send expression must be identifier" unless args[1].is_a? AST::Identifier
+    raise TypeError, "Method in send expression must be an identifier" unless args[1].is_a? AST::Identifier
 
     receiver, method, margs = args[0], args[1].name, args[2..-1]
 
@@ -35,7 +35,7 @@ module Apricot
   SpecialForm.define(:def) do |g, args|
     raise ArgumentError, "Too few arguments to def" if args.length < 1
     raise ArgumentError, "Too many arguments to def" if args.length > 2
-    raise ArgumentError, "First argument to def must be an Identifier" unless args[0].is_a?(AST::Identifier)
+    raise ArgumentError, "First argument to def must be an identifier" unless args[0].is_a?(AST::Identifier)
 
     name = args[0].name
     value = args[1]
