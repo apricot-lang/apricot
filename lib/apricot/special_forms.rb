@@ -25,11 +25,11 @@ module Apricot
     raise ArgumentError, "Too few arguments to send expression, expecting (. reciever method ...)" if args.length < 2
     raise TypeError, "Method in send expression must be an identifier" unless args[1].is_a? AST::Identifier
 
-    receiver, method, margs = args[0], args[1].name, args[2..-1]
+    receiver, method, *margs = *args
 
     receiver.bytecode(g)
     margs.each {|a| a.bytecode(g) }
-    g.send method, margs.length
+    g.send method.name, margs.length
   end
 
   SpecialForm.define(:def) do |g, args|
