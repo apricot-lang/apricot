@@ -87,6 +87,8 @@ module Apricot
       when IDENTIFIER
         if @char =~ /[+-]/ && peek_char =~ /\d/
           parse_number
+        elsif @char =~ /[A-Z]/
+          parse_constant
         else
           parse_identifier
         end
@@ -221,6 +223,29 @@ module Apricot
       else
         syntax_error "Invalid number: #{number}"
       end
+    end
+
+    def parse_constant
+      constants = [""]
+
+      while @char =~ IDENTIFIER
+        if @char == ':' && peek_char == ':'
+          constants << ""
+          next_char
+        else
+          constants.last << @char
+        end
+
+        next_char
+      end
+
+      begin
+        constants.map! {|x| x.to_sym }
+      rescue ArgumentError # raised by to_sym on empty strings
+        syntax_error "Invalid constant #{constants.join('::')}"
+      end
+
+      AST::Constant.new(@line, constants)
     end
 
     def parse_identifier

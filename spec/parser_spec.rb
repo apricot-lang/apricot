@@ -23,6 +23,23 @@ describe Apricot::Parser do
     @first.name.should == :example
   end
 
+  it 'parses constants' do
+    parse('Example').length.should == 1
+    @first.should be_a(Apricot::AST::Constant)
+    @first.names.should == [:Example]
+  end
+
+  it 'parses scoped constants' do
+    parse('Foo::Bar::Baz').length.should == 1
+    @first.should be_a(Apricot::AST::Constant)
+    @first.names.should == [:Foo, :Bar, :Baz]
+  end
+
+  it 'does not parse invalid scoped constants' do
+    expect { parse('Foo::') }.to raise_error(Apricot::SyntaxError)
+    expect { parse('Foo::::Bar') }.to raise_error(Apricot::SyntaxError)
+  end
+
   it 'parses true, false, and nil' do
     parse('true false nil').length.should == 3
     @ast.elements[0].should be_a(Apricot::AST::TrueLiteral)
