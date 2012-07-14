@@ -11,8 +11,8 @@ module Apricot
       def bytecode(g)
         pos(g)
 
-        g.push_const @names.first
-        @names[1..-1].each {|n| g.find_const n }
+        g.push_cpath_top
+        @names.each {|n| g.find_const n }
       end
     end
   end

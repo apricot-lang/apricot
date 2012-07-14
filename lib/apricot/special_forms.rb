@@ -35,16 +35,25 @@ module Apricot
   SpecialForm.define(:def) do |g, args|
     raise ArgumentError, "Too few arguments to def" if args.length < 1
     raise ArgumentError, "Too many arguments to def" if args.length > 2
-    raise ArgumentError, "First argument to def must be an identifier" unless args[0].is_a?(AST::Identifier)
 
-    name = args[0].name
-    value = args[1]
+    target, value = *args
 
-    value ? value.bytecode(g) : g.push_nil
+    case target
+    when AST::Identifier
+      value ? value.bytecode(g) : g.push_nil
 
-    g.set_local 0
-    g.local_count = 1
-    g.local_names = [name]
+      g.set_local 0
+      g.local_count = 1
+      g.local_names = [target.name]
+    when AST::Constant
+      g.push_cpath_top
+      target.names[0..-2].each {|n| g.find_const n }
+      g.push_literal target.names.last
+      value.bytecode(g)
+      g.send :const_set, 2
+    else
+      raise ArgumentError, "First argument to def must be an identifier or constant"
+    end
   end
 
   SpecialForm.define(:if) do |g, args|
