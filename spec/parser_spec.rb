@@ -162,26 +162,26 @@ describe Apricot::Parser do
 
   it 'parses empty arrays' do
     parse('[]').length.should == 1
-    @first.should be_a(Apricot::AST::Array)
+    @first.should be_a(Apricot::AST::ArrayLiteral)
     @first.elements.should be_empty
   end
 
   it 'parses arrays' do
     parse('[1 two]').length.should == 1
-    @first.should be_a(Apricot::AST::Array)
+    @first.should be_a(Apricot::AST::ArrayLiteral)
     @first.elements[0].should be_a(Apricot::AST::IntegerLiteral)
     @first.elements[1].should be_a(Apricot::AST::Identifier)
   end
 
   it 'parses empty hashes' do
     parse('{}').length.should == 1
-    @first.should be_a(Apricot::AST::Hash)
+    @first.should be_a(Apricot::AST::HashLiteral)
     @first.elements.should be_empty
   end
 
   it 'parses hashes' do
     parse('{:example 1}').length.should == 1
-    @first.should be_a(Apricot::AST::Hash)
+    @first.should be_a(Apricot::AST::HashLiteral)
     @first.elements[0].should be_a(Apricot::AST::SymbolLiteral)
     @first.elements[1].should be_a(Apricot::AST::IntegerLiteral)
   end
