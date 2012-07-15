@@ -12,5 +12,13 @@ module Apricot::AST
 
       g.push_local 0
     end
+
+    def assign_bytecode(g, value)
+      value.bytecode(g)
+      g.set_local 0
+
+      g.local_count = 1
+      g.local_names = [@name]
+    end
   end
 end

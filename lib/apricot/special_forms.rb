@@ -38,19 +38,11 @@ module Apricot
 
     target, value = *args
 
-    case target
-    when AST::Identifier
-      value ? value.bytecode(g) : g.push_nil
+    value ||= AST::NilLiteral.new(1)
 
-      g.set_local 0
-      g.local_count = 1
-      g.local_names = [target.name]
-    when AST::Constant
-      g.push_cpath_top
-      target.names[0..-2].each {|n| g.find_const n }
-      g.push_literal target.names.last
-      value.bytecode(g)
-      g.send :const_set, 2
+    case target
+    when AST::Identifier, AST::Constant
+      target.assign_bytecode(g, value)
     else
       raise ArgumentError, "First argument to def must be an identifier or constant"
     end
