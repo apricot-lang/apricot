@@ -132,8 +132,19 @@ describe Apricot::Parser do
     @first.value.should == :example
   end
 
+  it 'parses quoted symbols' do
+    parse(':"\x01()"').length.should == 1
+    @first.should be_a(Apricot::AST::SymbolLiteral)
+    @first.value.should == :"\x01()"
+  end
+
+  it 'does not parse unfinished quoted symbols' do
+    expect { parse(':"') }.to raise_error(Apricot::SyntaxError)
+  end
+
   it 'does not parse empty symbols' do
     expect { parse(':') }.to raise_error(Apricot::SyntaxError)
+    expect { parse(':""') }.to raise_error(Apricot::SyntaxError)
   end
 
   it 'parses empty lists' do

@@ -187,17 +187,28 @@ module Apricot
     end
 
     def parse_symbol
+      line = @line
       next_char # skip the :
       symbol = ""
 
-      while @char =~ IDENTIFIER
-        symbol << @char
-        next_char
+      if @char == '"'
+        next_char # skip opening "
+        while @char
+          break if @char == '"'
+          symbol << parse_string_char
+        end
+        syntax_error "Unexpected end of program while parsing symbol" unless @char == '"'
+        next_char # skip closing "
+      else
+        while @char =~ IDENTIFIER
+          symbol << @char
+          next_char
+        end
       end
 
       syntax_error "Empty symbol name" if symbol.empty?
 
-      AST::SymbolLiteral.new(@line, symbol.to_sym)
+      AST::SymbolLiteral.new(line, symbol.to_sym)
     end
 
     def parse_number
