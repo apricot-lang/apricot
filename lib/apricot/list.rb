@@ -30,6 +30,19 @@ module Apricot
       end
     end
 
+    def ==(other)
+      list = self
+
+      until list.empty?
+        return false if other.empty? || list.head != other.head
+
+        list = list.tail
+        other = other.tail
+      end
+
+      other.empty?
+    end
+
     def empty?
       !@tail
     end
