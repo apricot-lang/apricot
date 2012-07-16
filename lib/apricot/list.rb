@@ -31,6 +31,8 @@ module Apricot
     end
 
     def ==(other)
+      return false unless other.is_a? List
+
       list = self
 
       until list.empty?
