@@ -76,4 +76,21 @@ describe Apricot::List do
 
     list.tail.object_id.should == empty_list.object_id
   end
+
+  it 'can be used as a key in Hashes' do
+    list1 = new_list(1,2)
+    list2 = new_list(1,2)
+    list3 = new_list(1,2,3)
+    h = {}
+
+    h[list1] = 1
+    h[list2] = 2
+    h[list3] = 3
+    h[new_list] = 4
+
+    h[list1].should == 2
+    h[list2].should == 2
+    h[list3].should == 3
+    h[empty_list].should == 4
+  end
 end

@@ -45,6 +45,18 @@ module Apricot
       other.empty?
     end
 
+    alias_method :eql?, :==
+
+    def hash
+      hashes = []
+
+      return count if Thread.detect_outermost_recursion(self) do
+        each {|x| hashes << x.hash }
+      end
+
+      hashes.reduce(hashes.size) {|acc,hash| acc ^ hash }
+    end
+
     def empty?
       !@tail
     end
