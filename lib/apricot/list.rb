@@ -11,7 +11,7 @@ module Apricot
       list
     end
 
-    attr_accessor :head, :tail
+    attr_reader :head, :tail
 
     def initialize(head, tail)
       @head = head
@@ -48,12 +48,7 @@ module Apricot
     alias_method :eql?, :==
 
     def hash
-      hashes = []
-
-      return count if Thread.detect_outermost_recursion(self) do
-        each {|x| hashes << x.hash }
-      end
-
+      hashes = map {|x| x.hash }
       hashes.reduce(hashes.size) {|acc,hash| acc ^ hash }
     end
 
@@ -68,7 +63,12 @@ module Apricot
     private :initialize_copy
 
     def inspect
-      "(#{map(&:inspect).join(' ')})"
+      return '()' if empty?
+
+      str = '('
+      each {|x| str << x.inspect << ' ' }
+      str.chop!
+      str << ')'
     end
 
     EmptyList = new(nil, nil)
