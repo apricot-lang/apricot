@@ -60,6 +60,7 @@ module Apricot
       super
       @tail = other.tail.dup if other.tail && !other.tail.empty?
     end
+
     private :initialize_copy
 
     def inspect
