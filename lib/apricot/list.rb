@@ -49,6 +49,12 @@ module Apricot
       !@tail
     end
 
+    def initialize_copy(other)
+      super
+      @tail = other.tail.dup if other.tail && !other.tail.empty?
+    end
+    private :initialize_copy
+
     def inspect
       "(#{map(&:inspect).join(' ')})"
     end
@@ -56,4 +62,3 @@ module Apricot
     EmptyList = new(nil, nil)
   end
 end
-
