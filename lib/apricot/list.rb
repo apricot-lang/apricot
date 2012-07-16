@@ -72,6 +72,8 @@ module Apricot
       str << ')'
     end
 
+    alias_method :to_s, :inspect
+
     EmptyList = new(nil, nil)
   end
 end
