@@ -3,6 +3,10 @@ describe 'Apricot' do
     Rubinius.run_script(Apricot::Compiler.compile_string(code))
   end
 
+  it 'compiles an empty program' do
+    apricot(%q||).should == nil
+  end
+
   it 'compiles false, true and nil' do
     apricot(%q|true|).should == true
     apricot(%q|false|).should == false
