@@ -1,3 +1,1 @@
-%w[ast parser compiler stages printers special_forms list identifier].map do |r|
-  require "apricot/#{r}"
-end
+%w[ast parser compiler stages printers special_forms list identifier constant].map {|r| require "apricot/#{r}" }
