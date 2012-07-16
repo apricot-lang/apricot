@@ -67,4 +67,26 @@ describe 'Apricot' do
     expect { Bar }.to raise_error(NameError)
     apricot(%q|(do (def Bar 1) Bar)|).should == 1
   end
+
+  it 'compiles quoted forms' do
+    apricot(%q|'1|).should == 1
+    apricot(%q|'a|).should == Apricot::Identifier.new(:a)
+    apricot(%q|''a|).should == Apricot::List[
+      Apricot::Identifier.new(:quote),
+      Apricot::Identifier.new(:a)
+    ]
+    apricot(%q|'1.2|).should == 1.2
+    require 'rational' # TODO put this elsewhere
+    apricot(%q|'1/2|).should == Rational(1,2)
+    apricot(%q|':a|).should == :a
+    apricot(%q|'()|).should == Apricot::List::EmptyList
+    apricot(%q|'(1)|).should == Apricot::List[1]
+    apricot(%q|'[a]|).should == [Apricot::Identifier.new(:a)]
+    apricot(%q|'{a 1}|).should == {Apricot::Identifier.new(:a) => 1}
+    apricot(%q|'"foo"|).should == "foo"
+    apricot(%q|'true|).should == true
+    apricot(%q|'false|).should == false
+    apricot(%q|'nil|).should == nil
+    apricot(%q|'Foo::Bar|).should == Apricot::Constant.new(:Foo, :Bar)
+  end
 end

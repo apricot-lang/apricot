@@ -11,10 +11,7 @@ module Apricot::AST
       pos(g)
 
       if @elements.empty?
-        g.push_cpath_top
-        g.find_const :Apricot
-        g.find_const :List
-        g.find_const :EmptyList
+        quote_bytecode(g)
       else
         op = @elements.first
         args = @elements[1..-1]
@@ -33,6 +30,19 @@ module Apricot::AST
 #        arg.bytecode(g)
 #      end
 #      g.send @elements[0].name.to_sym, @elements.count - 1, true
+    end
+
+    def quote_bytecode(g)
+      g.push_cpath_top
+      g.find_const :Apricot
+      g.find_const :List
+
+      if @elements.empty?
+        g.find_const :EmptyList
+      else
+        @elements.each {|e| e.quote_bytecode(g) }
+        g.send :[], @elements.length
+      end
     end
   end
 end

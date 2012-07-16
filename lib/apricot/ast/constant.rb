@@ -22,6 +22,14 @@ module Apricot
         value.bytecode(g)
         g.send :const_set, 2
       end
+
+      def quote_bytecode(g)
+        g.push_cpath_top
+        g.find_const :Apricot
+        g.find_const :Constant
+        @names.each {|name| g.push_literal name }
+        g.send :new, @names.length
+      end
     end
   end
 end

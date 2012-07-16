@@ -87,6 +87,6 @@ module Apricot
     raise ArgumentError, "Too few arguments to quote" if args.length < 1
     raise ArgumentError, "Too many arguments to quote" if args.length > 1
 
-    g.push_literal args.first
+    args.first.quote_bytecode(g)
   end
 end

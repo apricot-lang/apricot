@@ -1,5 +1,11 @@
 module Apricot::AST
-  class Literal < Node
+  class SimpleLiteral < Node
+    def quote_bytecode(g)
+      bytecode(g)
+    end
+  end
+
+  class Literal < SimpleLiteral
     attr_reader :value
 
     def initialize(line, value)
@@ -37,28 +43,28 @@ module Apricot::AST
     end
   end
 
-  class TrueLiteral < Node
+  class TrueLiteral < SimpleLiteral
     def bytecode(g)
       pos(g)
       g.push_true
     end
   end
 
-  class FalseLiteral < Node
+  class FalseLiteral < SimpleLiteral
     def bytecode(g)
       pos(g)
       g.push_false
     end
   end
 
-  class NilLiteral < Node
+  class NilLiteral < SimpleLiteral
     def bytecode(g)
       pos(g)
       g.push_nil
     end
   end
 
-  class RationalLiteral < Node
+  class RationalLiteral < SimpleLiteral
     attr_reader :numerator, :denominator
 
     def initialize(line, numerator, denominator)
@@ -100,11 +106,15 @@ module Apricot::AST
       @elements = elements
     end
 
-    def bytecode(g)
+    def bytecode(g, quoted = false)
       pos(g)
 
-      @elements.each {|e| e.bytecode(g) }
+      @elements.each {|e| quoted ? e.quote_bytecode(g) : e.bytecode(g) }
       g.make_array @elements.length
+    end
+
+    def quote_bytecode(g)
+      bytecode(g, true)
     end
   end
 
@@ -116,7 +126,7 @@ module Apricot::AST
       @elements = elements
     end
 
-    def bytecode(g)
+    def bytecode(g, quoted = false)
       pos(g)
 
       # Create a new Hash
@@ -128,11 +138,22 @@ module Apricot::AST
       # Add keys and values
       @elements.each_slice(2) do |k, v|
         g.dup # The Hash
-        k.bytecode(g)
-        v.bytecode(g)
+
+        if quoted
+          k.quote_bytecode(g)
+          v.quote_bytecode(g)
+        else
+          k.bytecode(g)
+          v.bytecode(g)
+        end
+
         g.send :[]=, 2
         g.pop # []= leaves v on the stack
       end
+    end
+
+    def quote_bytecode(g)
+      bytecode(g, true)
     end
   end
 end

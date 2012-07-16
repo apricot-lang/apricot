@@ -20,5 +20,15 @@ module Apricot::AST
       g.local_count = 1
       g.local_names = [@name]
     end
+
+    def quote_bytecode(g)
+      pos(g)
+
+      g.push_cpath_top
+      g.find_const :Apricot
+      g.find_const :Identifier
+      g.push_literal @name
+      g.send :new, 1
+    end
   end
 end
