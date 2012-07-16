@@ -11,7 +11,10 @@ module Apricot::AST
       pos(g)
 
       if @elements.empty?
-        g.push_literal self
+        g.push_cpath_top
+        g.find_const :Apricot
+        g.find_const :List
+        g.find_const :EmptyList
       else
         op = @elements.first
         args = @elements[1..-1]
