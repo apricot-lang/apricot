@@ -14,9 +14,9 @@ describe Apricot::List do
 
   it 'can be built up with cons' do
     list = empty_list.cons(3).cons(2).cons(1)
-    list.head == 1
-    list.tail.head == 2
-    list.tail.tail.head == 3
+    list.head.should == 1
+    list.tail.head.should == 2
+    list.tail.tail.head.should == 3
   end
 
   it 'supports the == operator' do
