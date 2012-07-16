@@ -33,6 +33,7 @@ if evals.empty?
   if $stdin.tty?
     require 'readline'
     while code = Readline.readline("apr> ")
+      next if code.strip.empty?
       begin
         cm = Apricot::Compiler.compile_string code, "(eval)", bytecode
         value = Rubinius.run_script(cm)
