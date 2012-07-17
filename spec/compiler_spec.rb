@@ -37,6 +37,11 @@ describe 'Apricot' do
     apricot(%q|{:foo 1, :bar 2}|).should == {:foo => 1, :bar => 2}
   end
 
+  it 'compiles sets' do
+    apricot(%q|#{}|).should == Set.new
+    apricot(%q|#{:foo :foo :bar}|).should == Set[:foo, :foo, :bar]
+  end
+
   it 'compiles constants' do
     apricot(%q|Array|).should == Array
     apricot(%q|Rubinius::Compiler|).should == Rubinius::Compiler

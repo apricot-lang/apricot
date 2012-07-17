@@ -200,6 +200,19 @@ describe Apricot::Parser do
     expect { parse('{:foo 1 :bar}') }.to raise_error(Apricot::SyntaxError)
   end
 
+  it 'parses empty sets' do
+    parse('#{}').length.should == 1
+    @first.should be_a(Apricot::AST::SetLiteral)
+    @first.elements.should be_empty
+  end
+
+  it 'parses sets' do
+    parse('#{1 two}').length.should == 1
+    @first.should be_a(Apricot::AST::SetLiteral)
+    @first.elements[0].should be_a(Apricot::AST::IntegerLiteral)
+    @first.elements[1].should be_a(Apricot::AST::Identifier)
+  end
+
   it 'parses multiple forms' do
     parse('foo bar').length.should == 2
     @ast.elements[0].should be_a(Apricot::AST::Identifier)
