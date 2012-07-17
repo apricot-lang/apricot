@@ -37,7 +37,7 @@ if evals.empty?
       begin
         cm = Apricot::Compiler.compile_string code, "(eval)", bytecode
         value = Rubinius.run_script(cm)
-        puts "=> #{value.inspect}"
+        puts "=> #{value.apricot_inspect}"
       rescue => e
         puts "#{e.class}: #{e.message}"
       end
