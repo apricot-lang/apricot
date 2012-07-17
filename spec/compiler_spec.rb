@@ -76,7 +76,6 @@ describe 'Apricot' do
       Apricot::Identifier.new(:a)
     ]
     apricot(%q|'1.2|).should == 1.2
-    require 'rational' # TODO put this elsewhere
     apricot(%q|'1/2|).should == Rational(1,2)
     apricot(%q|':a|).should == :a
     apricot(%q|'()|).should == Apricot::List::EmptyList
