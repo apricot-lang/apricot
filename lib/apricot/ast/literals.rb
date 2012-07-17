@@ -118,19 +118,12 @@ module Apricot::AST
     end
   end
 
-  class ArrayLiteral < Node
+  class CollectionLiteral < Node
     attr_reader :elements
 
     def initialize(line, elements)
       super(line)
       @elements = elements
-    end
-
-    def bytecode(g, quoted = false)
-      pos(g)
-
-      @elements.each {|e| quoted ? e.quote_bytecode(g) : e.bytecode(g) }
-      g.make_array @elements.length
     end
 
     def quote_bytecode(g)
@@ -138,14 +131,16 @@ module Apricot::AST
     end
   end
 
-  class HashLiteral < Node
-    attr_reader :elements
+  class ArrayLiteral < CollectionLiteral
+    def bytecode(g, quoted = false)
+      pos(g)
 
-    def initialize(line, elements)
-      super(line)
-      @elements = elements
+      @elements.each {|e| quoted ? e.quote_bytecode(g) : e.bytecode(g) }
+      g.make_array @elements.length
     end
+  end
 
+  class HashLiteral < CollectionLiteral
     def bytecode(g, quoted = false)
       pos(g)
 
@@ -171,20 +166,9 @@ module Apricot::AST
         g.pop # []= leaves v on the stack
       end
     end
-
-    def quote_bytecode(g)
-      bytecode(g, true)
-    end
   end
 
-  class SetLiteral < Node
-    attr_reader :elements
-
-    def initialize(line, elements)
-      super(line)
-      @elements = elements
-    end
-
+  class SetLiteral < CollectionLiteral
     def bytecode(g, quoted = false)
       pos(g)
 
@@ -196,10 +180,6 @@ module Apricot::AST
         quoted ? e.quote_bytecode(g) : e.bytecode(g)
         g.send :add, 1
       end
-    end
-
-    def quote_bytecode(g)
-      bytecode(g, true)
     end
   end
 end
