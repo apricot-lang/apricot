@@ -5,8 +5,9 @@ describe Apricot::Parser do
     @ast.elements
   end
 
-  def parse_one(s)
+  def parse_one(s, klass)
     parse(s).length.should == 1
+    @first.should be_a(klass)
   end
 
   it 'parses nothing' do
@@ -26,20 +27,17 @@ describe Apricot::Parser do
   end
 
   it 'parses identifiers' do
-    parse_one('example')
-    @first.should be_a(Apricot::AST::Identifier)
+    parse_one('example', Apricot::AST::Identifier)
     @first.name.should == :example
   end
 
   it 'parses constants' do
-    parse_one('Example')
-    @first.should be_a(Apricot::AST::Constant)
+    parse_one('Example', Apricot::AST::Constant)
     @first.names.should == [:Example]
   end
 
   it 'parses scoped constants' do
-    parse_one('Foo::Bar::Baz')
-    @first.should be_a(Apricot::AST::Constant)
+    parse_one('Foo::Bar::Baz', Apricot::AST::Constant)
     @first.names.should == [:Foo, :Bar, :Baz]
   end
 
@@ -56,32 +54,27 @@ describe Apricot::Parser do
   end
 
   it 'parses fixnums' do
-    parse_one('123')
-    @first.should be_a(Apricot::AST::FixnumLiteral)
+    parse_one('123', Apricot::AST::FixnumLiteral)
     @first.value.should == 123
   end
 
   it 'parses bignums' do
-    parse_one('12345678901234567890')
-    @first.should be_a(Apricot::AST::BignumLiteral)
+    parse_one('12345678901234567890', Apricot::AST::BignumLiteral)
     @first.value.should == 12345678901234567890
   end
 
   it 'parses radix integers' do
-    parse_one('2r10')
-    @first.should be_a(Apricot::AST::FixnumLiteral)
+    parse_one('2r10', Apricot::AST::FixnumLiteral)
     @first.value.should == 2
   end
 
   it 'parses floats' do
-    parse_one('1.23')
-    @first.should be_a(Apricot::AST::FloatLiteral)
+    parse_one('1.23', Apricot::AST::FloatLiteral)
     @first.value.should == 1.23
   end
 
   it 'parses rationals' do
-    parse_one('12/34')
-    @first.should be_a(Apricot::AST::RationalLiteral)
+    parse_one('12/34', Apricot::AST::RationalLiteral)
     @first.numerator.should == 12
     @first.denominator.should == 34
   end
@@ -91,20 +84,17 @@ describe Apricot::Parser do
   end
 
   it 'parses empty strings' do
-    parse_one('""')
-    @first.should be_a(Apricot::AST::StringLiteral)
+    parse_one('""', Apricot::AST::StringLiteral)
     @first.value.should == ''
   end
 
   it 'parses strings' do
-    parse_one('"Hello, world!"')
-    @first.should be_a(Apricot::AST::StringLiteral)
+    parse_one('"Hello, world!"', Apricot::AST::StringLiteral)
     @first.value.should == 'Hello, world!'
   end
 
   it 'parses multiline strings' do
-    parse_one(%{"This is\na test"})
-    @first.should be_a(Apricot::AST::StringLiteral)
+    parse_one(%{"This is\na test"}, Apricot::AST::StringLiteral)
     @first.value.should == "This is\na test"
   end
 
@@ -113,20 +103,17 @@ describe Apricot::Parser do
   end
 
   it 'parses strings with character escapes' do
-    parse_one('"\\a\\b\\t\\n\\v\\f\\r\\e\\"\\\\"')
-    @first.should be_a(Apricot::AST::StringLiteral)
+    parse_one('"\\a\\b\\t\\n\\v\\f\\r\\e\\"\\\\"', Apricot::AST::StringLiteral)
     @first.value.should == "\a\b\t\n\v\f\r\e\"\\"
   end
 
   it 'parses strings with octal escapes' do
-    parse_one('"\\1\\01\\001"')
-    @first.should be_a(Apricot::AST::StringLiteral)
+    parse_one('"\\1\\01\\001"', Apricot::AST::StringLiteral)
     @first.value.should == "\001\001\001"
   end
 
   it 'parses strings with hex escapes' do
-    parse_one('"\\x1\\x01"')
-    @first.should be_a(Apricot::AST::StringLiteral)
+    parse_one('"\\x1\\x01"', Apricot::AST::StringLiteral)
     @first.value.should == "\001\001"
   end
 
@@ -135,20 +122,17 @@ describe Apricot::Parser do
   end
 
   it 'stops parsing hex/octal escapes in strings at non-hex/octal digits' do
-    parse_one('"\xAZ\082"')
-    @first.should be_a(Apricot::AST::StringLiteral)
+    parse_one('"\xAZ\082"', Apricot::AST::StringLiteral)
     @first.value.should == "\x0AZ\00082"
   end
 
   it 'parses symbols' do
-    parse_one(':example')
-    @first.should be_a(Apricot::AST::SymbolLiteral)
+    parse_one(':example', Apricot::AST::SymbolLiteral)
     @first.value.should == :example
   end
 
   it 'parses quoted symbols' do
-    parse_one(':"\x01()"')
-    @first.should be_a(Apricot::AST::SymbolLiteral)
+    parse_one(':"\x01()"', Apricot::AST::SymbolLiteral)
     @first.value.should == :"\x01()"
   end
 
@@ -162,40 +146,34 @@ describe Apricot::Parser do
   end
 
   it 'parses empty lists' do
-    parse_one('()')
-    @first.should be_a(Apricot::AST::List)
+    parse_one('()', Apricot::AST::List)
     @first.elements.should be_empty
   end
 
   it 'parses lists' do
-    parse_one('(1 two)')
-    @first.should be_a(Apricot::AST::List)
+    parse_one('(1 two)', Apricot::AST::List)
     @first.elements[0].should be_a(Apricot::AST::FixnumLiteral)
     @first.elements[1].should be_a(Apricot::AST::Identifier)
   end
 
   it 'parses empty arrays' do
-    parse_one('[]')
-    @first.should be_a(Apricot::AST::ArrayLiteral)
+    parse_one('[]', Apricot::AST::ArrayLiteral)
     @first.elements.should be_empty
   end
 
   it 'parses arrays' do
-    parse_one('[1 two]')
-    @first.should be_a(Apricot::AST::ArrayLiteral)
+    parse_one('[1 two]', Apricot::AST::ArrayLiteral)
     @first.elements[0].should be_a(Apricot::AST::FixnumLiteral)
     @first.elements[1].should be_a(Apricot::AST::Identifier)
   end
 
   it 'parses empty hashes' do
-    parse_one('{}')
-    @first.should be_a(Apricot::AST::HashLiteral)
+    parse_one('{}', Apricot::AST::HashLiteral)
     @first.elements.should be_empty
   end
 
   it 'parses hashes' do
-    parse_one('{:example 1}')
-    @first.should be_a(Apricot::AST::HashLiteral)
+    parse_one('{:example 1}', Apricot::AST::HashLiteral)
     @first.elements[0].should be_a(Apricot::AST::SymbolLiteral)
     @first.elements[1].should be_a(Apricot::AST::FixnumLiteral)
   end
@@ -205,14 +183,12 @@ describe Apricot::Parser do
   end
 
   it 'parses empty sets' do
-    parse_one('#{}')
-    @first.should be_a(Apricot::AST::SetLiteral)
+    parse_one('#{}', Apricot::AST::SetLiteral)
     @first.elements.should be_empty
   end
 
   it 'parses sets' do
-    parse_one('#{1 two}')
-    @first.should be_a(Apricot::AST::SetLiteral)
+    parse_one('#{1 two}', Apricot::AST::SetLiteral)
     @first.elements[0].should be_a(Apricot::AST::FixnumLiteral)
     @first.elements[1].should be_a(Apricot::AST::Identifier)
   end
@@ -224,8 +200,7 @@ describe Apricot::Parser do
   end
 
   it 'parses quoted forms' do
-    parse_one("'test")
-    @first.should be_a(Apricot::AST::List)
+    parse_one("'test", Apricot::AST::List)
     @first.elements.length.should == 2
     @first.elements[0].should be_a(Apricot::AST::Identifier)
     @first.elements[0].name.should == :quote
