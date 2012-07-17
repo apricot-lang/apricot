@@ -8,17 +8,16 @@ class Array
   # Adapted from Array#inspect. This version prints no commas and calls
   # #apricot_inspect on its elements. e.g. [1 2 3]
   def apricot_inspect
-    return "[]" if @total == 0
+    return '[]' if size == 0
 
-    result = "["
+    str = '['
 
-    return "[...]" if Thread.detect_recursion self do
-      each { |o| result << o.apricot_inspect << " " }
+    return '[...]' if Thread.detect_recursion self do
+      each {|x| str << x.apricot_inspect << ' ' }
     end
 
-    Rubinius::Type.infect(result, self)
-    result.shorten!(1)
-    result << "]"
+    result.chop!
+    result << ']'
   end
 end
 
