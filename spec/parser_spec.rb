@@ -17,6 +17,10 @@ describe Apricot::Parser do
     parse('; example').should be_empty
   end
 
+  it 'discards commented forms' do
+    parse('#_form').should be_empty
+  end
+
   it 'parses identifiers' do
     parse('example').length.should == 1
     @first.should be_a(Apricot::AST::Identifier)

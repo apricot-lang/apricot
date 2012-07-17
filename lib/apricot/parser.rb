@@ -98,12 +98,16 @@ module Apricot
 
     # Skips whitespace, commas, and comments
     def skip_whitespace
-      while @char =~ /[\s,;]/
+      while @char =~ /[\s,;#]/
         # Comments begin with a semicolon and extend to the end of the line
         if @char == ';'
           while @char && @char != "\n"
             next_char
           end
+        elsif @char == '#'
+          break unless peek_char == '_'
+          next_char; next_char # skip #_
+          parse_form #discard next form
         else
           next_char
         end
