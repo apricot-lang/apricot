@@ -16,8 +16,8 @@ class Array
       each {|x| str << x.apricot_inspect << ' ' }
     end
 
-    result.chop!
-    result << ']'
+    str.chop!
+    str << ']'
   end
 end
 
