@@ -107,7 +107,9 @@ module Apricot
         elsif @char == '#'
           break unless peek_char == '_'
           next_char; next_char # skip #_
-          parse_form #discard next form
+          skip_whitespace
+          syntax_error "Unexpected end of program after #_, expected a form" unless @char
+          parse_form # discard next form
         else
           next_char
         end
