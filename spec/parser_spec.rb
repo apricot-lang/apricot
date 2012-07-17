@@ -5,6 +5,10 @@ describe Apricot::Parser do
     @ast.elements
   end
 
+  def parse_one(s)
+    parse(s).length.should == 1
+  end
+
   it 'parses nothing' do
     parse('').should be_empty
   end
@@ -209,7 +213,7 @@ describe Apricot::Parser do
   it 'parses sets' do
     parse('#{1 two}').length.should == 1
     @first.should be_a(Apricot::AST::SetLiteral)
-    @first.elements[0].should be_a(Apricot::AST::IntegerLiteral)
+    @first.elements[0].should be_a(Apricot::AST::FixnumLiteral)
     @first.elements[1].should be_a(Apricot::AST::Identifier)
   end
 
