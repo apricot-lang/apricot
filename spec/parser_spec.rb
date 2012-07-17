@@ -51,15 +51,21 @@ describe Apricot::Parser do
     @ast.elements[2].should be_a(Apricot::AST::NilLiteral)
   end
 
-  it 'parses integers' do
+  it 'parses fixnums' do
     parse('123').length.should == 1
-    @first.should be_a(Apricot::AST::IntegerLiteral)
+    @first.should be_a(Apricot::AST::FixnumLiteral)
     @first.value.should == 123
+  end
+
+  it 'parses bignums' do
+    parse('12345678901234567890').length.should == 1
+    @first.should be_a(Apricot::AST::BignumLiteral)
+    @first.value.should == 12345678901234567890
   end
 
   it 'parses radix integers' do
     parse('2r10').length.should == 1
-    @first.should be_a(Apricot::AST::IntegerLiteral)
+    @first.should be_a(Apricot::AST::FixnumLiteral)
     @first.value.should == 2
   end
 
@@ -160,7 +166,7 @@ describe Apricot::Parser do
   it 'parses lists' do
     parse('(1 two)').length.should == 1
     @first.should be_a(Apricot::AST::List)
-    @first.elements[0].should be_a(Apricot::AST::IntegerLiteral)
+    @first.elements[0].should be_a(Apricot::AST::FixnumLiteral)
     @first.elements[1].should be_a(Apricot::AST::Identifier)
   end
 
@@ -173,7 +179,7 @@ describe Apricot::Parser do
   it 'parses arrays' do
     parse('[1 two]').length.should == 1
     @first.should be_a(Apricot::AST::ArrayLiteral)
-    @first.elements[0].should be_a(Apricot::AST::IntegerLiteral)
+    @first.elements[0].should be_a(Apricot::AST::FixnumLiteral)
     @first.elements[1].should be_a(Apricot::AST::Identifier)
   end
 
@@ -187,7 +193,7 @@ describe Apricot::Parser do
     parse('{:example 1}').length.should == 1
     @first.should be_a(Apricot::AST::HashLiteral)
     @first.elements[0].should be_a(Apricot::AST::SymbolLiteral)
-    @first.elements[1].should be_a(Apricot::AST::IntegerLiteral)
+    @first.elements[1].should be_a(Apricot::AST::FixnumLiteral)
   end
 
   it 'does not parse invalid hashes' do

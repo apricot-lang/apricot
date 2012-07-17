@@ -14,7 +14,27 @@ module Apricot::AST
     end
   end
 
-  class IntegerLiteral < Literal
+  class IntegerLiteral
+    def self.new(line, value)
+      case value
+      when Bignum
+        BignumLiteral.new(line, value)
+      when Fixnum
+        FixnumLiteral.new(line, value)
+      else
+        raise "#{value} is not an integer"
+      end
+    end
+  end
+
+  class BignumLiteral < Literal
+    def bytecode(g)
+      pos(g)
+      g.push_unique_literal @value
+    end
+  end
+
+  class FixnumLiteral < Literal
     def bytecode(g)
       pos(g)
       g.push @value
