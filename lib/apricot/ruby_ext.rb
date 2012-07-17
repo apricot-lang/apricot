@@ -38,6 +38,21 @@ class Hash
   end
 end
 
+class Set
+  def apricot_inspect
+    return '#{}' if size == 0
+
+    str = '#{'
+
+    return '#{...}' if Thread.detect_recursion self do
+      each {|x| str << x.apricot_inspect << ' ' }
+    end
+
+    str.chop!
+    str << '}'
+  end
+end
+
 class Rational
   def apricot_inspect
     to_s

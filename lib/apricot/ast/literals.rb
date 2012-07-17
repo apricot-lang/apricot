@@ -156,4 +156,30 @@ module Apricot::AST
       bytecode(g, true)
     end
   end
+
+  class SetLiteral < Node
+    attr_reader :elements
+
+    def initialize(line, elements)
+      super(line)
+      @elements = elements
+    end
+
+    def bytecode(g, quoted = false)
+      pos(g)
+
+      g.push_cpath_top
+      g.find_const :Set
+      g.send :new, 0 # TODO: Inline this new?
+
+      @elements.each do |e|
+        quoted ? e.quote_bytecode(g) : e.bytecode(g)
+        g.send :add, 1
+      end
+    end
+
+    def quote_bytecode(g)
+      bytecode(g, true)
+    end
+  end
 end

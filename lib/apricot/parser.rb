@@ -77,6 +77,7 @@ module Apricot
     # @return [AST::Node] an AST node representing the form
     def parse_form
       case @char
+      when '#' then parse_dispatch
       when "'" then parse_quote
       when '(' then parse_list
       when '[' then parse_array
@@ -93,6 +94,14 @@ module Apricot
           parse_identifier
         end
       else syntax_error "Unexpected character: #{@char}"
+      end
+    end
+
+    def parse_dispatch
+      next_char # skip #
+      case @char
+      when '{' then parse_set
+      else syntax_error "Unknown reader macro: ##{@char}"
       end
     end
 
@@ -138,6 +147,11 @@ module Apricot
       forms = parse_forms_until('}')
       syntax_error "Odd number of forms in key-value hash" if forms.count.odd?
       AST::HashLiteral.new(@line, forms)
+    end
+
+    def parse_set
+      next_char # skip the {
+      AST::SetLiteral.new(@line, parse_forms_until('}'))
     end
 
     def parse_string
