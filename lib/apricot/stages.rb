@@ -25,7 +25,6 @@ module Apricot
 
       def run
         @output = parse
-        @output.file = @file
         run_next
       end
     end

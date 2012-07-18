@@ -1,11 +1,11 @@
 module Apricot
   module AST
     class TopLevel < Node
-      attr_accessor :file
-      attr_reader :elements
+      attr_reader :elements, :file
 
-      def initialize(elements)
+      def initialize(elements, file)
         @elements = elements
+        @file = file
         @line = 1
       end
 
