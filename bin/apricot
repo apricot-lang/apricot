@@ -13,7 +13,7 @@ options = Rubinius::Options.new "Usage: #{$0} [options] [program]", 20
 options.doc "OPTIONS:"
 
 options.on "-e", "CODE", "evaluate CODE and print the result" do |code|
-  evals << [:eval, code]
+  evals << [:eval, code, "-e"]
 end
 
 options.on "-B", "--bytecode", "print bytecode after compiling" do
