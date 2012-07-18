@@ -8,14 +8,29 @@ module Apricot
 
     COMPLETIONS = SpecialForm::Specials.keys.map(&:to_s).sort
 
+    COMMANDS = {
+      "backtrace" => [
+        "Print the backtrace of the most recent exception",
+        proc do
+          puts (@exception ? @exception.awesome_backtrace : "No backtrace")
+        end
+      ],
+
+      "exit" => ["Exit the REPL", proc { exit }],
+
+      "help" => [
+        "Print this message",
+        proc do
+          COMMANDS.sort.each {|name, a| puts '!' + name.ljust(14) + a[0] }
+        end
+      ]
+    }
+
     def initialize(prompt, bytecode = false, history_file = nil)
       @prompt = prompt
       @bytecode = bytecode
       @history_file = File.expand_path(history_file || HISTORY_FILE)
     end
-
-    # TODO: add !backtrace doing the following, also !exit and !help
-    # puts (@exception ? @exception.backtrace : "No backtrace")
 
     def run
       Readline.completion_append_character = " "
@@ -27,17 +42,25 @@ module Apricot
       load_history
       terminal_state = `stty -g`.chomp
 
-      loop do
-        begin
-          code = readline_with_history
-          break unless code
-          next if code.strip.empty?
+      while code = readline_with_history
+        stripped = code.strip
+        if stripped.empty?
+          next
+        elsif stripped.start_with?('!') && command = stripped[1..-1]
+          if COMMANDS.include?(command) && block = COMMANDS[command][1]
+            instance_eval(&block)
+          else
+            puts "Unknown command: !#{command}"
+          end
+          next
+        end
 
+        begin
           cm = Apricot::Compiler.compile_string code, "(eval)", @bytecode
           value = Rubinius.run_script(cm)
           puts "=> #{value.apricot_inspect}"
         rescue Exception => e
-#          @exception = e
+          @exception = e
           puts "#{e.class}: #{e.message}"
         end
       end
