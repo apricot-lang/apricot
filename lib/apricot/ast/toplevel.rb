@@ -16,17 +16,8 @@ module Apricot
 
         g.push_state self
 
-        if @elements.empty?
-          pos(g)
-          g.push_nil
-        else
-          @elements[0..-2].each do |e|
-            e.bytecode(g)
-            g.pop
-          end
-          @elements.last.bytecode(g)
-        end
-
+        pos(g)
+        SpecialForm[:do].bytecode(g, @elements)
         g.ret
 
         g.pop_state

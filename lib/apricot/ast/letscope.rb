@@ -6,8 +6,7 @@ module Apricot
     class LetScope < Node
       attr_accessor :parent
 
-      def initialize(parent)
-        @parent = parent
+      def initialize
         @variables = {}
       end
 

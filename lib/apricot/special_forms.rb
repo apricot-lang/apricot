@@ -91,17 +91,24 @@ module Apricot
   end
 
   SpecialForm.define(:let) do |g, args|
-    # TODO handle arguments properly
+    raise ArgumentError, "Too few arguments to let" if args.length < 1
+    raise TypeError, "First argument to let must be an Array literal" unless args.first.is_a? AST::ArrayLiteral
 
-    g.push_state AST::LetScope.new(g.state.scope)
+    bindings = args.shift.elements
 
-    args[0].elements.each_slice(2) do |name, value|
+    raise ArgumentError, "Bindings array for let must contain an even number of forms" if bindings.length.odd?
+
+    g.push_state AST::LetScope.new
+
+    bindings.each_slice(2) do |id, value|
+      raise TypeError, "Binding targets in let must be identifiers" unless id.is_a? AST::Identifier
+
       value.bytecode(g)
-      g.state.scope.new_local(name.name).reference.set_bytecode(g)
+      g.state.scope.new_local(id.name).reference.set_bytecode(g)
       g.pop
     end
 
-    args[1].bytecode(g)
+    SpecialForm[:do].bytecode(g, args)
 
     g.pop_state
   end
