@@ -6,25 +6,25 @@ module Apricot
     HISTORY_FILE = "~/.apricot-history"
     MAX_HISTORY_LINES = 1000
 
-    COMPLETIONS = SpecialForm::Specials.keys.map(&:to_s).sort
-
     COMMANDS = {
-      "backtrace" => [
+      "!backtrace" => [
         "Print the backtrace of the most recent exception",
         proc do
           puts (@exception ? @exception.awesome_backtrace : "No backtrace")
         end
       ],
 
-      "exit" => ["Exit the REPL", proc { exit }],
+      "!exit" => ["Exit the REPL", proc { exit }],
 
-      "help" => [
+      "!help" => [
         "Print this message",
         proc do
-          COMMANDS.sort.each {|name, a| puts '!' + name.ljust(14) + a[0] }
+          COMMANDS.sort.each {|name, a| puts name.ljust(14) + a[0] }
         end
       ]
     }
+
+    COMPLETIONS = (COMMANDS.keys + SpecialForm::Specials.keys.map(&:to_s)).sort
 
     def initialize(prompt, bytecode = false, history_file = nil)
       @prompt = prompt
@@ -46,11 +46,11 @@ module Apricot
         stripped = code.strip
         if stripped.empty?
           next
-        elsif stripped.start_with?('!') && command = stripped[1..-1]
-          if COMMANDS.include?(command) && block = COMMANDS[command][1]
+        elsif stripped.start_with?('!')
+          if COMMANDS.include?(stripped) && block = COMMANDS[stripped][1]
             instance_eval(&block)
           else
-            puts "Unknown command: !#{command}"
+            puts "Unknown command: !#{stripped}"
           end
           next
         end
