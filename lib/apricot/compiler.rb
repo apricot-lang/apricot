@@ -10,7 +10,7 @@ module Apricot
       compiler.run
     end
 
-    def self.compile_string(code, file = "(eval)", debug = false)
+    def self.compile_string(code, file = "(none)", debug = false)
       compiler = new :apricot_string, :compiled_method
 
       compiler.parser.input code, file

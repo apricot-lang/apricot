@@ -10,9 +10,13 @@ module Apricot
       end
 
       def bytecode(g)
-        pos(g)
+        g.name = :__top_level__
+        g.file = @file.to_sym
+
+#        g.push_state self
 
         if @elements.empty?
+          pos(g)
           g.push_nil
         else
           @elements[0..-2].each do |e|
@@ -23,6 +27,11 @@ module Apricot
         end
 
         g.ret
+
+#        g.pop_state
+
+#        g.local_count = local_count
+#        g.local_names = local_names
       end
     end
   end
