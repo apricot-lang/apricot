@@ -31,17 +31,8 @@ end
 
 if evals.empty?
   if $stdin.tty?
-    require 'readline'
-    while code = Readline.readline("apr> ")
-      next if code.strip.empty?
-      begin
-        cm = Apricot::Compiler.compile_string code, "(eval)", bytecode
-        value = Rubinius.run_script(cm)
-        puts "=> #{value.apricot_inspect}"
-      rescue => e
-        puts "#{e.class}: #{e.message}"
-      end
-    end
+    require 'apricot/repl'
+    Apricot::REPL.new('apr> ', bytecode).run
   else
     evals << [:eval, STDIN.read, "(stdin)"]
   end
