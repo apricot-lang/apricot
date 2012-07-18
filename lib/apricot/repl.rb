@@ -50,7 +50,7 @@ module Apricot
           if COMMANDS.include?(stripped) && block = COMMANDS[stripped][1]
             instance_eval(&block)
           else
-            puts "Unknown command: !#{stripped}"
+            puts "Unknown command: #{stripped}"
           end
           next
         end
