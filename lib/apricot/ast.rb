@@ -14,6 +14,6 @@ module Apricot
   end
 end
 
-%w{literals identifier constant list root containers}.map do |r|
+%w{literals identifier constant list toplevel}.map do |r|
   require "apricot/ast/#{r}"
 end
