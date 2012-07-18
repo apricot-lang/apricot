@@ -73,6 +73,17 @@ describe 'Apricot' do
     apricot(%q|(do (def Bar 1) Bar)|).should == 1
   end
 
+  it 'compiles let forms' do
+    apricot(%q|(let [])|).should == nil
+    apricot(%q|(let [a 1])|).should == nil
+    apricot(%q|(let [a 1] a)|).should == 1
+    apricot(%q|(let [a 1 b 2] [b a])|).should == [2, 1]
+    apricot(%q|(let [a 1] [(let [a 2] a) a])|).should == [2, 1]
+    apricot(%q|(let [a 1 b 2] (let [a 42] [b a]))|).should == [2, 42]
+    apricot(%q|(let [a 1 b a] [a b])|).should == [1, 1]
+    apricot(%q|(let [a 1] (let [b a] [a b]))|).should == [1, 1]
+  end
+
   it 'compiles quoted forms' do
     apricot(%q|'1|).should == 1
     apricot(%q|'a|).should == Apricot::Identifier.new(:a)
