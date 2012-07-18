@@ -89,4 +89,20 @@ module Apricot
 
     args.first.quote_bytecode(g)
   end
+
+  SpecialForm.define(:let) do |g, args|
+    # TODO handle arguments properly
+
+    g.push_state AST::LetScope.new(g.state.scope)
+
+    args[0].elements.each_slice(2) do |name, value|
+      value.bytecode(g)
+      g.state.scope.new_local(name.name).reference.set_bytecode(g)
+      g.pop
+    end
+
+    args[1].bytecode(g)
+
+    g.pop_state
+  end
 end

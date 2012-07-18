@@ -14,6 +14,6 @@ module Apricot
   end
 end
 
-%w[literals identifier constant list toplevel].each do |r|
+%w[literals identifier constant list toplevel letscope state].each do |r|
   require "apricot/ast/#{r}"
 end

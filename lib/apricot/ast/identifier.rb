@@ -10,15 +10,12 @@ module Apricot::AST
     def bytecode(g)
       pos(g)
 
-      g.push_local 0
+      g.state.scope.find_var(name).reference.get_bytecode(g)
     end
 
     def assign_bytecode(g, value)
-      value.bytecode(g)
-      g.set_local 0
-
-      g.local_count = 1
-      g.local_names = [@name]
+      # called by (def <self> <value>)
+      # TODO: this should assign a variable on the current namespace
     end
 
     def quote_bytecode(g)

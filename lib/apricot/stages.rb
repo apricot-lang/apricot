@@ -10,7 +10,7 @@ module Apricot
       end
 
       def run
-        @output = Rubinius::Generator.new
+        @output = Apricot::Generator.new
         @input.bytecode @output
         @output.close
         run_next
