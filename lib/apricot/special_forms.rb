@@ -98,13 +98,14 @@ module Apricot
 
     raise ArgumentError, "Bindings array for let must contain an even number of forms" if bindings.length.odd?
 
-    g.push_state AST::LetScope.new
+    scope = AST::LetScope.new
+    g.push_state scope
 
     bindings.each_slice(2) do |id, value|
       raise TypeError, "Binding targets in let must be identifiers" unless id.is_a? AST::Identifier
 
       value.bytecode(g)
-      g.state.scope.new_local(id.name).reference.set_bytecode(g)
+      scope.new_local(id.name).reference.set_bytecode(g)
       g.pop
     end
 

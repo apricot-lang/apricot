@@ -10,7 +10,7 @@ module Apricot::AST
     def bytecode(g)
       pos(g)
 
-      g.state.scope.find_var(name).reference.get_bytecode(g)
+      g.state.scope.find_var(name).get_bytecode(g)
     end
 
     def assign_bytecode(g, value)

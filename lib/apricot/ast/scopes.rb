@@ -27,6 +27,34 @@ module Apricot
       end
     end
 
+    class FnScope
+      include StorageScope
+
+      attr_accessor :parent
+
+      def initialize
+        @variables = {}
+      end
+
+      # An identifier or a nested scope is looking up a variable. If the
+      # variable is found here, return a reference to it. Otherwise look it up
+      # on the parent and increment its depth because it is beyond the bounds
+      # of the current block of code (fn).
+      def find_var(name)
+        if var = @variables[name]
+          var.reference
+        else
+          var = @parent.find_var(name)
+          var.depth += 1
+        end
+      end
+
+      # Create a new local on the current level.
+      def new_local(name)
+        @variables[name] = store_new_local(name)
+      end
+    end
+
     # The let scope doesn't have real storage for locals. It stores its locals
     # on the nearest enclosing real scope, which is any separate block of code
     # such as a fn, defn, defmacro or the top level of the program.
@@ -37,9 +65,13 @@ module Apricot
         @variables = {}
       end
 
-      # A nested scope is looking up a variable.
+      # An identifier or a nested scope is looking up a variable.
       def find_var(name)
-        @variables[name] || @parent.find_var(name)
+        if var = @variables[name]
+          var.reference
+        else
+          @parent.find_var(name)
+        end
       end
 
       # Create a new local on the current level, with storage on the nearest
