@@ -122,4 +122,42 @@ module Apricot
 
     g.pop_state
   end
+
+    # (fn name? [argument*] body*)
+    SpecialForm.define(:fn) do |g, args|
+      name = args.shift.name if args.first.is_a? AST::Identifier
+
+      raise TypeError, "Argument list for fn must be an array literal" unless args.first.is_a? AST::ArrayLiteral
+
+      arg_list = args.shift.elements
+
+      fn = g.class.new
+      fn.name = name || :__fn__
+      fn.file = g.file
+      fn.required_args = fn.total_args = arg_list.length
+
+      scope = AST::FnScope.new
+      scope.parent = g.state.scope
+      fn.push_state scope
+
+      fn.definition_line g.line
+      fn.set_line g.line
+
+      arg_list.each do |arg|
+        raise TypeError, "Arguments in fn form must be identifiers" unless arg.is_a? AST::Identifier
+
+        scope.new_local(arg.name)
+      end
+
+      SpecialForm[:do].bytecode(fn, args)
+
+      fn.ret
+      fn.close
+
+      fn.pop_state
+      fn.local_count = scope.local_count
+      fn.local_names = scope.local_names
+
+      g.push_generator fn
+    end
 end
