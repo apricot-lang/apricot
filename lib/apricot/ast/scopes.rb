@@ -46,6 +46,7 @@ module Apricot
         else
           var = @parent.find_var(name)
           var.depth += 1
+          var
         end
       end
 
