@@ -100,13 +100,14 @@ module Apricot
   # (let [binding*] body*) where binding is an identifier followed by a value
   SpecialForm.define(:let) do |g, args|
     raise ArgumentError, "Too few arguments to let" if args.length < 1
-    raise TypeError, "First argument to let must be an Array literal" unless args.first.is_a? AST::ArrayLiteral
+    raise TypeError, "First argument to let must be an array literal" unless args.first.is_a? AST::ArrayLiteral
 
     bindings = args.shift.elements
 
     raise ArgumentError, "Bindings array for let must contain an even number of forms" if bindings.length.odd?
 
     scope = AST::LetScope.new
+    scope.parent = g.state.scope
     g.push_state scope
 
     bindings.each_slice(2) do |id, value|
