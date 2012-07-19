@@ -34,7 +34,7 @@ module Apricot
     # The let scope doesn't have real storage for locals. It stores its locals
     # on the nearest enclosing real scope, which is any separate block of code
     # such as a fn, defn, defmacro or the top level of the program.
-    class LetScope < Node
+    class LetScope
       attr_accessor :parent
 
       def initialize
