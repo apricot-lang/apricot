@@ -21,8 +21,11 @@ module Apricot
     end
   end
 
+  # (. receiver method args*)
+  # TODO: block argument passing
+  # TODO: (. receiver (method args*)) form to ease the writing of the .. macro
   SpecialForm.define(:'.') do |g, args|
-    raise ArgumentError, "Too few arguments to send expression, expecting (. reciever method ...)" if args.length < 2
+    raise ArgumentError, "Too few arguments to send expression, expecting (. receiver method ...)" if args.length < 2
     raise TypeError, "Method in send expression must be an identifier" unless args[1].is_a? AST::Identifier
 
     receiver, method, *margs = *args
@@ -32,6 +35,7 @@ module Apricot
     g.send method.name, margs.length
   end
 
+  # (def name value?)
   SpecialForm.define(:def) do |g, args|
     raise ArgumentError, "Too few arguments to def" if args.length < 1
     raise ArgumentError, "Too many arguments to def" if args.length > 2
@@ -48,6 +52,7 @@ module Apricot
     end
   end
 
+  # (if cond body else_body?)
   SpecialForm.define(:if) do |g, args|
     raise ArgumentError, "Too few arguments to if" if args.length < 2
     raise ArgumentError, "Too many arguments to if" if args.length > 3
@@ -71,6 +76,7 @@ module Apricot
     end_label.set!
   end
 
+  # (do body*)
   SpecialForm.define(:do) do |g, args|
     if args.empty?
       g.push_nil
@@ -83,6 +89,7 @@ module Apricot
     end
   end
 
+  # (quote form)
   SpecialForm.define(:quote) do |g, args|
     raise ArgumentError, "Too few arguments to quote" if args.length < 1
     raise ArgumentError, "Too many arguments to quote" if args.length > 1
@@ -90,6 +97,7 @@ module Apricot
     args.first.quote_bytecode(g)
   end
 
+  # (let [binding*] body*) where binding is an identifier followed by a value
   SpecialForm.define(:let) do |g, args|
     raise ArgumentError, "Too few arguments to let" if args.length < 1
     raise TypeError, "First argument to let must be an Array literal" unless args.first.is_a? AST::ArrayLiteral
