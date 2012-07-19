@@ -1,15 +1,11 @@
 module Apricot
   module AST
-    module TopLevelScope
+    # This is a scope with real local variable storage, i.e. it is part of a
+    # block of code like a fn or the top level program. Let scopes do not have
+    # storage and must ask for storage from one of these.
+    module StorageScope
       def variable_names
         @variable_names ||= []
-      end
-
-      # A nested scope is looking up a variable. There are no local variables
-      # at the top level, so look up the variable on the current namespace.
-      def find_var(name)
-        # TODO: look up variable on the current namespace
-        raise "Could not find var: #{name}"
       end
 
       def store_new_local(name)

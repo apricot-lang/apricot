@@ -1,7 +1,7 @@
 module Apricot
   module AST
     class TopLevel < Node
-      include TopLevelScope
+      include StorageScope
 
       attr_reader :elements, :file
 
@@ -25,6 +25,13 @@ module Apricot
 
         g.local_count = local_count
         g.local_names = local_names
+      end
+
+      # A nested scope is looking up a variable. There are no local variables
+      # at the top level, so look up the variable on the current namespace.
+      def find_var(name)
+        # TODO: look up variable on the current namespace
+        raise "Could not find var: #{name}"
       end
     end
   end
