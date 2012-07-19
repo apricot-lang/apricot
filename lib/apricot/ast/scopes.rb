@@ -1,5 +1,36 @@
 module Apricot
   module AST
+    module TopLevelScope
+      def variable_names
+        @variable_names ||= []
+      end
+
+      # A nested scope is looking up a variable. There are no local variables
+      # at the top level, so look up the variable on the current namespace.
+      def find_var(name)
+        # TODO: look up variable on the current namespace
+        raise "Could not find var: #{name}"
+      end
+
+      def store_new_local(name)
+        variable = Compiler::LocalVariable.new next_slot
+        variable_names << name
+        variable
+      end
+
+      def next_slot
+        variable_names.size
+      end
+
+      def local_count
+        variable_names.size
+      end
+
+      def local_names
+        variable_names
+      end
+    end
+
     # The let scope doesn't have real storage for locals. It stores its locals
     # on the nearest enclosing real scope, which is any separate block of code
     # such as a fn, defn, defmacro or the top level of the program.
