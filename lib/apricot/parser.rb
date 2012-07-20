@@ -257,24 +257,24 @@ module Apricot
     end
 
     def parse_constant
-      constants = [""]
+      constant = ""
 
       while @char =~ IDENTIFIER
-        if @char == ':' && peek_char == ':'
-          constants << ""
-          next_char
-        else
-          constants.last << @char
-        end
-
+        constant << @char
         next_char
       end
 
-      syntax_error "Invalid constant #{constants.join('::')}" if constants.any? {|x| x.empty? }
+      # A negative second argument to String#split means it won't trim empty
+      # strings off the end, so we can check for them afterwards.
+      names = constant.split('::', -1)
 
-      constants.map! {|x| x.to_sym }
+      unless names.all? {|n| n =~ /^[A-Z]\w*$/ }
+        syntax_error "Invalid constant: #{constant}"
+      end
 
-      AST::Constant.new(@line, constants)
+      names.map! {|x| x.to_sym }
+
+      AST::Constant.new(@line, names)
     end
 
     def parse_identifier

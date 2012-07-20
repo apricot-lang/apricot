@@ -36,6 +36,10 @@ describe Apricot::Parser do
     @first.names.should == [:Example]
   end
 
+  it 'does not parse invalid constants' do
+    expect { parse('Fo$o') }.to raise_error(Apricot::SyntaxError)
+  end
+
   it 'parses scoped constants' do
     parse_one('Foo::Bar::Baz', Apricot::AST::Constant)
     @first.names.should == [:Foo, :Bar, :Baz]
@@ -43,6 +47,8 @@ describe Apricot::Parser do
 
   it 'does not parse invalid scoped constants' do
     expect { parse('Foo::') }.to raise_error(Apricot::SyntaxError)
+    expect { parse('Foo:') }.to raise_error(Apricot::SyntaxError)
+    expect { parse('Foo::a') }.to raise_error(Apricot::SyntaxError)
     expect { parse('Foo::::Bar') }.to raise_error(Apricot::SyntaxError)
   end
 
