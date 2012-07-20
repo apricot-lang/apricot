@@ -13,23 +13,17 @@ module Apricot::AST
       if @elements.empty?
         quote_bytecode(g)
       else
-        op = @elements.first
-        args = @elements[1..-1]
+        callee = @elements.shift
+        args = @elements
 
-        if op.is_a?(Identifier) && special = Apricot::SpecialForm[op.name]
+        if callee.is_a?(Identifier) && special = Apricot::SpecialForm[callee.name]
           special.bytecode(g, args)
         else
-          g.push_nil
-          # TODO
+          callee.bytecode(g)
+          args.each {|arg| arg.bytecode(g) }
+          g.send :call, args.length
         end
       end
-
-      # Old hack
-#      g.push_self
-#      @elements[1..-1].each do |arg|
-#        arg.bytecode(g)
-#      end
-#      g.send @elements[0].name.to_sym, @elements.count - 1, true
     end
 
     def quote_bytecode(g)
