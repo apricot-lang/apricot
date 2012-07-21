@@ -41,8 +41,7 @@ end
 evals.each do |type, *args|
   case type
   when :eval
-    cm = Apricot::Compiler.compile_string args[0], args[1], bytecode
-    Rubinius.run_script cm
+    Apricot::Compiler.eval(args[0], args[1], bytecode)
   when :file
     cm = Apricot::Compiler.compile args[0], nil, bytecode
     Rubinius.run_script cm

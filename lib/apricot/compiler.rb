@@ -10,13 +10,19 @@ module Apricot
       compiler.run
     end
 
-    def self.compile_string(code, file = "(none)", debug = false)
+    def self.compile_string(code, file = nil, debug = false)
       compiler = new :apricot_string, :compiled_method
 
-      compiler.parser.input code, file
+      compiler.parser.input(code, file || "(none)")
       compiler.packager.print(BytecodePrinter) if debug
 
       compiler.run
     end
+
+	def self.eval(code, file = "(none)", debug = false)
+	  cm = compile_string(code, file, debug)
+	  cm.scope = Rubinius::ConstantScope.new(Object, nil)
+	  Rubinius.run_script cm
+	end
   end
 end

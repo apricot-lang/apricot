@@ -56,8 +56,7 @@ module Apricot
         end
 
         begin
-          cm = Apricot::Compiler.compile_string code, "(eval)", @bytecode
-          value = Rubinius.run_script(cm)
+          value = Apricot::Compiler.eval(code, "(eval)", @bytecode)
           puts "=> #{value.apricot_inspect}"
         rescue Exception => e
           @exception = e
