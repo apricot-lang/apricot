@@ -21,7 +21,7 @@ module Apricot
 
 	def self.eval(code, file = "(none)", debug = false)
 	  cm = compile_string(code, file, debug)
-	  cm.scope = Rubinius::ConstantScope.new(Object, nil)
+	  cm.scope = Rubinius::ConstantScope.new(Object)
 	  Rubinius.run_script cm
 	end
   end

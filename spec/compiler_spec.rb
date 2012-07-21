@@ -1,6 +1,6 @@
 describe 'Apricot' do
   def apricot(code)
-    Rubinius.run_script(Apricot::Compiler.compile_string(code))
+    Apricot::Compiler.eval code
   end
 
   it 'compiles an empty program' do
