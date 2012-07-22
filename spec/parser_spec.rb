@@ -142,7 +142,7 @@ describe Apricot::Parser do
     parse_one('#r<egex>', Apricot::AST::RegexLiteral).value.should == 'egex'
     parse_one('#r!\!!', Apricot::AST::RegexLiteral).value.should == '!'
     parse_one('#r!foo\bar!', Apricot::AST::RegexLiteral).value.should == 'foo\bar'
-    parse_one('#r!\\\\!', Apricot::AST::RegexLiteral).value.should == "\\"
+    parse_one('#r!\\\\!', Apricot::AST::RegexLiteral).value.should == "\\\\"
   end
 
   it 'parses symbols' do

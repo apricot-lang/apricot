@@ -224,8 +224,10 @@ module Apricot
         if @char == delimiter
           next_char # consume delimiter
           return AST::RegexLiteral.new(line, regex)
-        elsif @char == "\\" && (peek_char == delimiter || peek_char == "\\")
+        elsif @char == "\\" && peek_char == delimiter
           next_char
+        elsif @char == "\\" && peek_char == "\\"
+          regex << consume_char
         end
         regex << consume_char
       end
