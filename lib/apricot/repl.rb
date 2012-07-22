@@ -117,7 +117,7 @@ module Apricot
       # read another line.
       Readline::HISTORY.pop
       @line -= 1
-      readline_with_history
+      retry
     end
   end
 end
