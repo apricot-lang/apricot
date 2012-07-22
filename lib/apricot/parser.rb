@@ -22,19 +22,19 @@ module Apricot
                     "v" => "\v", "f" => "\f", "r" => "\r", "e" => "\e"}
 
     # @param [String] source a source program
-    def initialize(source, filename = "(none)")
+    def initialize(source, filename = "(none)", line = 1)
       @filename = filename
       @source = source
       @location = 0
-      @line = 1
+      @line = line
     end
 
     def self.parse_file(filename)
       new(File.read(filename), filename).parse
     end
 
-    def self.parse_string(source, filename = "(none)")
-      new(source, filename).parse
+    def self.parse_string(source, filename = "(none)", line = 1)
+      new(source, filename, line).parse
     end
 
     # @return [Array<AST::Node>] a list of the forms in the program

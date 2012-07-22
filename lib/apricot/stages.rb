@@ -46,13 +46,14 @@ module Apricot
       stage :apricot_string
       next_stage Generator
 
-      def input(code, file = "(none)")
+      def input(code, file = "(none)", line = 1)
         @input = code
         @file = file
+        @line = line
       end
 
       def parse
-        Apricot::Parser.parse_string(@input, @file)
+        Apricot::Parser.parse_string(@input, @file, @line)
       end
     end
   end

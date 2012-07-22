@@ -30,6 +30,7 @@ module Apricot
       @prompt = prompt
       @bytecode = bytecode
       @history_file = File.expand_path(history_file || HISTORY_FILE)
+      @line = 1
     end
 
     def run
@@ -56,11 +57,13 @@ module Apricot
         end
 
         begin
-          value = Apricot::Compiler.eval(code, "(eval)", @bytecode)
+          value = Apricot::Compiler.eval(code, "(eval)", @line, @bytecode)
           puts "=> #{value.apricot_inspect}"
         rescue Exception => e
           @exception = e
           puts "#{e.class}: #{e.message}"
+        ensure
+          @line += 1
         end
       end
 
