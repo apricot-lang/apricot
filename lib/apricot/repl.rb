@@ -59,6 +59,12 @@ module Apricot
         begin
           value = Apricot::Compiler.eval(code, "(eval)", @line, @bytecode)
           puts "=> #{value.apricot_inspect}"
+        rescue Interrupt
+          # Raised by Ctrl-C. Print a newline so the prompt is at the start of
+          # the next line.
+          puts
+        rescue SystemExit, SignalException
+          raise
         rescue Exception => e
           @exception = e
           puts "#{e.class}: #{e.message}"
@@ -102,6 +108,12 @@ module Apricot
       end
 
       line
+    rescue Interrupt
+      # This is raised by Ctrl-C. Remove the line from history then try to
+      # read another line.
+      Readline::HISTORY.pop
+      @line -= 1
+      readline_with_history
     end
   end
 end
