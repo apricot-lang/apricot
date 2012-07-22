@@ -62,9 +62,9 @@ module Apricot
         rescue Exception => e
           @exception = e
           puts "#{e.class}: #{e.message}"
-        ensure
-          @line += 1
         end
+
+        @line += 1
       end
 
       puts # Print a newline after Ctrl-D (EOF)

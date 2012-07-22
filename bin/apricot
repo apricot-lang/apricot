@@ -13,7 +13,7 @@ options = Rubinius::Options.new "Usage: #{$0} [options] [program]", 20
 options.doc "OPTIONS:"
 
 options.on "-e", "CODE", "evaluate CODE and print the result" do |code|
-  evals << [:eval, code, "-e"]
+  evals << [:eval, code]
 end
 
 options.on "-B", "--bytecode", "print bytecode after compiling" do
@@ -34,16 +34,18 @@ if evals.empty?
     require 'apricot/repl'
     Apricot::REPL.new('apr> ', bytecode).run
   else
-    evals << [:eval, STDIN.read, "(stdin)"]
+    evals << [:stdin]
   end
 end
 
 evals.each do |type, *args|
   case type
   when :eval
-    Apricot::Compiler.eval(args[0], args[1], 1, bytecode)
+    Apricot::Compiler.eval(args.first, "(eval)", 1, bytecode)
+  when :stdin
+    Apricot::Compiler.eval(STDIN.read, "(stdin)", 1, bytecode)
   when :file
-    cm = Apricot::Compiler.compile args[0], nil, bytecode
+    cm = Apricot::Compiler.compile(args.first, nil, bytecode)
     Rubinius.run_script cm
   end
 end
