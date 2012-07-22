@@ -58,3 +58,9 @@ class Rational
     to_s
   end
 end
+
+class Regexp
+  def apricot_inspect
+    "#r#{inspect}"
+  end
+end

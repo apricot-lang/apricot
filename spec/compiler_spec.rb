@@ -27,6 +27,10 @@ describe 'Apricot' do
     apricot(%q|"foo"|).should == "foo"
   end
 
+  it 'compiles regexes' do
+    apricot(%q|#r"foo"|).should == /foo/
+  end
+
   it 'compiles arrays' do
     apricot(%q|[]|).should == []
     apricot(%q|[1 2 3]|).should == [1, 2, 3]

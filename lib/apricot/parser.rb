@@ -101,6 +101,7 @@ module Apricot
       next_char # skip #
       case @char
       when '{' then parse_set
+      when 'r' then parse_regex
       else syntax_error "Unknown reader macro: ##{@char}"
       end
     end
@@ -204,6 +205,32 @@ module Apricot
       end
 
       number.to_i(base).chr
+    end
+
+    def parse_regex
+      line = @line
+      next_char # skip the r
+      delimiter = case @char
+                  when '(' then ')'
+                  when '[' then ']'
+                  when '{' then '}'
+                  when '<' then '>'
+                  else @char
+                  end
+      next_char # skip delimiter
+      regex = ""
+
+      while @char
+        if @char == delimiter
+          next_char # consume delimiter
+          return AST::RegexLiteral.new(line, regex)
+        elsif @char == "\\" && (peek_char == delimiter || peek_char == "\\")
+          next_char
+        end
+        regex << consume_char
+      end
+
+      syntax_error "Unexpected end of program while parsing regex"
     end
 
     def parse_symbol

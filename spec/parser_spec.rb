@@ -8,6 +8,7 @@ describe Apricot::Parser do
   def parse_one(s, klass)
     parse(s).length.should == 1
     @first.should be_a(klass)
+    @first
   end
 
   it 'parses nothing' do
@@ -130,6 +131,18 @@ describe Apricot::Parser do
   it 'stops parsing hex/octal escapes in strings at non-hex/octal digits' do
     parse_one('"\xAZ\082"', Apricot::AST::StringLiteral)
     @first.value.should == "\x0AZ\00082"
+  end
+
+  it 'parses regexes' do
+    parse_one('#r!!', Apricot::AST::RegexLiteral).value.should == ''
+    parse_one('#r!egex!', Apricot::AST::RegexLiteral).value.should == 'egex'
+    parse_one('#r(egex)', Apricot::AST::RegexLiteral).value.should == 'egex'
+    parse_one('#r[egex]', Apricot::AST::RegexLiteral).value.should == 'egex'
+    parse_one('#r{egex}', Apricot::AST::RegexLiteral).value.should == 'egex'
+    parse_one('#r<egex>', Apricot::AST::RegexLiteral).value.should == 'egex'
+    parse_one('#r!\!!', Apricot::AST::RegexLiteral).value.should == '!'
+    parse_one('#r!foo\bar!', Apricot::AST::RegexLiteral).value.should == 'foo\bar'
+    parse_one('#r!\\\\!', Apricot::AST::RegexLiteral).value.should == "\\"
   end
 
   it 'parses symbols' do

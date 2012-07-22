@@ -118,6 +118,27 @@ module Apricot::AST
     end
   end
 
+  class RegexLiteral < Literal
+    def bytecode(g)
+      pos(g)
+
+      idx = g.add_literal(nil)
+      g.push_literal_at idx
+      g.dup
+      g.is_nil
+
+      lbl = g.new_label
+      g.gif lbl
+      g.pop
+      g.push_cpath_top
+      g.find_const :Regexp
+      g.push_literal @value
+      g.send :new, 1
+      g.set_literal idx
+      lbl.set!
+    end
+  end
+
   class CollectionLiteral < Node
     attr_reader :elements
 
