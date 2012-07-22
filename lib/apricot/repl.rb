@@ -59,13 +59,17 @@ module Apricot
         begin
           value = Apricot::Compiler.eval(code, "(eval)", @line, @bytecode)
           puts "=> #{value.apricot_inspect}"
-        rescue Interrupt
-          # Raised by Ctrl-C. Print a newline so the prompt is at the start of
-          # the next line.
+          e = nil
+        rescue Interrupt => e
+          # Raised by Ctrl-C. Print a newline so the error message is on the
+          # next line.
           puts
         rescue SystemExit, SignalException
           raise
         rescue Exception => e
+        end
+
+        if e
           @exception = e
           puts "#{e.class}: #{e.message}"
         end
