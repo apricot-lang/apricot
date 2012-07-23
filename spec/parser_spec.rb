@@ -11,6 +11,10 @@ describe Apricot::Parser do
     @first
   end
 
+  def expect_syntax_error(s)
+    expect { parse(s) }.to raise_error(Apricot::SyntaxError)
+  end
+
   it 'parses nothing' do
     parse('').should be_empty
   end
@@ -38,7 +42,7 @@ describe Apricot::Parser do
   end
 
   it 'does not parse invalid constants' do
-    expect { parse('Fo$o') }.to raise_error(Apricot::SyntaxError)
+    expect_syntax_error 'Fo$o'
   end
 
   it 'parses scoped constants' do
@@ -47,10 +51,10 @@ describe Apricot::Parser do
   end
 
   it 'does not parse invalid scoped constants' do
-    expect { parse('Foo::') }.to raise_error(Apricot::SyntaxError)
-    expect { parse('Foo:') }.to raise_error(Apricot::SyntaxError)
-    expect { parse('Foo::a') }.to raise_error(Apricot::SyntaxError)
-    expect { parse('Foo::::Bar') }.to raise_error(Apricot::SyntaxError)
+    expect_syntax_error 'Foo::'
+    expect_syntax_error 'Foo:'
+    expect_syntax_error 'Foo::a'
+    expect_syntax_error 'Foo::::Bar'
   end
 
   it 'parses true, false, and nil' do
@@ -87,7 +91,7 @@ describe Apricot::Parser do
   end
 
   it 'does not parse invalid numbers' do
-    expect { parse('12abc') }.to raise_error(Apricot::SyntaxError)
+    expect_syntax_error '12abc'
   end
 
   it 'parses empty strings' do
@@ -106,7 +110,7 @@ describe Apricot::Parser do
   end
 
   it 'does not parse unfinished strings' do
-    expect { parse('"') }.to raise_error(Apricot::SyntaxError)
+    expect_syntax_error '"'
   end
 
   it 'parses strings with character escapes' do
@@ -125,7 +129,7 @@ describe Apricot::Parser do
   end
 
   it 'does not parse strings with invalid hex escapes' do
-    expect { parse('"\\x"') }.to raise_error(Apricot::SyntaxError)
+    expect_syntax_error '"\\x"'
   end
 
   it 'stops parsing hex/octal escapes in strings at non-hex/octal digits' do
@@ -155,7 +159,7 @@ describe Apricot::Parser do
   end
 
   it 'does not parse regexes with unknown trailing options' do
-    expect { parse('#r/foo/asdf') }.to raise_error(Apricot::SyntaxError)
+    expect_syntax_error '#r/foo/asdf'
   end
 
   it 'parses symbols' do
@@ -169,12 +173,12 @@ describe Apricot::Parser do
   end
 
   it 'does not parse unfinished quoted symbols' do
-    expect { parse(':"') }.to raise_error(Apricot::SyntaxError)
+    expect_syntax_error ':"'
   end
 
   it 'does not parse empty symbols' do
-    expect { parse(':') }.to raise_error(Apricot::SyntaxError)
-    expect { parse(':""') }.to raise_error(Apricot::SyntaxError)
+    expect_syntax_error ':'
+    expect_syntax_error ':""'
   end
 
   it 'parses empty lists' do
@@ -211,7 +215,7 @@ describe Apricot::Parser do
   end
 
   it 'does not parse invalid hashes' do
-    expect { parse('{:foo 1 :bar}') }.to raise_error(Apricot::SyntaxError)
+    expect_syntax_error '{:foo 1 :bar}'
   end
 
   it 'parses empty sets' do
