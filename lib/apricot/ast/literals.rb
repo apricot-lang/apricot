@@ -118,7 +118,15 @@ module Apricot::AST
     end
   end
 
-  class RegexLiteral < Literal
+  class RegexLiteral < SimpleLiteral
+    attr_accessor :pattern, :options
+
+    def initialize(line, pattern, options)
+      super(line)
+      @pattern = pattern
+      @options = options
+    end
+
     def bytecode(g)
       pos(g)
 
@@ -132,8 +140,9 @@ module Apricot::AST
       g.pop
       g.push_cpath_top
       g.find_const :Regexp
-      g.push_literal @value
-      g.send :new, 1
+      g.push_literal @pattern
+      g.push @options
+      g.send :new, 2
       g.set_literal idx
       lbl.set!
     end

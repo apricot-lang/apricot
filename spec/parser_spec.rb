@@ -134,15 +134,28 @@ describe Apricot::Parser do
   end
 
   it 'parses regexes' do
-    parse_one('#r!!', Apricot::AST::RegexLiteral).value.should == ''
-    parse_one('#r!egex!', Apricot::AST::RegexLiteral).value.should == 'egex'
-    parse_one('#r(egex)', Apricot::AST::RegexLiteral).value.should == 'egex'
-    parse_one('#r[egex]', Apricot::AST::RegexLiteral).value.should == 'egex'
-    parse_one('#r{egex}', Apricot::AST::RegexLiteral).value.should == 'egex'
-    parse_one('#r<egex>', Apricot::AST::RegexLiteral).value.should == 'egex'
-    parse_one('#r!\!!', Apricot::AST::RegexLiteral).value.should == '!'
-    parse_one('#r!foo\bar!', Apricot::AST::RegexLiteral).value.should == 'foo\bar'
-    parse_one('#r!\\\\!', Apricot::AST::RegexLiteral).value.should == "\\\\"
+    parse_one('#r!!', Apricot::AST::RegexLiteral).pattern.should == ''
+    parse_one('#r!egex!', Apricot::AST::RegexLiteral).pattern.should == 'egex'
+    parse_one('#r(egex)', Apricot::AST::RegexLiteral).pattern.should == 'egex'
+    parse_one('#r[egex]', Apricot::AST::RegexLiteral).pattern.should == 'egex'
+    parse_one('#r{egex}', Apricot::AST::RegexLiteral).pattern.should == 'egex'
+    parse_one('#r<egex>', Apricot::AST::RegexLiteral).pattern.should == 'egex'
+    parse_one('#r!\!!', Apricot::AST::RegexLiteral).pattern.should == '!'
+    parse_one('#r!foo\bar!', Apricot::AST::RegexLiteral).pattern.should == 'foo\bar'
+    parse_one('#r!\\\\!', Apricot::AST::RegexLiteral).pattern.should == "\\\\"
+  end
+
+  it 'parses regexes with trailing options' do
+    parse_one('#r//i', Apricot::AST::RegexLiteral)
+    @first.options.should == Regexp::IGNORECASE
+    parse_one('#r/foo/x', Apricot::AST::RegexLiteral)
+    @first.options.should == Regexp::EXTENDED
+    parse_one('#r//im', Apricot::AST::RegexLiteral)
+    @first.options.should == Regexp::IGNORECASE | Regexp::MULTILINE
+  end
+
+  it 'does not parse regexes with unknown trailing options' do
+    expect { parse('#r/foo/asdf') }.to raise_error(Apricot::SyntaxError)
   end
 
   it 'parses symbols' do

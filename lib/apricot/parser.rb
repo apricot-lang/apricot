@@ -20,6 +20,8 @@ module Apricot
     DIGITS       = ('0'..'9').to_a + ('a'..'z').to_a
     CHAR_ESCAPES = {"a" => "\a", "b" => "\b", "t" => "\t", "n" => "\n",
                     "v" => "\v", "f" => "\f", "r" => "\r", "e" => "\e"}
+    REGEXP_OPTIONS = {'i' => Regexp::IGNORECASE, 'x' => Regexp::EXTENDED,
+                      'm' => Regexp::MULTILINE}
 
     # @param [String] source a source program
     def initialize(source, filename = "(none)", line = 1)
@@ -223,7 +225,8 @@ module Apricot
       while @char
         if @char == delimiter
           next_char # consume delimiter
-          return AST::RegexLiteral.new(line, regex)
+          options = regex_options_helper
+          return AST::RegexLiteral.new(line, regex, options)
         elsif @char == "\\" && peek_char == delimiter
           next_char
         elsif @char == "\\" && peek_char == "\\"
@@ -233,6 +236,22 @@ module Apricot
       end
 
       syntax_error "Unexpected end of program while parsing regex"
+    end
+
+    def regex_options_helper
+      options = 0
+
+      while @char =~ /[a-zA-Z]/
+        if option = REGEXP_OPTIONS[@char]
+          options |= option
+        else
+          syntax_error "Unknown regexp option: '#{@char}'"
+        end
+
+        next_char
+      end
+
+      options
     end
 
     def parse_symbol
