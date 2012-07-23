@@ -53,7 +53,9 @@ describe 'Apricot' do
 
   it 'compiles send forms' do
     apricot(%q|(. 1 class)|).should == Fixnum
+    apricot(%q|(. 1 (class))|).should == Fixnum
     apricot(%q|(. "foo" append "bar")|).should == "foobar"
+    apricot(%q|(. "foo" (append "bar"))|).should == "foobar"
   end
 
   it 'compiles constant defs' do

@@ -22,17 +22,30 @@ module Apricot
   end
 
   # (. receiver method args*)
+  # (. receiver (method args*))
   # TODO: block argument passing
-  # TODO: (. receiver (method args*)) form to ease the writing of the .. macro
   SpecialForm.define(:'.') do |g, args|
     raise ArgumentError, "Too few arguments to send expression, expecting (. receiver method ...)" if args.length < 2
-    raise TypeError, "Method in send expression must be an identifier" unless args[1].is_a? AST::Identifier
 
-    receiver, method, *margs = *args
+    receiver, method_or_list = args.shift(2)
+
+    # Handle the (. receiver (method args*)) form
+    method = nil
+    if method_or_list.is_a? AST::List
+      method = method_or_list.elements.shift
+
+      raise ArgumentError, "Invalid send expression, expecting (. receiver (method ...))" unless args.empty?
+
+      args = method_or_list.elements
+    else
+      method = method_or_list
+    end
+
+    raise TypeError, "Method in send expression must be an identifier" unless method.is_a? AST::Identifier
 
     receiver.bytecode(g)
-    margs.each {|a| a.bytecode(g) }
-    g.send method.name, margs.length
+    args.each {|a| a.bytecode(g) }
+    g.send method.name, args.length
   end
 
   # (def name value?)
