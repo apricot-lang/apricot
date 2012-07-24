@@ -1,7 +1,13 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env rbx
 
 file = __FILE__
 file = File.readlink(file) while File.symlink? file
+
+unless Rubinius.ruby19?
+  puts "Warning: Apricot must be run in Ruby 1.9 mode, executing rbx -X19..."
+  exec("/usr/bin/env", "rbx", "-X19", file)
+end
+
 $LOAD_PATH.unshift(File.expand_path('../../lib', file))
 
 require 'apricot'
