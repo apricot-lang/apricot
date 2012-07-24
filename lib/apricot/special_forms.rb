@@ -30,7 +30,6 @@ module Apricot
     receiver, method_or_list = args.shift(2)
 
     # Handle the (. receiver (method args*)) form
-    method = nil
     if method_or_list.is_a? AST::List
       method = method_or_list.elements.shift
 
