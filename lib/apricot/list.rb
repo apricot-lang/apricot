@@ -67,7 +67,7 @@ module Apricot
       return '()' if empty?
 
       str = '('
-      each {|x| str << x.inspect << ' ' }
+      each {|x| str << x.apricot_inspect << ' ' }
       str.chop!
       str << ')'
     end
