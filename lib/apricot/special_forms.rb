@@ -170,6 +170,9 @@ module Apricot
       fn.local_count = scope.local_count
       fn.local_names = scope.local_names
 
-      g.push_generator fn
+      g.push_cpath_top
+      g.find_const :Kernel
+      g.create_block fn
+      g.send_with_block :lambda, 0
     end
 end
