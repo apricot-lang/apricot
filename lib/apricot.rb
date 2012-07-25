@@ -1,9 +1,7 @@
 require 'rational'
 require 'set'
 
-%w[parser compiler ast generator stages printers locals special_forms list
-identifier constant ruby_ext].each {|r| require "apricot/#{r}" }
-
+# TODO: Move gensym to a more appropriate file
 module Apricot
   @gensym = 0
 
@@ -11,3 +9,6 @@ module Apricot
     :"#{prefix}__#{@gensym += 1}"
   end
 end
+
+%w[parser compiler ast generator stages printers locals special_forms list
+identifier constant ruby_ext].each {|r| require "apricot/#{r}" }
