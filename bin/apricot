@@ -1,4 +1,5 @@
 #!/usr/bin/env rbx
+# vim: ft=ruby:
 
 file = __FILE__
 file = File.readlink(file) while File.symlink? file
