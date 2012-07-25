@@ -23,12 +23,16 @@ module Apricot
     REGEXP_OPTIONS = {'i' => Regexp::IGNORECASE, 'x' => Regexp::EXTENDED,
                       'm' => Regexp::MULTILINE}
 
+    FnState = Struct.new(:args, :rest)
+
     # @param [String] source a source program
     def initialize(source, filename = "(none)", line = 1)
       @filename = filename
       @source = source
       @location = 0
       @line = line
+
+      @fn_state = []
     end
 
     def self.parse_file(filename)
@@ -103,6 +107,7 @@ module Apricot
       next_char # skip #
       case @char
       when '{' then parse_set
+      when '(' then parse_fn
       when 'r' then parse_regex
       else syntax_error "Unknown reader macro: ##{@char}"
       end
@@ -133,6 +138,21 @@ module Apricot
       form = parse_form
       quote = AST::Identifier.new(@line, :quote)
       AST::List.new(@line, [quote, form])
+    end
+
+    def parse_fn
+      @fn_state.unshift(FnState.new([], nil))
+      body = parse_list
+      state = @fn_state.shift
+
+      state.args << :'&' << state.rest if state.rest
+      args = state.args.map.with_index do |x, i|
+        AST::Identifier.new(body.line, x || Apricot.gensym("p#{i + 1}"))
+      end
+
+      AST::List.new(body.line, [AST::Identifier.new(body.line, 'fn'),
+                                AST::ArrayLiteral.new(body.line, args),
+                                body])
     end
 
     def parse_list
@@ -333,7 +353,21 @@ module Apricot
         next_char
       end
 
-      identifier = identifier.to_sym
+      # Handle % identifiers in #() syntax
+      if (state = @fn_state.first) && identifier[0] == '%'
+        identifier = case identifier[1..-1]
+        when '' # % is equivalent to %1
+          state.args[0] ||= Apricot.gensym('p1')
+        when '&'
+          state.rest ||= Apricot.gensym('rest')
+        else
+          n = identifier[1..-1].to_i
+          syntax_error "arg literal must be %, %& or %integer" if n == 0
+          state.args[n - 1] ||= Apricot.gensym("p#{n}")
+        end
+      else
+        identifier = identifier.to_sym
+      end
 
       case identifier
       when :true
