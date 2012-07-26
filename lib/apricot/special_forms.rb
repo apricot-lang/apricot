@@ -135,64 +135,64 @@ module Apricot
     g.pop_state
   end
 
-    # (fn name? [args*] body*)
-    # (fn name? [args* & rest] body*)
-    SpecialForm.define(:fn) do |g, args|
-      name = args.shift.name if args.first.is_a? AST::Identifier
+  # (fn name? [args*] body*)
+  # (fn name? [args* & rest] body*)
+  SpecialForm.define(:fn) do |g, args|
+    name = args.shift.name if args.first.is_a? AST::Identifier
 
-      raise TypeError, "Argument list for fn must be an array literal" unless args.first.is_a? AST::ArrayLiteral
+    raise TypeError, "Argument list for fn must be an array literal" unless args.first.is_a? AST::ArrayLiteral
 
-      arg_list = args.shift.elements
+    arg_list = args.shift.elements
 
-      fn = g.class.new
-      fn.name = name || :__fn__
-      fn.file = g.file
+    fn = g.class.new
+    fn.name = name || :__fn__
+    fn.file = g.file
 
-      scope = AST::FnScope.new
-      scope.parent = g.state.scope
-      fn.push_state scope
+    scope = AST::FnScope.new
+    scope.parent = g.state.scope
+    fn.push_state scope
 
-      fn.definition_line g.line
-      fn.set_line g.line
+    fn.definition_line g.line
+    fn.set_line g.line
 
-      splat_index = nil
+    splat_index = nil
 
-      arg_list.each_with_index do |arg, i|
-        raise TypeError, "Arguments in fn form must be identifiers" unless arg.is_a? AST::Identifier
+    arg_list.each_with_index do |arg, i|
+      raise TypeError, "Arguments in fn form must be identifiers" unless arg.is_a? AST::Identifier
 
-        if arg.name == :&
-          splat_index = i
-          break
-        end
-
-        scope.new_local(arg.name)
+      if arg.name == :&
+        splat_index = i
+        break
       end
 
-      if splat_index
-        splat_arg = arg_list[splat_index + 1] # arg after &
-        raise ArgumentError, "Expected identifier following & in argument list" unless splat_arg
-        raise ArgumentError, "Unexpected arguments after rest argument" if arg_list[splat_index + 2]
-
-        scope.new_local(splat_arg.name)
-      end
-
-      SpecialForm[:do].bytecode(fn, args)
-
-      fn.ret
-      fn.close
-
-      fn.pop_state
-      fn.splat_index = splat_index if splat_index
-      fn.local_count = scope.local_count
-      fn.local_names = scope.local_names
-
-      args_count = arg_list.length
-      args_count -= 2 if splat_index # don't count the & or splat arg itself
-      fn.required_args = fn.total_args = args_count
-
-      g.push_cpath_top
-      g.find_const :Kernel
-      g.create_block fn
-      g.send_with_block :lambda, 0
+      scope.new_local(arg.name)
     end
+
+    if splat_index
+      splat_arg = arg_list[splat_index + 1] # arg after &
+      raise ArgumentError, "Expected identifier following & in argument list" unless splat_arg
+      raise ArgumentError, "Unexpected arguments after rest argument" if arg_list[splat_index + 2]
+
+      scope.new_local(splat_arg.name)
+    end
+
+    SpecialForm[:do].bytecode(fn, args)
+
+    fn.ret
+    fn.close
+
+    fn.pop_state
+    fn.splat_index = splat_index if splat_index
+    fn.local_count = scope.local_count
+    fn.local_names = scope.local_names
+
+    args_count = arg_list.length
+    args_count -= 2 if splat_index # don't count the & or splat arg itself
+    fn.required_args = fn.total_args = args_count
+
+    g.push_cpath_top
+    g.find_const :Kernel
+    g.create_block fn
+    g.send_with_block :lambda, 0
+  end
 end
