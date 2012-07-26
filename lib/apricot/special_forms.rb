@@ -109,14 +109,14 @@ module Apricot
     args.first.quote_bytecode(g)
   end
 
-  # (let [binding*] body*) where binding is an identifier followed by a value
-  SpecialForm.define(:let) do |g, args|
-    raise ArgumentError, "Too few arguments to let" if args.length < 1
-    raise TypeError, "First argument to let must be an array literal" unless args.first.is_a? AST::ArrayLiteral
+  # Code shared between let and loop. type is :let or :loop
+  def self.let(g, args, type)
+    raise ArgumentError, "Too few arguments to #{type}" if args.length < 1
+    raise TypeError, "First argument to #{type} must be an array literal" unless args.first.is_a? AST::ArrayLiteral
 
     bindings = args.shift.elements
 
-    raise ArgumentError, "Bindings array for let must contain an even number of forms" if bindings.length.odd?
+    raise ArgumentError, "Bindings array for #{type} must contain an even number of forms" if bindings.length.odd?
 
     scope = AST::LetScope.new
     scope.parent = g.state.scope
@@ -130,9 +130,50 @@ module Apricot
       g.pop
     end
 
+    if type == :loop
+      scope.loop_label = g.new_label
+      scope.loop_label.set!
+    end
+
     SpecialForm[:do].bytecode(g, args)
 
     g.pop_state
+  end
+
+  # (let [binding*] body*) where binding is an identifier followed by a value
+  SpecialForm.define(:let) do |g, args|
+    let(g, args, :let)
+  end
+
+  # (loop [binding*] body*) where binding is an identifier followed by a value
+  # Just like let but also introduces a loop target for (recur ...)
+  SpecialForm.define(:loop) do |g, args|
+    let(g, args, :loop)
+  end
+
+  # (recur args*)
+  # Rebinds the arguments of the nearest enclosing loop or fn and jumps to the
+  # top of the loop/fn
+  SpecialForm.define(:recur) do |g, args|
+    target = g.state.scope
+
+    # Climb the scope ladder past the non-loop let bindings. We will end up on
+    # a loop binding, a fn, or the top level scope.
+    while target.is_a?(AST::LetScope) && !target.loop?
+      target = target.parent
+    end
+
+    raise "No loop or fn target for recur found" if target.is_a?(AST::TopLevel)
+
+    # TODO: check arity
+    vars = target.variables.values
+    args.each_with_index do |arg, i|
+      arg.bytecode(g)
+      vars[i].reference.set_bytecode(g)
+      g.pop
+    end
+
+    g.goto target.loop_label
   end
 
   # (fn name? [args*] body*)
@@ -174,7 +215,11 @@ module Apricot
       raise ArgumentError, "Unexpected arguments after rest argument" if arg_list[splat_index + 2]
 
       scope.new_local(splat_arg.name)
+      scope.splat = true
     end
+
+    scope.loop_label = fn.new_label
+    scope.loop_label.set!
 
     SpecialForm[:do].bytecode(fn, args)
 

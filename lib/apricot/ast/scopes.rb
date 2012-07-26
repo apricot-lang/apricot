@@ -30,10 +30,13 @@ module Apricot
     class FnScope
       include StorageScope
 
-      attr_accessor :parent
+      attr_accessor :parent, :variables, :loop_label, :splat
+      alias_method :splat?, :splat
 
       def initialize
         @variables = {}
+        @loop_label = nil
+        @splat = false
       end
 
       # An identifier or a nested scope is looking up a variable. If the
@@ -60,10 +63,12 @@ module Apricot
     # on the nearest enclosing real scope, which is any separate block of code
     # such as a fn, defn, defmacro or the top level of the program.
     class LetScope
-      attr_accessor :parent
+      attr_accessor :parent, :variables, :loop_label
+      alias_method :loop?, :loop_label
 
       def initialize
         @variables = {}
+        @loop_label = nil
       end
 
       # An identifier or a nested scope is looking up a variable.
