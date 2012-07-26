@@ -115,6 +115,7 @@ module Apricot
     rescue Interrupt
       # This is raised by Ctrl-C. Remove the line from history then try to
       # read another line.
+      puts "^C"
       Readline::HISTORY.pop
       @line -= 1
       retry
