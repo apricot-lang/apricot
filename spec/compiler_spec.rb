@@ -58,6 +58,13 @@ describe 'Apricot' do
     apricot(%q|(. "foo" (append "bar"))|).should == "foobar"
   end
 
+  it 'compiles send forms with block args' do
+    apricot(%q|(. [1 2 3] map \| :to_s)|).should == %w[1 2 3]
+    apricot(%q|(. [1 2 3] (map \| :to_s))|).should == %w[1 2 3]
+    apricot(%q|(. [1 2 3] map \| #(. % + 1))|).should == [2, 3, 4]
+    apricot(%q|(. [1 2 3] (map \| #(. % + 1)))|).should == [2, 3, 4]
+  end
+
   it 'compiles constant defs' do
     expect { Foo }.to raise_error(NameError)
     apricot(%q|(def Foo 1)|)
