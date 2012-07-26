@@ -97,6 +97,13 @@ describe 'Apricot' do
     apricot(%q|(let [a 1] (let [b a] [a b]))|).should == [1, 1]
   end
 
+  it 'compiles fn forms' do
+    apricot(%q|((fn []))|).should == nil
+    apricot(%q|((fn [] 42))|).should == 42
+    apricot(%q|((fn [x] x) 42)|).should == 42
+    apricot(%q|((fn [x y] [y x]) 1 2)|).should == [2, 1]
+  end
+
   it 'compiles quoted forms' do
     apricot(%q|'1|).should == 1
     apricot(%q|'a|).should == Apricot::Identifier.new(:a)
