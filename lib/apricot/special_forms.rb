@@ -184,7 +184,9 @@ module Apricot
 
   # (recur args*)
   # Rebinds the arguments of the nearest enclosing loop or fn and jumps to the
-  # top of the loop/fn
+  # top of the loop/fn. Argument rebinding is done in parallel (rebinding a
+  # variable in a recur will not affect uses of that variable in the other
+  # recur bindings.)
   SpecialForm.define(:recur) do |g, args|
     target = g.state.scope
 
@@ -196,11 +198,15 @@ module Apricot
 
     raise "No loop or fn target for recur found" if target.is_a?(AST::TopLevel)
 
-    # TODO: check arity
     vars = target.variables.values
-    args.each_with_index do |arg, i|
-      arg.bytecode(g)
-      vars[i].reference.set_bytecode(g)
+
+    # TODO: check for fns with rest (splat) args
+    raise ArgumentError, "Arity of recur does not match enclosing loop or fn" unless vars.length == args.length
+
+    args.each {|arg| arg.bytecode(g) }
+
+    vars.reverse_each do |var|
+      var.reference.set_bytecode(g)
       g.pop
     end
 
