@@ -104,6 +104,32 @@ describe 'Apricot' do
     apricot(%q|((fn [x y] [y x]) 1 2)|).should == [2, 1]
   end
 
+  it 'compiles loop and recur forms' do
+    apricot(%q|(loop [])|).should == nil
+    apricot(%q|(loop [a 1])|).should == nil
+    apricot(%q|(loop [a 1] a)|).should == 1
+
+    apricot(<<-CODE).should == [5,4,3,2,1]
+      (let [a []]
+        (loop [x 5]
+          (if (. x > 0)
+            (do
+              (. a << x)
+              (recur (. x - 1)))))
+        a)
+    CODE
+  end
+
+  it 'compiles recur forms in fns' do
+    apricot(<<-CODE).should == 15
+      ((fn [x y]
+         (if (. x > 0)
+           (recur (. x - 1) (. y + x))
+           y))
+       5 0)
+    CODE
+  end
+
   it 'compiles quoted forms' do
     apricot(%q|'1|).should == 1
     apricot(%q|'a|).should == Apricot::Identifier.new(:a)
