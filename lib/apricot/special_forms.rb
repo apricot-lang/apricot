@@ -22,8 +22,9 @@ module Apricot
   end
 
   # (. receiver method args*)
+  # (. receiver method args* | block)
   # (. receiver (method args*))
-  # TODO: block argument passing
+  # (. receiver (method args* | block))
   SpecialForm.define(:'.') do |g, args|
     raise ArgumentError, "Too few arguments to send expression, expecting (. receiver method ...)" if args.length < 2
 
@@ -42,9 +43,39 @@ module Apricot
 
     raise TypeError, "Method in send expression must be an identifier" unless method.is_a? AST::Identifier
 
+    block_arg = nil
+
+    if i = args.find_index {|arg| arg.is_a?(AST::Identifier) && arg.name == :| }
+      block_arg = args[i + 1]
+
+      raise ArgumentError, "Expected block argument after | in send expression" unless block_arg
+      raise ArgumentError, "Unexpected arguments after block argument in send expression" if args[i + 2]
+
+      args = args[0...i]
+    end
+
     receiver.bytecode(g)
     args.each {|a| a.bytecode(g) }
-    g.send method.name, args.length
+
+    if block_arg
+      nil_block = g.new_label
+      block_arg.bytecode(g)
+      g.dup
+      g.is_nil
+      g.git nil_block
+
+      g.push_cpath_top
+      g.find_const :Proc
+
+      g.swap
+      g.send :__from_block__, 1
+
+      nil_block.set!
+
+      g.send_with_block method.name, args.length
+    else
+      g.send method.name, args.length
+    end
   end
 
   # (def name value?)
