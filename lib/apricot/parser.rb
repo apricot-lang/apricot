@@ -150,7 +150,7 @@ module Apricot
         AST::Identifier.new(body.line, x || Apricot.gensym("p#{i + 1}"))
       end
 
-      AST::List.new(body.line, [AST::Identifier.new(body.line, 'fn'),
+      AST::List.new(body.line, [AST::Identifier.new(body.line, :fn),
                                 AST::ArrayLiteral.new(body.line, args),
                                 body])
     end
