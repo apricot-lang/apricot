@@ -243,4 +243,20 @@ describe Apricot::Parser do
     @first.elements[1].should be_a(Apricot::AST::Identifier)
     @first.elements[1].name.should == :test
   end
+
+  it 'parses #() shorthand' do
+    Apricot.stub(:gensym).and_return(*('a'..'z').map(&:to_sym))
+
+    parse("#()").should == parse("(fn [] ())")
+    parse("#(%)").should == parse("(fn [a] (a))")
+    parse("#(% %2)").should == parse("(fn [b c] (b c))")
+    parse("#(%1 %2)").should == parse("(fn [d e] (d e))")
+    parse("#(%2)").should == parse("(fn [g f] (f))")
+    parse("#(%&)").should == parse("(fn [& h] (h))")
+    parse("#(% %&)").should == parse("(fn [i & j] (i j))")
+
+    expect_syntax_error("#(%0)")
+    expect_syntax_error("#(%-1)")
+    expect_syntax_error("#(%x)")
+  end
 end
