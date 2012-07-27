@@ -19,10 +19,10 @@ module Apricot
       compiler.run
     end
 
-	def self.eval(code, file = "(none)", line = 1, debug = false)
-	  cm = compile_string(code, file, line, debug)
-	  cm.scope = Rubinius::ConstantScope.new(Object)
-	  Rubinius.run_script cm
-	end
+    def self.eval(code, file = "(none)", line = 1, debug = false)
+      cm = compile_string(code, file, line, debug)
+      cm.scope = Rubinius::ConstantScope.new(Object)
+      Rubinius.run_script cm
+    end
   end
 end
