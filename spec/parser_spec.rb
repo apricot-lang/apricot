@@ -245,7 +245,7 @@ describe Apricot::Parser do
   end
 
   it 'parses #() shorthand' do
-    Apricot.stub(:gensym).and_return(*('a'..'z').map(&:to_sym))
+    Apricot.stub(:gensym).and_return(*:a..:z)
 
     parse("#()").should == parse("(fn [] ())")
     parse("#(%)").should == parse("(fn [a] (a))")
