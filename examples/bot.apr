@@ -6,16 +6,18 @@
 (let [sock (.new TCPSocket "irc.tenthbit.net" 6667)
       str #(.reduce %& :+)
       log #(. Kernel puts (str %1 %2))
-      send (fn [s] (log "<< " s) (.puts sock (str s "\r\n")))]
-  (send "NICK apribot")
-  (send "USER apr * * :Apribot")
+      send (fn [& msgs]
+             (.each msgs | (fn [msg]
+                             (log "<< " msg)
+                             (.puts sock (str msg "\r\n")))))]
+  (send "NICK apribot"
+        "USER apr * * :Apribot")
   (loop []
     (let [line (.gets sock)]
       (log ">> " line)
       (if (.start_with? line "PING")
         (send (.sub line "PING" "PONG")))
       (if (.include? line "001")
-        (do
-          (send "JOIN #programming")
-          (send "PRIVMSG #programming :yes, I'm real!")))
+        (send "JOIN #programming"
+              "PRIVMSG #programming :yes, I'm real!"))
       (recur))))
