@@ -64,3 +64,15 @@ class Regexp
     "#r#{inspect}"
   end
 end
+
+class Symbol
+  def apricot_inspect
+    str = to_s
+
+    if str =~ /^#{Apricot::Parser::IDENTIFIER}+$/
+      ":#{str}"
+    else
+      ":#{str.inspect}"
+    end
+  end
+end
