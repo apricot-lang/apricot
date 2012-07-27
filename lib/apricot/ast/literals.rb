@@ -88,6 +88,13 @@ module Apricot::AST
     end
   end
 
+  class SelfLiteral < SimpleLiteral
+    def bytecode(g)
+      pos(g)
+      g.push_self
+    end
+  end
+
   class RationalLiteral < SimpleLiteral
     attr_reader :numerator, :denominator
 

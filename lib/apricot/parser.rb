@@ -376,6 +376,8 @@ module Apricot
         AST::FalseLiteral.new(@line)
       when :nil
         AST::NilLiteral.new(@line)
+      when :self
+        AST::SelfLiteral.new(@line)
       else
         AST::Identifier.new(@line, identifier)
       end
