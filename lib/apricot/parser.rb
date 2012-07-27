@@ -362,7 +362,7 @@ module Apricot
           state.rest ||= Apricot.gensym('rest')
         else
           n = identifier[1..-1].to_i
-          syntax_error "arg literal must be %, %& or %integer" if n == 0
+          syntax_error "arg literal must be %, %& or %integer" if n <= 0
           state.args[n - 1] ||= Apricot.gensym("p#{n}")
         end
       else
