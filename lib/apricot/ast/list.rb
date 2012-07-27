@@ -38,5 +38,9 @@ module Apricot::AST
         g.send :[], @elements.length
       end
     end
+
+    def node_equal?(other)
+      self.elements == other.elements
+    end
   end
 end

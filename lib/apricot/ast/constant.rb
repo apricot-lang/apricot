@@ -30,6 +30,10 @@ module Apricot
         @names.each {|name| g.push_literal name }
         g.send :new, @names.length
       end
+
+      def node_equal?(other)
+        self.names == other.names
+      end
     end
   end
 end

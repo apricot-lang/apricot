@@ -12,6 +12,10 @@ module Apricot::AST
       super(line)
       @value = value
     end
+
+    def node_equal?(other)
+      self.value == other.value
+    end
   end
 
   class IntegerLiteral
@@ -116,6 +120,10 @@ module Apricot::AST
       g.set_literal idx
       lbl.set!
     end
+
+    def node_equal?(other)
+      self.numerator == other.numerator && self.denominator == other.denominator
+    end
   end
 
   class RegexLiteral < SimpleLiteral
@@ -146,6 +154,10 @@ module Apricot::AST
       g.set_literal idx
       lbl.set!
     end
+
+    def node_equal?(other)
+      self.pattern == other.pattern && self.options == other.options
+    end
   end
 
   class CollectionLiteral < Node
@@ -158,6 +170,10 @@ module Apricot::AST
 
     def quote_bytecode(g)
       bytecode(g, true)
+    end
+
+    def node_equal?(other)
+      self.elements == other.elements
     end
   end
 

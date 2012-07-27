@@ -27,5 +27,9 @@ module Apricot::AST
       g.push_literal @name
       g.send :intern, 1
     end
+
+    def node_equal?(other)
+      self.name == other.name
+    end
   end
 end

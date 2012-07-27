@@ -10,6 +10,12 @@ module Apricot
       def pos(g)
         g.set_line(@line)
       end
+
+      def ==(other)
+        return true if self.equal?(other)
+        return false unless self.class == other.class
+        self.node_equal?(other)
+      end
     end
   end
 end

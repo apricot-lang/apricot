@@ -33,6 +33,10 @@ module Apricot
         # TODO: look up variable on the current namespace
         raise "Could not find var: #{name}"
       end
+
+      def node_equal?(other)
+        self.file == other.file && self.elements == other.elements
+      end
     end
   end
 end
