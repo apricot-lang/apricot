@@ -248,6 +248,7 @@ describe Apricot::Parser do
     Apricot.stub(:gensym).and_return(*:a..:z)
 
     parse("#()").should == parse("(fn [] ())")
+    parse("#(foo)").should == parse("(fn [] (foo))")
     parse("#(%)").should == parse("(fn [a] (a))")
     parse("#(% %2)").should == parse("(fn [b c] (b c))")
     parse("#(%1 %2)").should == parse("(fn [d e] (d e))")
