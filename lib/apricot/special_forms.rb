@@ -77,6 +77,8 @@ module Apricot
       name = method.name
       if name == :+ && args.length == 1
         g.meta_send_op_plus g.find_literal(:+)
+      if name == :- && args.length == 1
+        g.meta_send_op_minus g.find_literal(:-)
       elsif name == :> && args.length == 1
         g.meta_send_op_gt g.find_literal(:>)
       else
