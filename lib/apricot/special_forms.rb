@@ -64,9 +64,10 @@ module Apricot
     end
 
     receiver.bytecode(g)
-    args.each {|a| a.bytecode(g) }
 
     if block_arg
+      args.each {|a| a.bytecode(g) }
+
       nil_block = g.new_label
       block_arg.bytecode(g)
       g.dup
@@ -84,9 +85,35 @@ module Apricot
       g.send_with_block method.name, args.length
 
     elsif args.length == 1 && op = FastMathOps[method.name]
+      args.each {|a| a.bytecode(g) }
       g.__send__ op, g.find_literal(method.name)
 
+    elsif method.name == :new
+      slow = g.new_label
+      done = g.new_label
+
+      g.dup # dup the receiver
+      g.check_serial :new, Rubinius::CompiledMethod::KernelMethodSerial
+      g.gif slow
+
+      # fast path
+      g.send :allocate, 0, true
+      g.dup
+      args.each {|a| a.bytecode(g) }
+      g.send :initialize, args.length, true
+      g.pop
+
+      g.goto done
+
+      # slow path
+      slow.set!
+      args.each {|a| a.bytecode(g) }
+      g.send :new, args.length
+
+      done.set!
+
     else
+      args.each {|a| a.bytecode(g) }
       g.send method.name, args.length
     end
   end
