@@ -210,6 +210,7 @@ module Apricot
       g.pop
     end
 
+    g.check_interrupts
     g.goto target.loop_label
   end
 
