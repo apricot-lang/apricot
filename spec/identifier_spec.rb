@@ -1,12 +1,23 @@
 describe Apricot::Identifier do
-  def new_id(name)
-    described_class.new name
+  def intern(name)
+    described_class.intern name
+  end
+
+  it 'does not support .new' do
+    expect { described_class.new :foo }.to raise_error(NoMethodError)
+  end
+
+  it 'creates only one identifier for each name' do
+    id1 = intern :foo
+    id2 = intern :foo
+
+    id1.object_id.should == id2.object_id
   end
 
   it 'supports the == operator' do
-    id1 = new_id :id1
-    id2 = new_id :id1
-    id3 = new_id :id3
+    id1 = intern :id1
+    id2 = intern :id1
+    id3 = intern :id3
 
     id1.should == id2
     id2.should == id1
@@ -18,13 +29,13 @@ describe Apricot::Identifier do
   end
 
   it 'can be inspected' do
-    new_id(:test).inspect.should == "test"
+    intern(:test).inspect.should == "test"
   end
 
   it 'can be used as a key in Hashes' do
-    id1 = new_id :id1
-    id2 = new_id :id1
-    id3 = new_id :id3
+    id1 = intern :id1
+    id2 = intern :id1
+    id3 = intern :id3
     h = {}
 
     h[id1] = 1

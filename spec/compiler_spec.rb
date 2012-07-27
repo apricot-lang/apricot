@@ -132,18 +132,18 @@ describe 'Apricot' do
 
   it 'compiles quoted forms' do
     apricot(%q|'1|).should == 1
-    apricot(%q|'a|).should == Apricot::Identifier.new(:a)
+    apricot(%q|'a|).should == Apricot::Identifier.intern(:a)
     apricot(%q|''a|).should == Apricot::List[
-      Apricot::Identifier.new(:quote),
-      Apricot::Identifier.new(:a)
+      Apricot::Identifier.intern(:quote),
+      Apricot::Identifier.intern(:a)
     ]
     apricot(%q|'1.2|).should == 1.2
     apricot(%q|'1/2|).should == Rational(1,2)
     apricot(%q|':a|).should == :a
     apricot(%q|'()|).should == Apricot::List::EmptyList
     apricot(%q|'(1)|).should == Apricot::List[1]
-    apricot(%q|'[a]|).should == [Apricot::Identifier.new(:a)]
-    apricot(%q|'{a 1}|).should == {Apricot::Identifier.new(:a) => 1}
+    apricot(%q|'[a]|).should == [Apricot::Identifier.intern(:a)]
+    apricot(%q|'{a 1}|).should == {Apricot::Identifier.intern(:a) => 1}
     apricot(%q|'"foo"|).should == "foo"
     apricot(%q|'true|).should == true
     apricot(%q|'false|).should == false
