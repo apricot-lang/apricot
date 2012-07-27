@@ -74,7 +74,14 @@ module Apricot
 
       g.send_with_block method.name, args.length
     else
-      g.send method.name, args.length
+      name = method.name
+      if name == :+ && args.length == 1
+        g.meta_send_op_plus g.find_literal(:+)
+      elsif name == :> && args.length == 1
+        g.meta_send_op_gt g.find_literal(:>)
+      else
+        g.send method.name, args.length
+      end
     end
   end
 
