@@ -107,7 +107,8 @@ module Apricot
       line = Readline.readline(@prompt, true)
       return if line.nil?
 
-      if line =~ /^\s*$/ or Readline::HISTORY[-2] == line
+      if line =~ /^\s*$/ || (Readline::HISTORY.size > 1 &&
+                             Readline::HISTORY[-2] == line)
         Readline::HISTORY.pop
       end
 
