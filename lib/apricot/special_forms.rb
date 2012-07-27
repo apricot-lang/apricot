@@ -21,6 +21,15 @@ module Apricot
     end
   end
 
+  FastMathOps = {
+    :+    => :meta_send_op_plus,
+    :-    => :meta_send_op_minus,
+    :==   => :meta_send_op_equal,
+    :===  => :meta_send_op_tequal,
+    :<    => :meta_send_op_lt,
+    :>    => :meta_send_op_gt
+  }
+
   # (. receiver method args*)
   # (. receiver method args* | block)
   # (. receiver (method args*))
@@ -73,17 +82,12 @@ module Apricot
       nil_block.set!
 
       g.send_with_block method.name, args.length
+
+    elsif args.length == 1 && op = FastMathOps[method.name]
+      g.__send__ op, g.find_literal(method.name)
+
     else
-      name = method.name
-      if name == :+ && args.length == 1
-        g.meta_send_op_plus g.find_literal(:+)
-      elsif name == :- && args.length == 1
-        g.meta_send_op_minus g.find_literal(:-)
-      elsif name == :> && args.length == 1
-        g.meta_send_op_gt g.find_literal(:>)
-      else
-        g.send method.name, args.length
-      end
+      g.send method.name, args.length
     end
   end
 
