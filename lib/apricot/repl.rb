@@ -14,6 +14,13 @@ module Apricot
         end
       ],
 
+      "!bytecode" => [
+        "Print the bytecode generated from the previous line",
+        proc do
+          puts (@last_cm ? @last_cm.decode : "No previous line")
+        end
+      ],
+
       "!exit" => ["Exit the REPL", proc { exit }],
 
       "!help" => [
@@ -57,7 +64,10 @@ module Apricot
         end
 
         begin
-          value = Apricot::Compiler.eval(code, "(eval)", @line, @bytecode)
+          cm = Apricot::Compiler.compile_string(code, "(eval)", @line, @bytecode)
+          cm.scope = Rubinius::ConstantScope.new(Object)
+          @last_cm = cm
+          value = Rubinius.run_script cm
           puts "=> #{value.apricot_inspect}"
           e = nil
         rescue Interrupt => e
