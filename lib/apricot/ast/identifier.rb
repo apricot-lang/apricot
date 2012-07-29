@@ -16,8 +16,12 @@ module Apricot
 
       # called by (def <identifier> <value>)
       def assign_bytecode(g, value)
+        g.push_cpath_top
+        g.find_const :Apricot
+        g.send :current_namespace, 0
+        g.push_literal @name
         value.bytecode(g)
-        Compiler::NamespaceVariableReference.new(@name).set_bytecode(g)
+        g.send :set_var, 2
       end
 
       def quote_bytecode(g)

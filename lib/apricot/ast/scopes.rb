@@ -9,9 +9,9 @@ module Apricot
       end
 
       def store_new_local(name)
-        var = Compiler::LocalReference.new next_slot
+        slot = next_slot
         variable_names << name
-        var
+        slot
       end
 
       def next_slot
@@ -46,8 +46,8 @@ module Apricot
       # on the parent and increment its depth because it is beyond the bounds
       # of the current block of code (fn).
       def find_var(name, depth = 0)
-        if var = @variables[name]
-          var.with_depth(depth)
+        if slot = @variables[name]
+          Compiler::LocalReference.new(slot, depth)
         else
           @parent.find_var(name, depth + 1)
         end
@@ -80,8 +80,8 @@ module Apricot
 
       # An identifier or a nested scope is looking up a variable.
       def find_var(name, depth = 0)
-        if var = @variables[name]
-          var.with_depth(depth)
+        if slot = @variables[name]
+          Compiler::LocalReference.new(slot, depth)
         else
           @parent.find_var(name, depth)
         end

@@ -196,7 +196,7 @@ module Apricot
       raise TypeError, "Binding targets in let must be identifiers" unless id.is_a? AST::Identifier
 
       value.bytecode(g)
-      scope.new_local(id.name).set_bytecode(g)
+      g.set_local scope.new_local(id.name)
       g.pop
     end
 
@@ -236,7 +236,7 @@ module Apricot
     args.each {|arg| arg.bytecode(g) }
 
     vars.reverse_each do |var|
-      var.set_bytecode(g)
+      g.set_local var
       g.pop
     end
 
@@ -381,7 +381,7 @@ module Apricot
       g.push_scope scope
 
       # Exception is still on the stack
-      scope.new_local(name.name).set_bytecode(g)
+      g.set_local scope.new_local(name.name)
       g.pop
 
       SpecialForm[:do].bytecode(g, clause)
