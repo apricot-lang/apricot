@@ -37,5 +37,41 @@ module Apricot
         end
       end
     end
+
+    class ModuleVariableReference
+      attr_reader :name
+
+      def initialize(name)
+        @name = name
+      end
+
+      # Ignore depth
+      # TODO: make these stupid methods unnecessary
+      def depth
+        0
+      end
+
+      def depth=(val)
+      end
+
+      def get_bytecode(g)
+        g.push_cpath_top
+        g.find_const :Apricot
+        g.send :current_namespace, 0
+        g.push_literal @name
+        g.send :get_var, 1
+      end
+
+      def set_bytecode(g)
+        g.push_cpath_top
+        g.find_const :Apricot
+        g.send :current_namespace, 0
+        g.swap
+        g.push_literal @name
+        g.swap
+        g.send :set_var, 2
+      end
+    end
+
   end
 end
