@@ -141,9 +141,9 @@ module Apricot
     end
 
     def parse_fn
-      @fn_state.unshift(FnState.new([], nil))
+      @fn_state << FnState.new([], nil)
       body = parse_list
-      state = @fn_state.shift
+      state = @fn_state.pop
 
       state.args << :'&' << state.rest if state.rest
       args = state.args.map.with_index do |x, i|
@@ -354,7 +354,7 @@ module Apricot
       end
 
       # Handle % identifiers in #() syntax
-      if (state = @fn_state.first) && identifier[0] == '%'
+      if (state = @fn_state.last) && identifier[0] == '%'
         identifier = case identifier[1..-1]
         when '' # % is equivalent to %1
           state.args[0] ||= Apricot.gensym('p1')
