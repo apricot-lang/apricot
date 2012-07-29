@@ -182,7 +182,7 @@ describe Apricot::Parser do
 
   it 'does parse empty quoted symbols' do
     parse_one(':""', Apricot::AST::SymbolLiteral)
-    @first.value.should == ""
+    @first.value.should == :""
   end
 
   it 'parses empty lists' do
