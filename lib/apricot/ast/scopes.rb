@@ -59,6 +59,11 @@ module Apricot
       def new_local(name)
         @variables[name] = store_new_local(name)
       end
+
+      # A (recur) is looking for a recursion target. This, being a fn, is one.
+      def find_recur_target
+        self
+      end
     end
 
     # The let scope doesn't have real storage for locals. It stores its locals
@@ -94,6 +99,12 @@ module Apricot
       # parent so it eventually reaches a real scope.
       def store_new_local(name)
         @parent.store_new_local(name)
+      end
+
+      # A (recur) is looking for a recursion target. This is one only if it is
+      # a (loop) form.
+      def find_recur_target
+        loop? ? self : @parent.find_recur_target
       end
     end
   end

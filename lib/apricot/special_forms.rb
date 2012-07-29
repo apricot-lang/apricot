@@ -227,16 +227,7 @@ module Apricot
   # variable in a recur will not affect uses of that variable in the other
   # recur bindings.)
   SpecialForm.define(:recur) do |g, args|
-    target = g.scope
-
-    # Climb the scope ladder past the non-loop let bindings. We will end up on
-    # a loop binding, a fn, or the top level scope.
-    while target.is_a?(AST::LetScope) && !target.loop?
-      target = target.parent
-    end
-
-    raise "No loop or fn target for recur found" if target.is_a?(AST::TopLevel)
-
+    target = g.scope.find_recur_target
     vars = target.variables.values
 
     # TODO: check for fns with rest (splat) args
