@@ -1,19 +1,13 @@
 module Apricot
   class Compiler
-    class LocalVariable
-      def initialize(slot)
-        @slot = slot
-      end
-
-      def reference(depth = 0)
-        LocalReference.new(@slot, depth)
-      end
-    end
-
     class LocalReference
       def initialize(slot, depth = 0)
         @slot = slot
         @depth = depth
+      end
+
+      def with_depth(depth)
+        self.class.new(@slot, depth)
       end
 
       def get_bytecode(g)
@@ -33,7 +27,7 @@ module Apricot
       end
     end
 
-    class NamespaceVariableReference
+    class NamespaceReference
       def initialize(name)
         @name = name
       end
