@@ -27,19 +27,22 @@ module Apricot
       end
     end
 
-    class FnScope
-      include StorageScope
-
+    class Scope
       attr_reader :parent, :variables
-      attr_accessor :loop_label, :splat
-      alias_method :splat?, :splat
+      attr_accessor :loop_label
 
       def initialize(parent)
         @parent = parent
         @variables = {}
         @loop_label = nil
-        @splat = false
       end
+    end
+
+    class FnScope < Scope
+      include StorageScope
+
+      attr_accessor :splat
+      alias_method :splat?, :splat
 
       # An identifier or a nested scope is looking up a variable. If the
       # variable is found here, return a reference to it. Otherwise look it up
@@ -68,17 +71,7 @@ module Apricot
     # The let scope doesn't have real storage for locals. It stores its locals
     # on the nearest enclosing real scope, which is any separate block of code
     # such as a fn, defn, defmacro or the top level of the program.
-    class LetScope
-      attr_reader :parent, :variables
-      attr_accessor :loop_label
-      alias_method :loop?, :loop_label
-
-      def initialize(parent)
-        @parent = parent
-        @variables = {}
-        @loop_label = nil
-      end
-
+    class LetScope < Scope
       # An identifier or a nested scope is looking up a variable.
       def find_var(name, depth = 0)
         if slot = @variables[name]
@@ -104,7 +97,7 @@ module Apricot
       # A (recur) is looking for a recursion target. This is one only if it is
       # a (loop) form.
       def find_recur_target
-        loop? ? self : @parent.find_recur_target
+        loop_label ? self : @parent.find_recur_target
       end
     end
   end
