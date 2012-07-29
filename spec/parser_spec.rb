@@ -59,9 +59,9 @@ describe Apricot::Parser do
 
   it 'parses true, false, and nil' do
     parse('true false nil').length.should == 3
-    @ast.elements[0].should be_a(Apricot::AST::TrueLiteral)
-    @ast.elements[1].should be_a(Apricot::AST::FalseLiteral)
-    @ast.elements[2].should be_a(Apricot::AST::NilLiteral)
+    @ast[0].should be_a(Apricot::AST::TrueLiteral)
+    @ast[1].should be_a(Apricot::AST::FalseLiteral)
+    @ast[2].should be_a(Apricot::AST::NilLiteral)
   end
 
   it 'parses fixnums' do
@@ -188,8 +188,8 @@ describe Apricot::Parser do
 
   it 'parses lists' do
     parse_one('(1 two)', Apricot::AST::List)
-    @first.elements[0].should be_a(Apricot::AST::FixnumLiteral)
-    @first.elements[1].should be_a(Apricot::AST::Identifier)
+    @first[0].should be_a(Apricot::AST::FixnumLiteral)
+    @first[1].should be_a(Apricot::AST::Identifier)
   end
 
   it 'parses empty arrays' do
@@ -199,8 +199,8 @@ describe Apricot::Parser do
 
   it 'parses arrays' do
     parse_one('[1 two]', Apricot::AST::ArrayLiteral)
-    @first.elements[0].should be_a(Apricot::AST::FixnumLiteral)
-    @first.elements[1].should be_a(Apricot::AST::Identifier)
+    @first[0].should be_a(Apricot::AST::FixnumLiteral)
+    @first[1].should be_a(Apricot::AST::Identifier)
   end
 
   it 'parses empty hashes' do
@@ -210,8 +210,8 @@ describe Apricot::Parser do
 
   it 'parses hashes' do
     parse_one('{:example 1}', Apricot::AST::HashLiteral)
-    @first.elements[0].should be_a(Apricot::AST::SymbolLiteral)
-    @first.elements[1].should be_a(Apricot::AST::FixnumLiteral)
+    @first[0].should be_a(Apricot::AST::SymbolLiteral)
+    @first[1].should be_a(Apricot::AST::FixnumLiteral)
   end
 
   it 'does not parse invalid hashes' do
@@ -225,23 +225,23 @@ describe Apricot::Parser do
 
   it 'parses sets' do
     parse_one('#{1 two}', Apricot::AST::SetLiteral)
-    @first.elements[0].should be_a(Apricot::AST::FixnumLiteral)
-    @first.elements[1].should be_a(Apricot::AST::Identifier)
+    @first[0].should be_a(Apricot::AST::FixnumLiteral)
+    @first[1].should be_a(Apricot::AST::Identifier)
   end
 
   it 'parses multiple forms' do
     parse('foo bar').length.should == 2
-    @ast.elements[0].should be_a(Apricot::AST::Identifier)
-    @ast.elements[1].should be_a(Apricot::AST::Identifier)
+    @ast[0].should be_a(Apricot::AST::Identifier)
+    @ast[1].should be_a(Apricot::AST::Identifier)
   end
 
   it 'parses quoted forms' do
     parse_one("'test", Apricot::AST::List)
     @first.elements.length.should == 2
-    @first.elements[0].should be_a(Apricot::AST::Identifier)
-    @first.elements[0].name.should == :quote
-    @first.elements[1].should be_a(Apricot::AST::Identifier)
-    @first.elements[1].name.should == :test
+    @first[0].should be_a(Apricot::AST::Identifier)
+    @first[0].name.should == :quote
+    @first[1].should be_a(Apricot::AST::Identifier)
+    @first[1].name.should == :test
   end
 
   it 'parses #() shorthand' do

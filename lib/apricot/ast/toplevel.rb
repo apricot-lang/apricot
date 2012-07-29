@@ -36,6 +36,10 @@ module Apricot
       def node_equal?(other)
         self.file == other.file && self.elements == other.elements
       end
+
+      def [](*i)
+        @elements[*i]
+      end
     end
   end
 end
