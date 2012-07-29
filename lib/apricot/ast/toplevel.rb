@@ -30,7 +30,7 @@ module Apricot
       # A nested scope is looking up a variable. There are no local variables
       # at the top level, so look up the variable on the current namespace.
       def find_var(name)
-        Compiler::ModuleVariableReference.new(name)
+        Compiler::NamespaceVariableReference.new(name)
       end
 
       def node_equal?(other)

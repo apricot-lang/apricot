@@ -38,7 +38,7 @@ module Apricot
       end
     end
 
-    class ModuleVariableReference
+    class NamespaceVariableReference
       attr_reader :name
 
       def initialize(name)

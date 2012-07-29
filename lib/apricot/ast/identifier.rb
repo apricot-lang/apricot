@@ -14,10 +14,10 @@ module Apricot
         g.state.scope.find_var(name).get_bytecode(g)
       end
 
+      # called by (def <identifier> <value>)
       def assign_bytecode(g, value)
-        # called by (def <self> <value>)
         value.bytecode(g)
-        Compiler::ModuleVariableReference.new(@name).set_bytecode(g)
+        Compiler::NamespaceVariableReference.new(@name).set_bytecode(g)
       end
 
       def quote_bytecode(g)
