@@ -31,7 +31,7 @@ module Apricot
       # at the top level, so look up the variable on the current namespace.
       def find_var(name, depth = nil)
         # Ignore depth, it has no bearing on namespace lookups.
-        Compiler::NamespaceReference.new(name)
+        NamespaceReference.new(name)
       end
 
       def node_equal?(other)
