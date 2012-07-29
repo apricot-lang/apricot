@@ -30,10 +30,12 @@ module Apricot
     class FnScope
       include StorageScope
 
-      attr_accessor :parent, :variables, :loop_label, :splat
+      attr_reader :parent, :variables
+      attr_accessor :loop_label, :splat
       alias_method :splat?, :splat
 
-      def initialize
+      def initialize(parent)
+        @parent = parent
         @variables = {}
         @loop_label = nil
         @splat = false
@@ -63,10 +65,12 @@ module Apricot
     # on the nearest enclosing real scope, which is any separate block of code
     # such as a fn, defn, defmacro or the top level of the program.
     class LetScope
-      attr_accessor :parent, :variables, :loop_label
+      attr_reader :parent, :variables
+      attr_accessor :loop_label
       alias_method :loop?, :loop_label
 
-      def initialize
+      def initialize(parent)
+        @parent = parent
         @variables = {}
         @loop_label = nil
       end

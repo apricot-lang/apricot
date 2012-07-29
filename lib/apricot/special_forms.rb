@@ -189,8 +189,7 @@ module Apricot
 
     raise ArgumentError, "Bindings array for #{type} must contain an even number of forms" if bindings.length.odd?
 
-    scope = AST::LetScope.new
-    scope.parent = g.scope
+    scope = AST::LetScope.new(g.scope)
     g.push_scope scope
 
     bindings.each_slice(2) do |id, value|
@@ -267,8 +266,7 @@ module Apricot
     fn.name = name || :__fn__
     fn.file = g.file
 
-    scope = AST::FnScope.new
-    scope.parent = g.scope
+    scope = AST::FnScope.new(g.scope)
     fn.push_scope scope
 
     fn.definition_line g.line
@@ -388,8 +386,7 @@ module Apricot
       body.set!
 
       # Create a new scope to hold the exception
-      scope = AST::LetScope.new
-      scope.parent = g.scope
+      scope = AST::LetScope.new(g.scope)
       g.push_scope scope
 
       # Exception is still on the stack
