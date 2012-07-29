@@ -3,21 +3,24 @@
 
 (. Kernel require "socket")
 
-(let [sock (.new TCPSocket "irc.tenthbit.net" 6667)
-      str #(.reduce %& :+)
-      log #(. Kernel puts (str %1 %2))
-      send (fn [& msgs]
-             (.each msgs | (fn [msg]
-                             (log "<< " msg)
-                             (.puts sock (str msg "\r\n")))))]
-  (send "NICK apribot"
-        "USER apr * * :Apribot")
+(def str (fn [& args]
+           (.reduce args "" :+)))
+
+(def log (fn [prefix line]
+           (. Kernel puts (str prefix line))))
+
+(def send (fn [io & msgs]
+            (.each msgs | (fn [msg]
+                            (log "<< " msg)
+                            (.puts io (str msg "\r\n"))))))
+
+(let [irc (.new TCPSocket "irc.tenthbit.net" 6667)]
+  (send irc "NICK apribot" "USER apr * * :Apribot")
   (loop []
-    (let [line (.gets sock)]
+    (let [line (.gets irc)]
       (log ">> " line)
       (if (.start_with? line "PING")
-        (send (.sub line "PING" "PONG")))
+        (send irc (.sub line "PING" "PONG")))
       (if (.include? line "001")
-        (send "JOIN #programming"
-              "PRIVMSG #programming :yes, I'm real!"))
+        (send irc "JOIN #programming" "PRIVMSG #programming :yes, I'm real!"))
       (recur))))
