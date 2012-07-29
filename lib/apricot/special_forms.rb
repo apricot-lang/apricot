@@ -318,4 +318,135 @@ module Apricot
     g.create_block fn
     g.send_with_block :lambda, 0
   end
+
+  # (try body* (rescue condition name body*)* (ensure body*)?)
+  SpecialForm.define(:try) do |g, args|
+    body = []
+    rescue_clauses = []
+    ensure_clause = nil
+
+    if args.last.is_a?(AST::List) && args.last[0].is_a?(AST::Identifier) && args.last[0].name == :ensure
+      ensure_clause = args.pop[1..-1] # Chop off the ensure identifier
+    end
+
+    args.each do |arg|
+      if arg.is_a?(AST::List) && arg[0].is_a?(AST::Identifier) && arg[0].name == :rescue
+        rescue_clauses << arg[1..-1] # Chop off the rescue identifier
+      else
+        raise ArgumentError, "Unexpected form after rescue clause" unless rescue_clauses.empty?
+        body << arg
+      end
+    end
+
+    # Set up ensure
+    if ensure_clause
+      ensure_ex = g.new_label
+      ensure_ok = g.new_label
+      g.setup_unwind ensure_ex, 1
+    end
+
+    ex = g.new_label
+    reraise = g.new_label
+    done = g.new_label
+
+    g.push_exception_state
+    g.set_stack_local(ex_state = g.new_stack_local)
+    g.pop
+
+    # Evaluate body
+    g.setup_unwind ex, 0
+    SpecialForm[:do].bytecode(g, body)
+    g.pop_unwind
+    g.goto done
+
+    # Body raised an exception
+    ex.set!
+
+    # Save exception state for re-raise
+    g.push_exception_state
+    g.set_stack_local(raised_ex_state = g.new_stack_local)
+    g.pop
+
+    # Push exception for rescue conditions
+    g.push_current_exception
+
+    rescue_clauses.each_with_index do |clause, i|
+      condition, name = clause.shift(2)
+
+      body = g.new_label
+      # The last rescue clause re-raises if its condition doesn't match
+      next_rescue = (i == rescue_clauses.length - 1) ? reraise : g.new_label
+
+      g.dup # The exception
+      condition.bytecode(g)
+      g.swap
+      g.send :===, 1
+      g.git body
+      g.goto next_rescue
+
+      # This rescue condition matched
+      body.set!
+
+      # Create a new scope to hold the exception
+      scope = AST::LetScope.new
+      scope.parent = g.state.scope
+      g.push_state scope
+
+      # Exception is still on the stack
+      scope.new_local(name.name).reference.set_bytecode(g)
+      g.pop
+
+      SpecialForm[:do].bytecode(g, clause)
+
+      # Yay!
+      g.clear_exception
+      g.goto done
+
+      g.pop_state
+
+      # Rescue condition did not match
+      next_rescue.set!
+    end
+
+    # No rescue conditions matched, re-raise
+    g.pop # The exception
+
+    # Re-raise the original exception
+    g.push_stack_local raised_ex_state
+    g.restore_exception_state
+    g.reraise
+
+    # Body executed without exception or was rescued
+    done.set!
+
+    g.push_stack_local raised_ex_state
+    g.restore_exception_state
+
+    if ensure_clause
+      g.pop_unwind
+      g.goto ensure_ok
+
+      # Body raised an exception
+      ensure_ex.set!
+
+      # Execute ensure clause
+      g.push_exception_state
+      ensure_clause.each do |expr|
+        expr.bytecode(g)
+        g.pop # Ensure cannot return anything
+      end
+      g.restore_exception_state
+
+      g.reraise
+
+      # Body executed without exception or was rescued
+      ensure_ok.set!
+
+      # Execute ensure clause
+      ensure_clause.each do |expr|
+        expr.bytecode(g)
+        g.pop
+      end
+    end
+  end
 end
