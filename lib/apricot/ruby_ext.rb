@@ -2,6 +2,10 @@ class Object
   def apricot_inspect
     inspect
   end
+
+  def apricot_call(*args)
+    call(*args)
+  end
 end
 
 class Array
@@ -18,6 +22,10 @@ class Array
 
     str.chop!
     str << ']'
+  end
+
+  def apricot_call(idx)
+    self[idx]
   end
 end
 
@@ -36,6 +44,10 @@ class Hash
     str.shorten!(2)
     str << '}'
   end
+
+  def apricot_call(key)
+    self[key]
+  end
 end
 
 class Set
@@ -50,6 +62,10 @@ class Set
 
     str.chop!
     str << '}'
+  end
+
+  def apricot_call(elem)
+    elem if self.include? elem
   end
 end
 

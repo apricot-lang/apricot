@@ -39,7 +39,7 @@ module Apricot::AST
         # TODO: macros
         callee.bytecode(g)
         args.each {|arg| arg.bytecode(g) }
-        g.send :call, args.length
+        g.send :apricot_call, args.length
       end
     end
 
