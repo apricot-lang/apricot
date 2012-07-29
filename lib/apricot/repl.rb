@@ -33,7 +33,7 @@ module Apricot
 
     COMPLETIONS = (COMMANDS.keys + SpecialForm::Specials.keys.map(&:to_s)).sort
 
-    def initialize(prompt, bytecode = false, history_file = nil)
+    def initialize(prompt = 'apr> ', bytecode = false, history_file = nil)
       @prompt = prompt
       @bytecode = bytecode
       @history_file = File.expand_path(history_file || HISTORY_FILE)
