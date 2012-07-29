@@ -59,5 +59,9 @@ module Apricot::AST
     def node_equal?(other)
       self.elements == other.elements
     end
+
+    def [](*i)
+      @elements[*i]
+    end
   end
 end
