@@ -51,6 +51,15 @@ describe 'Apricot' do
     apricot(%q|Rubinius::Compiler|).should == Rubinius::Compiler
   end
 
+  it 'compiles call forms with data structures' do
+    apricot(%q|([:a :b] 1)|).should == :b
+    apricot(%q|([:a :b] 3)|).should == nil
+    apricot(%q|(#{:a :b} :b)|).should == :b
+    apricot(%q|(#{:a :b} :c)|).should == nil
+    apricot(%q|({:a 1} :a)|).should == 1
+    apricot(%q|({:a 1} :b)|).should == nil
+  end
+
   it 'compiles send forms' do
     apricot(%q|(. 1 class)|).should == Fixnum
     apricot(%q|(. 1 (class))|).should == Fixnum
