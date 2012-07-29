@@ -178,7 +178,11 @@ describe Apricot::Parser do
 
   it 'does not parse empty symbols' do
     expect_syntax_error ':'
-    expect_syntax_error ':""'
+  end
+
+  it 'does parse empty quoted symbols' do
+    parse_one(':""', Apricot::AST::SymbolLiteral)
+    @first.value.should == ""
   end
 
   it 'parses empty lists' do

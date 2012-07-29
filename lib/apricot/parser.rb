@@ -292,9 +292,9 @@ module Apricot
           symbol << @char
           next_char
         end
-      end
 
-      syntax_error "Empty symbol name" if symbol.empty?
+        syntax_error "Empty symbol name" if symbol.empty?
+      end
 
       AST::SymbolLiteral.new(line, symbol.to_sym)
     end
