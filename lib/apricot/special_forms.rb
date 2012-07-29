@@ -335,7 +335,6 @@ module Apricot
     end
 
     ex = g.new_label
-    reraise = g.new_label
     done = g.new_label
 
     g.push_exception_state
@@ -363,8 +362,7 @@ module Apricot
       condition, name = clause.shift(2)
 
       body = g.new_label
-      # The last rescue clause re-raises if its condition doesn't match
-      next_rescue = (i == rescue_clauses.length - 1) ? reraise : g.new_label
+      next_rescue = g.new_label
 
       g.dup # The exception
       condition.bytecode(g)
