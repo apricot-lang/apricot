@@ -45,13 +45,11 @@ module Apricot
       # variable is found here, return a reference to it. Otherwise look it up
       # on the parent and increment its depth because it is beyond the bounds
       # of the current block of code (fn).
-      def find_var(name)
+      def find_var(name, depth = 0)
         if var = @variables[name]
-          var.reference
+          var.reference(depth)
         else
-          var = @parent.find_var(name)
-          var.depth += 1
-          var
+          @parent.find_var(name, depth + 1)
         end
       end
 
@@ -81,11 +79,11 @@ module Apricot
       end
 
       # An identifier or a nested scope is looking up a variable.
-      def find_var(name)
+      def find_var(name, depth = 0)
         if var = @variables[name]
           var.reference
         else
-          @parent.find_var(name)
+          @parent.find_var(name, depth)
         end
       end
 

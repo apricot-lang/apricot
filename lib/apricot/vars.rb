@@ -1,21 +1,16 @@
 module Apricot
   class Compiler
     class LocalVariable
-      attr_reader :slot
-
       def initialize(slot)
         @slot = slot
       end
 
-      def reference
-        LocalReference.new @slot
+      def reference(depth = 0)
+        LocalReference.new(@slot, depth)
       end
     end
 
     class LocalReference
-      attr_accessor :depth
-      attr_reader :slot
-
       def initialize(slot, depth = 0)
         @slot = slot
         @depth = depth
@@ -39,19 +34,8 @@ module Apricot
     end
 
     class NamespaceVariableReference
-      attr_reader :name
-
       def initialize(name)
         @name = name
-      end
-
-      # Ignore depth
-      # TODO: make these stupid methods unnecessary
-      def depth
-        0
-      end
-
-      def depth=(val)
       end
 
       def get_bytecode(g)
