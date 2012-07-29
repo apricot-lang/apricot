@@ -358,7 +358,7 @@ module Apricot
     # Push exception for rescue conditions
     g.push_current_exception
 
-    rescue_clauses.each_with_index do |clause, i|
+    rescue_clauses.each do |clause|
       condition, name = clause.shift(2)
 
       body = g.new_label
