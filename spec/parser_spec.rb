@@ -57,15 +57,20 @@ describe Apricot::Parser do
     expect_syntax_error 'Foo::::Bar'
   end
 
-  it 'parses true, false, and nil' do
-    parse('true false nil').length.should == 3
-    @ast[0].should be_a(Apricot::AST::TrueLiteral)
-    @ast[1].should be_a(Apricot::AST::FalseLiteral)
-    @ast[2].should be_a(Apricot::AST::NilLiteral)
+  it 'parses true, false, nil, and self' do
+    parse('true false nil self').length.should == 4
+    @ast[0].should be_a(Apricot::AST::Literal)
+    @ast[0].value.should == :true
+    @ast[1].should be_a(Apricot::AST::Literal)
+    @ast[1].value.should == :false
+    @ast[2].should be_a(Apricot::AST::Literal)
+    @ast[2].value.should == :nil
+    @ast[3].should be_a(Apricot::AST::Literal)
+    @ast[3].value.should == :self
   end
 
   it 'parses fixnums' do
-    parse_one('123', Apricot::AST::FixnumLiteral)
+    parse_one('123', Apricot::AST::Literal)
     @first.value.should == 123
   end
 
@@ -75,7 +80,7 @@ describe Apricot::Parser do
   end
 
   it 'parses radix integers' do
-    parse_one('2r10', Apricot::AST::FixnumLiteral)
+    parse_one('2r10', Apricot::AST::Literal)
     @first.value.should == 2
   end
 
@@ -192,7 +197,7 @@ describe Apricot::Parser do
 
   it 'parses lists' do
     parse_one('(1 two)', Apricot::AST::List)
-    @first[0].should be_a(Apricot::AST::FixnumLiteral)
+    @first[0].should be_a(Apricot::AST::Literal)
     @first[1].should be_a(Apricot::AST::Identifier)
   end
 
@@ -203,7 +208,7 @@ describe Apricot::Parser do
 
   it 'parses arrays' do
     parse_one('[1 two]', Apricot::AST::ArrayLiteral)
-    @first[0].should be_a(Apricot::AST::FixnumLiteral)
+    @first[0].should be_a(Apricot::AST::Literal)
     @first[1].should be_a(Apricot::AST::Identifier)
   end
 
@@ -215,7 +220,7 @@ describe Apricot::Parser do
   it 'parses hashes' do
     parse_one('{:example 1}', Apricot::AST::HashLiteral)
     @first[0].should be_a(Apricot::AST::SymbolLiteral)
-    @first[1].should be_a(Apricot::AST::FixnumLiteral)
+    @first[1].should be_a(Apricot::AST::Literal)
   end
 
   it 'does not parse invalid hashes' do
@@ -229,7 +234,7 @@ describe Apricot::Parser do
 
   it 'parses sets' do
     parse_one('#{1 two}', Apricot::AST::SetLiteral)
-    @first[0].should be_a(Apricot::AST::FixnumLiteral)
+    @first[0].should be_a(Apricot::AST::Literal)
     @first[1].should be_a(Apricot::AST::Identifier)
   end
 
@@ -264,5 +269,6 @@ describe Apricot::Parser do
     expect_syntax_error("#(%-1)")
     expect_syntax_error("#(%x)")
     expect_syntax_error("#(%1.1)")
+    expect_syntax_error("#(%1asdf)")
   end
 end

@@ -309,12 +309,12 @@ module Apricot
 
       case number
       when /^[+-]?\d+$/
-        AST::IntegerLiteral.new(@line, number.to_i)
+        AST.new_integer(@line, number.to_i)
       when /^([+-]?)(\d+)r([a-zA-Z0-9]+)$/
         sign, radix, digits = $1, $2.to_i, $3
         syntax_error "Radix out of range: #{radix}" unless 2 <= radix && radix <= 36
         syntax_error "Invalid digits for radix in number: #{number}" unless digits.downcase.chars.all? {|d| DIGITS[0..radix-1].include?(d) }
-        AST::IntegerLiteral.new(@line, (sign + digits).to_i(radix))
+        AST.new_integer(@line, (sign + digits).to_i(radix))
       when /^[+-]?\d+\.?\d*(?:e[+-]?\d+)?$/
         AST::FloatLiteral.new(@line, number.to_f)
       when /^([+-]?\d+)\/(\d+)$/
@@ -371,14 +371,8 @@ module Apricot
       end
 
       case identifier
-      when :true
-        AST::TrueLiteral.new(@line)
-      when :false
-        AST::FalseLiteral.new(@line)
-      when :nil
-        AST::NilLiteral.new(@line)
-      when :self
-        AST::SelfLiteral.new(@line)
+      when :true, :false, :nil, :self
+        AST::Literal.new(@line, identifier)
       else
         AST::Identifier.new(@line, identifier)
       end

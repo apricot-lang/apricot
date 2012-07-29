@@ -1,11 +1,11 @@
 module Apricot::AST
-  class SimpleLiteral < Node
+  class BasicLiteral < Node
     def quote_bytecode(g)
       bytecode(g)
     end
   end
 
-  class Literal < SimpleLiteral
+  class Literal < BasicLiteral
     attr_reader :value
 
     def initialize(line, value)
@@ -13,21 +13,24 @@ module Apricot::AST
       @value = value
     end
 
+    def bytecode(g)
+      pos(g)
+      g.push @value
+    end
+
     def node_equal?(other)
       self.value == other.value
     end
   end
 
-  class IntegerLiteral
-    def self.new(line, value)
-      case value
-      when Bignum
-        BignumLiteral.new(line, value)
-      when Fixnum
-        FixnumLiteral.new(line, value)
-      else
-        raise "#{value} is not an integer"
-      end
+  def self.new_integer(line, value)
+    case value
+    when Bignum
+      BignumLiteral.new(line, value)
+    when Fixnum
+      Literal.new(line, value)
+    else
+      raise "#{value} is not an integer"
     end
   end
 
@@ -35,13 +38,6 @@ module Apricot::AST
     def bytecode(g)
       pos(g)
       g.push_unique_literal @value
-    end
-  end
-
-  class FixnumLiteral < Literal
-    def bytecode(g)
-      pos(g)
-      g.push @value
     end
   end
 
@@ -67,35 +63,7 @@ module Apricot::AST
     end
   end
 
-  class TrueLiteral < SimpleLiteral
-    def bytecode(g)
-      pos(g)
-      g.push_true
-    end
-  end
-
-  class FalseLiteral < SimpleLiteral
-    def bytecode(g)
-      pos(g)
-      g.push_false
-    end
-  end
-
-  class NilLiteral < SimpleLiteral
-    def bytecode(g)
-      pos(g)
-      g.push_nil
-    end
-  end
-
-  class SelfLiteral < SimpleLiteral
-    def bytecode(g)
-      pos(g)
-      g.push_self
-    end
-  end
-
-  class RationalLiteral < SimpleLiteral
+  class RationalLiteral < BasicLiteral
     attr_reader :numerator, :denominator
 
     def initialize(line, numerator, denominator)
@@ -133,7 +101,7 @@ module Apricot::AST
     end
   end
 
-  class RegexLiteral < SimpleLiteral
+  class RegexLiteral < BasicLiteral
     attr_accessor :pattern, :options
 
     def initialize(line, pattern, options)
