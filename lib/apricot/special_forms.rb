@@ -192,11 +192,11 @@ module Apricot
     scope = AST::LetScope.new(g.scope)
     g.push_scope scope
 
-    bindings.each_slice(2) do |id, value|
-      raise TypeError, "Binding targets in let must be identifiers" unless id.is_a? AST::Identifier
+    bindings.each_slice(2) do |name, value|
+      raise TypeError, "Binding targets in let must be identifiers" unless name.is_a? AST::Identifier
 
       value.bytecode(g)
-      g.set_local scope.new_local(id.name)
+      g.set_local scope.new_local(name)
       g.pop
     end
 
@@ -381,7 +381,7 @@ module Apricot
       g.push_scope scope
 
       # Exception is still on the stack
-      g.set_local scope.new_local(name.name)
+      g.set_local scope.new_local(name)
       g.pop
 
       SpecialForm[:do].bytecode(g, clause)
