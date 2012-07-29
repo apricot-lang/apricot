@@ -10,5 +10,5 @@ module Apricot
   end
 end
 
-%w[parser compiler ast generator stages printers vars special_forms list
-identifier constant ruby_ext namespace].each {|r| require "apricot/#{r}" }
+%w[parser compiler ast generator stages printers special_forms list identifier
+constant ruby_ext namespace].each {|r| require "apricot/#{r}" }

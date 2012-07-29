@@ -10,8 +10,7 @@ module Apricot
 
       def bytecode(g)
         pos(g)
-
-        g.scope.find_var(name).get_bytecode(g)
+        g.scope.find_var(name).bytecode(g)
       end
 
       # called by (def <identifier> <value>)

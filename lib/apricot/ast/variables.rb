@@ -1,12 +1,12 @@
 module Apricot
-  class Compiler
+  module AST
     class LocalReference
       def initialize(slot, depth = 0)
         @slot = slot
         @depth = depth
       end
 
-      def get_bytecode(g)
+      def bytecode(g)
         if @depth == 0
           g.push_local @slot
         else
@@ -20,7 +20,7 @@ module Apricot
         @name = name
       end
 
-      def get_bytecode(g)
+      def bytecode(g)
         g.push_cpath_top
         g.find_const :Apricot
         g.send :current_namespace, 0

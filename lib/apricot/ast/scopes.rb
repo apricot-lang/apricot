@@ -47,7 +47,7 @@ module Apricot
       # of the current block of code (fn).
       def find_var(name, depth = 0)
         if slot = @variables[name]
-          Compiler::LocalReference.new(slot, depth)
+          LocalReference.new(slot, depth)
         else
           @parent.find_var(name, depth + 1)
         end
@@ -81,7 +81,7 @@ module Apricot
       # An identifier or a nested scope is looking up a variable.
       def find_var(name, depth = 0)
         if slot = @variables[name]
-          Compiler::LocalReference.new(slot, depth)
+          LocalReference.new(slot, depth)
         else
           @parent.find_var(name, depth)
         end
