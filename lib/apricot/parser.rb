@@ -360,10 +360,11 @@ module Apricot
           state.args[0] ||= Apricot.gensym('p1')
         when '&'
           state.rest ||= Apricot.gensym('rest')
-        else
+        when /^[1-9]\d*$/
           n = identifier[1..-1].to_i
-          syntax_error "arg literal must be %, %& or %integer" if n <= 0
           state.args[n - 1] ||= Apricot.gensym("p#{n}")
+        else
+          syntax_error "arg literal must be %, %& or %integer"
         end
       else
         identifier = identifier.to_sym

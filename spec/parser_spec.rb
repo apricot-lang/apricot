@@ -263,5 +263,6 @@ describe Apricot::Parser do
     expect_syntax_error("#(%0)")
     expect_syntax_error("#(%-1)")
     expect_syntax_error("#(%x)")
+    expect_syntax_error("#(%1.1)")
   end
 end
