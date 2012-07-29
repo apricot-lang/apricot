@@ -190,8 +190,8 @@ module Apricot
     raise ArgumentError, "Bindings array for #{type} must contain an even number of forms" if bindings.length.odd?
 
     scope = AST::LetScope.new
-    scope.parent = g.state.scope
-    g.push_state scope
+    scope.parent = g.scope
+    g.push_scope scope
 
     bindings.each_slice(2) do |id, value|
       raise TypeError, "Binding targets in let must be identifiers" unless id.is_a? AST::Identifier
@@ -208,7 +208,7 @@ module Apricot
 
     SpecialForm[:do].bytecode(g, args)
 
-    g.pop_state
+    g.pop_scope
   end
 
   # (let [binding*] body*) where binding is an identifier followed by a value
@@ -228,7 +228,7 @@ module Apricot
   # variable in a recur will not affect uses of that variable in the other
   # recur bindings.)
   SpecialForm.define(:recur) do |g, args|
-    target = g.state.scope
+    target = g.scope
 
     # Climb the scope ladder past the non-loop let bindings. We will end up on
     # a loop binding, a fn, or the top level scope.
@@ -268,8 +268,8 @@ module Apricot
     fn.file = g.file
 
     scope = AST::FnScope.new
-    scope.parent = g.state.scope
-    fn.push_state scope
+    scope.parent = g.scope
+    fn.push_scope scope
 
     fn.definition_line g.line
     fn.set_line g.line
@@ -304,7 +304,7 @@ module Apricot
     fn.ret
     fn.close
 
-    fn.pop_state
+    fn.pop_scope
     fn.splat_index = splat_index if splat_index
     fn.local_count = scope.local_count
     fn.local_names = scope.local_names
@@ -389,8 +389,8 @@ module Apricot
 
       # Create a new scope to hold the exception
       scope = AST::LetScope.new
-      scope.parent = g.state.scope
-      g.push_state scope
+      scope.parent = g.scope
+      g.push_scope scope
 
       # Exception is still on the stack
       scope.new_local(name.name).reference.set_bytecode(g)
@@ -402,7 +402,7 @@ module Apricot
       g.clear_exception
       g.goto done
 
-      g.pop_state
+      g.pop_scope
 
       # Rescue condition did not match
       next_rescue.set!
