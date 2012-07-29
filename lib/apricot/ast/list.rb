@@ -13,8 +13,8 @@ module Apricot::AST
       if @elements.empty?
         quote_bytecode(g)
       else
-        callee = @elements.shift
-        args = @elements
+        callee = @elements.first
+        args = @elements[1..-1]
 
         if callee.is_a?(Identifier)
           name = callee.name
