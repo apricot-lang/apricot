@@ -19,8 +19,22 @@ module Apricot
       compiler.run
     end
 
+    def self.compile_node(node, file = "(none)", line = 1, debug = false)
+      compiler = new :apricot_bytecode, :compiled_method
+
+      compiler.generator.input AST::TopLevel.new([node], file)
+      compiler.packager.print(BytecodePrinter) if debug
+
+      compiler.run
+    end
+
     def self.eval(code, file = "(none)", line = 1, debug = false)
-      cm = compile_string(code, file, line, debug)
+      if code.is_a? AST::Node
+        cm = compile_node(code, file, line, debug)
+      else
+        cm = compile_string(code, file, line, debug)
+      end
+
       cm.scope = Rubinius::ConstantScope.new(Object)
       Rubinius.run_script cm
     end
