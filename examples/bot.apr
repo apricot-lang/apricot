@@ -14,7 +14,7 @@
                             (log "<< " msg)
                             (.puts io (str msg "\r\n"))))))
 
-(let [irc (.new TCPSocket "irc.tenthbit.net" 6667)]
+(let [irc (TCPSocket. "irc.tenthbit.net" 6667)]
   (send irc "NICK apribot" "USER apr * * :Apribot")
   (loop []
     (let [line (.gets irc)]
