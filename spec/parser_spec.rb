@@ -69,6 +69,44 @@ describe Apricot::Parser do
     @ast[3].value.should == :self
   end
 
+  it 'parses a constructor special form' do
+    parse_one('Foo.', Apricot::AST::Send)
+    @first.should be_a(Apricot::AST::Identifier)
+    @first.message.should == :new
+    @first.receiver.should be_a(Apricot::AST::Constant)
+    @first.receiver.names.should == [:Foo]
+  end
+
+  it 'parses a static member special form' do
+    parse_one('Foo/bar', Apricot::AST::Send)
+    @first.should be_a(Apricot::AST::Identifier)
+    @first.message.should == :bar
+    @first.receiver.should be_a(Apricot::AST::Constant)
+    @first.receiver.names.should == [:Foo]
+  end
+
+  it 'parses an instance method special form' do
+    parse_one('.bar', Apricot::AST::Send)
+    @first.should be_a(Apricot::AST::Identifier)
+    @first.message.should == :bar
+    @first.receiver.should be_nil
+  end
+
+  it 'does not parse forms with identifier chars as static send' do
+    parse_one('foo/bar', Apricot::AST::Identifier)
+    @first.should_not be_a(Apricot::AST::Send)
+  end
+
+  it 'parses forms ending with .. as identifier' do
+    parse_one('foo..', Apricot::AST::Identifier)
+    @first.should_not be_a(Apricot::AST::Send)
+  end
+
+  it 'parses forms starting with .. as identifier' do
+    parse_one('..foo', Apricot::AST::Identifier)
+    @first.should_not be_a(Apricot::AST::Send)
+  end
+
   it 'parses fixnums' do
     parse_one('123', Apricot::AST::Literal)
     @first.value.should == 123

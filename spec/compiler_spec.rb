@@ -84,6 +84,15 @@ describe 'Apricot' do
     apricot(%q|(.map [1 2 3] \| #(. % + 1))|).should == [2, 3, 4]
   end
 
+  it 'compiles shorthand form for instantiation' do
+    apricot(%q|(Class.)|).should be_a(Class)
+    apricot(%q|(String. "foo")|).should == "foo"
+  end
+
+  it 'compiles shorthand forms for static method send' do
+    apricot(%q|(Thread/current)|).should be_a(Thread)
+  end
+
   it 'compiles constant defs' do
     expect { Foo }.to raise_error(NameError)
     apricot(%q|(def Foo 1)|)
