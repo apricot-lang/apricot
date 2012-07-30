@@ -20,6 +20,6 @@ module Apricot
   end
 end
 
-%w[literals identifier constant list scopes variables toplevel].each do |r|
+%w[literals identifier constant send list scopes variables toplevel].each do |r|
   require "apricot/ast/#{r}"
 end

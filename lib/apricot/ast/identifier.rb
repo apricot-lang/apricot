@@ -18,7 +18,7 @@ module Apricot
         g.push_cpath_top
         g.find_const :Apricot
         g.send :current_namespace, 0
-        g.push_literal @name
+        g.push_literal name
         value.bytecode(g)
         g.send :set_var, 2
       end
@@ -29,7 +29,7 @@ module Apricot
         g.push_cpath_top
         g.find_const :Apricot
         g.find_const :Identifier
-        g.push_literal @name
+        g.push_literal name
         g.send :intern, 1
       end
 

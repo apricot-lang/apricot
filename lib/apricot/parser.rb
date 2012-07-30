@@ -336,13 +336,23 @@ module Apricot
       # strings off the end, so we can check for them afterwards.
       names = constant.split('::', -1)
 
+      if names.last =~ /[^\.]\.$/
+        message = :new
+        names[-1] = names.last[0..-2]
+      elsif names.last.count("/") == 1
+        name, message = names.last.split("/", 2)
+        names[-1] = name
+      end
+
       unless names.all? {|n| n =~ /^[A-Z]\w*$/ }
         syntax_error "Invalid constant: #{constant}"
       end
 
       names.map! {|x| x.to_sym }
 
-      AST::Constant.new(@line, names)
+      const = AST::Constant.new(@line, names)
+      return AST::Send.new(@line, const, message.to_sym) if message
+      const
     end
 
     def parse_identifier
@@ -367,6 +377,13 @@ module Apricot
           syntax_error "arg literal must be %, %& or %integer"
         end
       else
+
+        if identifier =~ /^\.[^\.]/
+          return AST::Send.new(@line, nil, identifier[1..-1].to_sym)
+        elsif identifier =~ /[^\.]\.$/
+          return AST::Send.new(@line, identifier[0..-2].to_sym, :new)
+        end
+
         identifier = identifier.to_sym
       end
 

@@ -24,16 +24,15 @@ module Apricot::AST
             special.bytecode(g, args)
             return
 
-          # Handle the (.method receiver args*) send expression form
-          elsif name.to_s.start_with?('.') && name.to_s != '..'
-            raise ArgumentError, "Too few arguments to send expression, expecting (.method receiver ...)" if args.empty?
-
-            method = Identifier.new(callee.line, callee.name[1..-1].to_sym)
+          # Handle send special forms like (.foo), (Foo.) (Foo/bar)
+          elsif callee.is_a?(Send)
+            args.insert(0, callee.receiver) if callee.receiver
+            method = Identifier.new(callee.line, callee.message)
             args.insert(1, method)
-
             Apricot::SpecialForm[:'.'].bytecode(g, args)
             return
           end
+
         end
 
         # TODO: macros
