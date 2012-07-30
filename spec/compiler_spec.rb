@@ -158,6 +158,70 @@ describe 'Apricot' do
     CODE
   end
 
+  it 'compiles try forms' do
+    apricot(%q|(try)|).should == nil
+    apricot(%q|(try :foo)|).should == :foo
+
+    apricot(%q|(try :success (rescue e :rescue))|).should == :success
+    expect { apricot(%q|(try (. Kernel raise))|) }.to raise_error(RuntimeError)
+    apricot(%q|(try (. Kernel raise) (rescue e :rescue))|).should == :rescue
+    apricot(%q|(try (. Kernel raise) (rescue [e] :rescue))|).should == :rescue
+    apricot(<<-CODE).should == :rescue
+      (try
+        (. Kernel raise)
+        (rescue [e 1 2 RuntimeError] :rescue))
+    CODE
+    apricot(<<-CODE).should == :rescue_bar
+      (try
+        (. Kernel raise ArgumentError)
+        (rescue [e TypeError] :rescue_foo)
+        (rescue [e ArgumentError] :rescue_bar))
+    CODE
+    apricot(<<-CODE).should be_a(TypeError)
+      (try
+        (. Kernel raise TypeError)
+        (rescue e e))
+    CODE
+    expect { apricot(<<-CODE) }.to raise_error(TypeError)
+      (try
+        (. Kernel raise TypeError)
+        (rescue [e ArgumentError] :rescue))
+    CODE
+
+    apricot(<<-CODE).should == :rescue
+      (try
+        (try
+          (. Kernel raise)
+          (rescue e (. Kernel raise)))
+        (rescue e :rescue))
+    CODE
+
+    apricot(<<-CODE).should == []
+      (let [a [1]]
+        (try
+          :success
+          (ensure (.pop a)))
+        a)
+    CODE
+    apricot(<<-CODE).should == []
+      (let [a [1]]
+        (try
+          (. Kernel raise)
+          (rescue e :rescue)
+          (ensure (.pop a)))
+        a)
+    CODE
+    apricot(<<-CODE).should == []
+      (let [a [1]]
+        (try
+          (try
+            (. Kernel raise)
+            (ensure (.pop a)))
+          (rescue e :rescue))
+        a)
+    CODE
+  end
+
   it 'compiles quoted forms' do
     apricot(%q|'1|).should == 1
     apricot(%q|'a|).should == Apricot::Identifier.intern(:a)

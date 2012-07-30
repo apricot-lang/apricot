@@ -308,7 +308,7 @@ module Apricot
     g.send_with_block :lambda, 0
   end
 
-  # (try body* (rescue condition name body*)* (ensure body*)?)
+  # (try body* (rescue name|[name condition*] body*)* (ensure body*)?)
   SpecialForm.define(:try) do |g, args|
     body = []
     rescue_clauses = []
@@ -359,16 +359,31 @@ module Apricot
     g.push_current_exception
 
     rescue_clauses.each do |clause|
-      condition, name = clause.shift(2)
+      # Parse either (rescue e body) or (rescue [e Exception] body)
+      if clause[0].is_a?(AST::Identifier)
+        name = clause.shift
+        conditions = []
+      elsif clause[0].is_a?(AST::ArrayLiteral)
+        conditions = clause.shift.elements
+        name = conditions.shift
+        raise TypeError, "Expected identifier as first form of rescue clause binding" unless name.is_a?(AST::Identifier)
+      else
+        raise TypeError, "Expected identifier or array as first form of rescue clause"
+      end
+
+      # Default to StandardError for (rescue e body) and (rescue [e] body)
+      conditions << AST::Constant.new(name.line, [:StandardError]) if conditions.empty?
 
       body = g.new_label
       next_rescue = g.new_label
 
-      g.dup # The exception
-      condition.bytecode(g)
-      g.swap
-      g.send :===, 1
-      g.git body
+      conditions.each do |cond|
+        g.dup # The exception
+        cond.bytecode(g)
+        g.swap
+        g.send :===, 1
+        g.git body
+      end
       g.goto next_rescue
 
       # This rescue condition matched

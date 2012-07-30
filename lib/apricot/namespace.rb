@@ -35,8 +35,7 @@ module Apricot
   Core = Namespace.new
   Core.set_var(:"*ns*", Core)
   Core.set_var(:"in-ns", lambda do |constant|
-    ns = Namespace.find_or_create constant
-    Apricot.current_namespace = ns
+    Apricot.current_namespace = Namespace.find_or_create constant
   end)
 
   class << self
@@ -44,8 +43,8 @@ module Apricot
       Core.get_var(:"*ns*")
     end
 
-    def current_namespace=(mod)
-      Core.set_var(:"*ns*", mod)
+    def current_namespace=(ns)
+      Core.set_var(:"*ns*", ns)
     end
   end
 end
