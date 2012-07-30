@@ -43,8 +43,8 @@ module Apricot
       Core.get_var(:"*ns*")
     end
 
-    def current_namespace=(mod)
-      Core.set_var(:"*ns*", mod)
+    def current_namespace=(ns)
+      Core.set_var(:"*ns*", ns)
     end
   end
 end
