@@ -51,6 +51,14 @@ describe 'Apricot' do
     apricot(%q|Rubinius::Compiler|).should == Rubinius::Compiler
   end
 
+  it 'compiles constans with the form like File/SEPARATOR' do
+    apricot(%q|File/SEPARATOR|).should == File::SEPARATOR
+  end
+
+  it 'compiles call to no-arg method on constant using send shortcut' do
+    apricot(%q|(.class Process::UID/eid)|).should == Fixnum
+  end
+
   it 'compiles call forms with data structures' do
     apricot(%q|([:a :b] 1)|).should == :b
     apricot(%q|([:a :b] 3)|).should == nil
@@ -82,6 +90,15 @@ describe 'Apricot' do
   it 'compiles shorthand send forms with block args' do
     apricot(%q|(.map [1 2 3] \| :to_s)|).should == %w[1 2 3]
     apricot(%q|(.map [1 2 3] \| #(. % + 1))|).should == [2, 3, 4]
+  end
+
+  it 'compiles shorthand form for instantiation' do
+    apricot(%q|(Class.)|).should be_a(Class)
+    apricot(%q|(String. "foo")|).should == "foo"
+  end
+
+  it 'compiles shorthand forms for static method send' do
+    apricot(%q|(Thread/current)|).should be_a(Thread)
   end
 
   it 'compiles constant defs' do
