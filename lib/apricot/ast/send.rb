@@ -29,6 +29,16 @@ module Apricot
         @receiver = receiver
         @message = message
       end
+
+      def bytecode(g)
+        if receiver.is_a?(Constant) && message
+          receiver.bytecode(g)
+          g.find_const(message)
+        else
+          super(g)
+        end
+      end
+
     end
   end
 end

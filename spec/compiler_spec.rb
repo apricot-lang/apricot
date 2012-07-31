@@ -51,6 +51,10 @@ describe 'Apricot' do
     apricot(%q|Rubinius::Compiler|).should == Rubinius::Compiler
   end
 
+  it 'compiles constans with the form like File/SEPARATOR' do
+    apricot(%q|File/SEPARATOR|).should == File::SEPARATOR
+  end
+
   it 'compiles call forms with data structures' do
     apricot(%q|([:a :b] 1)|).should == :b
     apricot(%q|([:a :b] 3)|).should == nil
