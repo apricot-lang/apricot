@@ -1,3 +1,4 @@
+; -*- clojure -*-
 ; An example IRC bot. This does not reflect our vision for Apricot, just what
 ; features we currently have working.
 
