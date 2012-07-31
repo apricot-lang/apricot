@@ -15,13 +15,13 @@ module Apricot
         g.name = :__top_level__
         g.file = @file.to_sym
 
-        g.push_scope self
+        g.scopes << self
 
         pos(g)
         SpecialForm[:do].bytecode(g, @elements)
         g.ret
 
-        g.pop_scope
+        g.scopes.pop
 
         g.local_count = local_count
         g.local_names = local_names

@@ -190,7 +190,7 @@ module Apricot
     raise ArgumentError, "Bindings array for #{type} must contain an even number of forms" if bindings.length.odd?
 
     scope = AST::LetScope.new(g.scope)
-    g.push_scope scope
+    g.scopes << scope
 
     bindings.each_slice(2) do |name, value|
       raise TypeError, "Binding targets in let must be identifiers" unless name.is_a? AST::Identifier
@@ -207,7 +207,7 @@ module Apricot
 
     SpecialForm[:do].bytecode(g, args)
 
-    g.pop_scope
+    g.scopes.pop
   end
 
   # (let [binding*] body*) where binding is an identifier followed by a value
@@ -258,7 +258,7 @@ module Apricot
     fn.file = g.file
 
     scope = AST::FnScope.new(g.scope)
-    fn.push_scope scope
+    fn.scopes << scope
 
     fn.definition_line g.line
     fn.set_line g.line
@@ -293,7 +293,7 @@ module Apricot
     fn.ret
     fn.close
 
-    fn.pop_scope
+    fn.scopes.pop
     fn.splat_index = splat_index if splat_index
     fn.local_count = scope.local_count
     fn.local_names = scope.local_names
@@ -391,7 +391,7 @@ module Apricot
 
       # Create a new scope to hold the exception
       scope = AST::LetScope.new(g.scope)
-      g.push_scope scope
+      g.scopes << scope
 
       # Exception is still on the stack
       g.set_local scope.new_local(name)
@@ -403,7 +403,7 @@ module Apricot
       g.clear_exception
       g.goto done
 
-      g.pop_scope
+      g.scopes.pop
 
       # Rescue condition did not match
       next_rescue.set!
