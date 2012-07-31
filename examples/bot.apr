@@ -1,13 +1,13 @@
 ; An example IRC bot. This does not reflect our vision for Apricot, just what
 ; features we currently have working.
 
-(. Kernel require "socket")
+(Kernel/require "socket")
 
 (def str (fn [& args]
            (.reduce args "" :+)))
 
 (def log (fn [prefix line]
-           (. Kernel puts (str prefix line))))
+           (Kernel/puts (str prefix line))))
 
 (def send (fn [io & msgs]
             (.each msgs | (fn [msg]
