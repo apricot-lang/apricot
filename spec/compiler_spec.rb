@@ -55,6 +55,10 @@ describe 'Apricot' do
     apricot(%q|File/SEPARATOR|).should == File::SEPARATOR
   end
 
+  it 'compiles call to no-arg method on constant using send shortcut' do
+    apricot(%q|(.class Process::UID/eid)|).should == Fixnum
+  end
+
   it 'compiles call forms with data structures' do
     apricot(%q|([:a :b] 1)|).should == :b
     apricot(%q|([:a :b] 3)|).should == nil

@@ -33,7 +33,11 @@ module Apricot
       def bytecode(g)
         if receiver.is_a?(Constant) && message
           receiver.bytecode(g)
-          g.find_const(message)
+          if message.to_s =~ /^[A-Z]/
+            g.find_const(message)
+          else
+            g.send message, 0
+          end
         else
           super(g)
         end
