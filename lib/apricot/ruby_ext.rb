@@ -64,9 +64,11 @@ class Set
     str << '}'
   end
 
-  def apricot_call(elem)
+  def [](elem)
     elem if self.include? elem
   end
+
+  alias_method :apricot_call, :[]
 end
 
 class Rational
