@@ -23,20 +23,27 @@ module Apricot::AST
           if special = Apricot::SpecialForm[name]
             special.bytecode(g, args)
             return
+          end
 
           # Handle the (.method receiver args*) send expression form
-          elsif name.to_s.start_with?('.') && name.to_s != '..'
+          if name.to_s.start_with?('.') && name.to_s != '..'
             raise ArgumentError, "Too few arguments to send expression, expecting (.method receiver ...)" if args.empty?
 
-            method = Identifier.new(callee.line, callee.name[1..-1].to_sym)
+            method = Identifier.new(@line, name[1..-1].to_sym)
             args.insert(1, method)
 
             Apricot::SpecialForm[:'.'].bytecode(g, args)
             return
           end
+
+          if Apricot.current_namespace.macros.include? name
+            args.map!(&:to_value)
+            expansion = Apricot.current_namespace.get_var(name).call(*args)
+            Node.from_value(expansion).bytecode(g)
+            return
+          end
         end
 
-        # TODO: macros
         callee.bytecode(g)
         args.each {|arg| arg.bytecode(g) }
         g.send :apricot_call, args.length

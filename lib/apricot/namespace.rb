@@ -16,10 +16,11 @@ module Apricot
       ns
     end
 
-    attr_accessor :vars
+    attr_accessor :vars, :macros
 
     def initialize
       @vars = {}
+      @macros = Set[]
     end
 
     def set_var(name, val)
