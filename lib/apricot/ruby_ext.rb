@@ -98,3 +98,11 @@ class Symbol
     o[self]
   end
 end
+
+module Enumerable
+  def to_list
+    list = Apricot::List::EmptyList
+    reverse_each {|x| list = list.cons(x) }
+    list
+  end
+end
