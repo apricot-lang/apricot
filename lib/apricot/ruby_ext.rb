@@ -91,4 +91,8 @@ class Symbol
       ":#{str.inspect}"
     end
   end
+
+  def apricot_call(o)
+    o[self]
+  end
 end
