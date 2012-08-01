@@ -65,8 +65,8 @@ describe Apricot::Parser do
     @ast[1].value.should == :false
     @ast[2].should be_a(Apricot::AST::Literal)
     @ast[2].value.should == :nil
-    @ast[3].should be_a(Apricot::AST::Literal)
-    @ast[3].value.should == :self
+    @ast[3].should be_a(Apricot::AST::Identifier)
+    @ast[3].name.should == :self
   end
 
   it 'parses fixnums' do

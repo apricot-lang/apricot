@@ -371,7 +371,7 @@ module Apricot
       end
 
       case identifier
-      when :true, :false, :nil, :self
+      when :true, :false, :nil
         AST::Literal.new(@line, identifier)
       else
         AST::Identifier.new(@line, identifier)

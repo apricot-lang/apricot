@@ -231,6 +231,7 @@ describe 'Apricot' do
     apricot(%q|'true|).should == true
     apricot(%q|'false|).should == false
     apricot(%q|'nil|).should == nil
+    apricot(%q|'self|).should == Apricot::Identifier.intern(:self)
     apricot(%q|'Foo::Bar|).should == Apricot::Constant.new(:Foo, :Bar)
   end
 end

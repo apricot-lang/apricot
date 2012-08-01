@@ -10,11 +10,18 @@ module Apricot
 
       def bytecode(g)
         pos(g)
-        g.scope.find_var(name).bytecode(g)
+
+        if @name == :self
+          g.push :self
+        else
+          g.scope.find_var(name).bytecode(g)
+        end
       end
 
       # called by (def <identifier> <value>)
       def assign_bytecode(g, value)
+        raise ArgumentError, "Can't change the value of self" if @name == :self
+
         g.push_cpath_top
         g.find_const :Apricot
         g.send :current_namespace, 0
