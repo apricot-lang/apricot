@@ -125,7 +125,7 @@ module Apricot
 
     target, value = *args
 
-    value ||= AST::NilLiteral.new(1)
+    value ||= AST::Literal.new(0, :nil)
 
     case target
     when AST::Identifier, AST::Constant
