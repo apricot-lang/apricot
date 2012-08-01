@@ -40,6 +40,10 @@ module Apricot
         g.send :intern, 1
       end
 
+      def to_value
+        Apricot::Identifier.intern @name
+      end
+
       def node_equal?(other)
         self.name == other.name
       end

@@ -56,6 +56,10 @@ module Apricot::AST
       end
     end
 
+    def to_value
+      Apricot::List[*@elements.map(&:to_value)]
+    end
+
     def node_equal?(other)
       self.elements == other.elements
     end

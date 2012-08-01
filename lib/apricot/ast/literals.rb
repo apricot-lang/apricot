@@ -18,6 +18,15 @@ module Apricot::AST
       g.push @value
     end
 
+    def to_value
+      case @value
+      when :true then true
+      when :false then false
+      when :nil then nil
+      else @value
+      end
+    end
+
     def node_equal?(other)
       self.value == other.value
     end
@@ -96,6 +105,10 @@ module Apricot::AST
       lbl.set!
     end
 
+    def to_value
+      Rational(@numerator, @denominator)
+    end
+
     def node_equal?(other)
       self.numerator == other.numerator && self.denominator == other.denominator
     end
@@ -128,6 +141,10 @@ module Apricot::AST
       g.send :new, 2
       g.set_literal idx
       lbl.set!
+    end
+
+    def to_value
+      Regexp.new(@pattern, @options)
     end
 
     def node_equal?(other)
@@ -163,6 +180,10 @@ module Apricot::AST
       @elements.each {|e| quoted ? e.quote_bytecode(g) : e.bytecode(g) }
       g.make_array @elements.length
     end
+
+    def to_value
+      @elements.map(&:to_value)
+    end
   end
 
   class HashLiteral < CollectionLiteral
@@ -191,6 +212,12 @@ module Apricot::AST
         g.pop # []= leaves v on the stack
       end
     end
+
+    def to_value
+      h = {}
+      @elements.each_slice(2) {|k,v| h[k.to_value] = v.to_value }
+      h
+    end
   end
 
   class SetLiteral < CollectionLiteral
@@ -205,6 +232,12 @@ module Apricot::AST
         quoted ? e.quote_bytecode(g) : e.bytecode(g)
         g.send :add, 1
       end
+    end
+
+    def to_value
+      s = Set.new
+      @elements.each {|e| set << e }
+      s
     end
   end
 end

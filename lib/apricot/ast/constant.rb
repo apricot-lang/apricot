@@ -31,6 +31,10 @@ module Apricot
         g.send :new, @names.length
       end
 
+      def to_value
+        Apricot::Constant.new(*@names)
+      end
+
       def node_equal?(other)
         self.names == other.names
       end
