@@ -7,47 +7,38 @@ module Apricot::AST
       @elements = elements
     end
 
-    def bytecode(g)
+    def bytecode(g, macroexpand = true)
       pos(g)
 
       if @elements.empty?
         quote_bytecode(g)
-      else
-        callee = @elements.first
-        args = @elements[1..-1]
-
-        if callee.is_a?(Identifier)
-          name = callee.name
-
-          # Handle special forms such as def, let, fn, quote, etc
-          if special = Apricot::SpecialForm[name]
-            special.bytecode(g, args)
-            return
-          end
-
-          # Handle the (.method receiver args*) send expression form
-          if name.to_s.start_with?('.') && name.to_s != '..'
-            raise ArgumentError, "Too few arguments to send expression, expecting (.method receiver ...)" if args.empty?
-
-            method = Identifier.new(@line, name[1..-1].to_sym)
-            args.insert(1, method)
-
-            Apricot::SpecialForm[:'.'].bytecode(g, args)
-            return
-          end
-
-          if Apricot.current_namespace.macros.include? name
-            args.map!(&:to_value)
-            expansion = Apricot.current_namespace.get_var(name).call(*args)
-            Node.from_value(expansion).bytecode(g)
-            return
-          end
-        end
-
-        callee.bytecode(g)
-        args.each {|arg| arg.bytecode(g) }
-        g.send :apricot_call, args.length
+        return
       end
+
+      callee = @elements.first
+      args = @elements.drop(1)
+
+      # Handle special forms such as def, let, fn, quote, etc
+      if callee.is_a?(Identifier) && special = Apricot::SpecialForm[callee.name]
+        special.bytecode(g, args)
+        return
+      end
+
+      if macroexpand
+        form = Node.from_value(Apricot.macroexpand(self.to_value))
+
+        # Avoid recursing and macroexpanding again if expansion returns a list
+        if form.is_a?(List)
+          form.bytecode(g, false)
+        else
+          form.bytecode(g)
+        end
+        return
+      end
+
+      callee.bytecode(g)
+      args.each {|arg| arg.bytecode(g) }
+      g.send :apricot_call, args.length
     end
 
     def quote_bytecode(g)

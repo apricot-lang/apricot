@@ -84,6 +84,18 @@ describe 'Apricot' do
     apricot(%q|(.map [1 2 3] \| #(. % + 1))|).should == [2, 3, 4]
   end
 
+  it 'macroexpands shorthand send forms' do
+    form = apricot(%q|'(.meth recv arg1 arg2)|)
+    ex = Apricot.macroexpand(form)
+
+    dot  = Apricot::Identifier.intern(:'.')
+    recv = Apricot::Identifier.intern(:recv)
+    meth = Apricot::Identifier.intern(:meth)
+    arg1 = Apricot::Identifier.intern(:arg1)
+    arg2 = Apricot::Identifier.intern(:arg2)
+    ex.should == Apricot::List[dot, recv, meth, arg1, arg2]
+  end
+
   it 'compiles constant defs' do
     expect { Foo }.to raise_error(NameError)
     apricot(%q|(def Foo 1)|)
