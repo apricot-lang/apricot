@@ -236,7 +236,7 @@ module Apricot::AST
 
     def to_value
       s = Set.new
-      @elements.each {|e| set << e }
+      @elements.each {|e| s << e.to_value }
       s
     end
   end
