@@ -117,7 +117,8 @@ module Apricot
     def skip_whitespace
       while @char =~ /[\s,;#]/
         # Comments begin with a semicolon and extend to the end of the line
-        if @char == ';'
+        # Treat #! as a comment for shebang lines
+        if @char == ';' || (@char == '#' && peek_char == '!')
           while @char && @char != "\n"
             next_char
           end
