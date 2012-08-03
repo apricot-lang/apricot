@@ -25,6 +25,7 @@ describe Apricot::Parser do
 
   it 'skips comments' do
     parse('; example').should be_empty
+    parse('#!/usr/bin/env apricot').should be_empty
   end
 
   it 'discards commented forms' do
