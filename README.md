@@ -4,6 +4,22 @@ A Clojure-like Lisp on Rubinius.
 
 Try to contain your excitement, please.
 
+
+## Setup
+To get Apricot up and running, make sure you have rubinius and bundler installed.
+
+    rvm install rubinius
+    gem install bundler
+    bundle
+
+## Starting Apricot
+To start Apricot
+
+    ./bin/apricot
+
+Once in the repl you can ask for help by using `!help` and you can exit with `!exit`
+
+
 ## License
 
 Copyright (c) 2012, Curtis McEnroe <programble@gmail.com>
