@@ -1,3 +1,5 @@
+require 'stringio'
+
 module Apricot
   class SyntaxError < StandardError
     attr_accessor :filename, :line, :msg
@@ -25,10 +27,10 @@ module Apricot
 
     FnState = Struct.new(:args, :rest)
 
-    # @param [String] source a source program
-    def initialize(source, filename = "(none)", line = 1)
+    # @param [IO] io an input stream object to read forms from
+    def initialize(io, filename = "(none)", line = 1)
       @filename = filename
-      @source = source
+      @io = io
       @location = 0
       @line = line
 
@@ -36,11 +38,11 @@ module Apricot
     end
 
     def self.parse_file(filename)
-      new(File.read(filename), filename).parse
+      File.open(filename) {|f| new(f, filename).parse }
     end
 
     def self.parse_string(source, filename = "(none)", line = 1)
-      new(source, filename, line).parse
+      new(StringIO.new(source, "r"), filename, line).parse
     end
 
     # @return [Array<AST::Node>] a list of the forms in the program
@@ -55,6 +57,13 @@ module Apricot
       end
 
       Apricot::AST::TopLevel.new(program, @filename)
+    end
+
+    # @return AST::Node an AST node representing the form read
+    def parse_one
+      next_char
+      skip_whitespace
+      parse_form
     end
 
     private
@@ -387,16 +396,19 @@ module Apricot
 
     def next_char
       @line += 1 if @char == "\n"
-      @char = @source[@location,1]
-      @char = nil if @char.empty?
-      @location += 1 if @char
-      @char
+      @char = @io.getc
+      return nil unless @char
+      @location += 1
+      # .chr shouldn't be necessary (rubinius issue #1847)
+      @char = @char.chr
     end
 
     def peek_char
-      char = @source[@location,1]
-      char = nil if char.empty?
-      char
+      char = @io.getc
+      return nil unless char
+      @io.ungetc char
+      # .chr shouldn't be necessary (rubinius issue #1847)
+      char.chr
     end
 
     def syntax_error(message)
