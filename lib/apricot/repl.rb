@@ -31,7 +31,8 @@ module Apricot
       ]
     }
 
-    COMPLETIONS = (COMMANDS.keys + SpecialForm::Specials.keys.map(&:to_s)).sort
+    COMMAND_COMPLETIONS = COMMANDS.keys.sort
+    SPECIAL_COMPLETIONS = SpecialForm::Specials.keys.map(&:to_s)
 
     def initialize(prompt = 'apr> ', bytecode = false, history_file = nil)
       @prompt = prompt
@@ -44,7 +45,13 @@ module Apricot
       Readline.completion_append_character = " "
 
       Readline.completion_proc = proc do |s|
-        COMPLETIONS.select {|c| c.start_with? s }
+        if s.start_with? '!'
+          COMMAND_COMPLETIONS.select {|c| c.start_with? s }
+        else
+          comps = SPECIAL_COMPLETIONS +
+            Apricot.current_namespace.vars.keys.map(&:to_s)
+          comps.select {|c| c.start_with? s }.sort
+        end
       end
 
       load_history
