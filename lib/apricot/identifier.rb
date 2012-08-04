@@ -36,7 +36,9 @@ module Apricot
       when /\A#{Apricot::Parser::IDENTIFIER}+\z/
         @name.to_s
       else
-        "#|#{@name.to_s.inspect[1..-2]}|"
+        str = @name.to_s.inspect[1..-2]
+        str.gsub!(/(\\.)|\|/) { $1 || '\|' }
+        "#|#{str}|"
       end
     end
 
