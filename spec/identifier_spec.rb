@@ -30,6 +30,13 @@ describe Apricot::Identifier do
 
   it 'can be inspected' do
     intern(:test).inspect.should == "test"
+    intern(:true).inspect.should == "#|true|"
+    intern(:false).inspect.should == "#|false|"
+    intern(:nil).inspect.should == "#|nil|"
+    intern(:"foo bar").inspect.should == "#|foo bar|"
+    intern(:"foo | bar").inspect.should == '#|foo \| bar|'
+    intern(:"foo\nbar").inspect.should == '#|foo\nbar|'
+    intern(:"test\n").inspect.should == '#|test\n|'
   end
 
   it 'can be used as a key in Hashes' do
