@@ -118,10 +118,8 @@ module Apricot
       when '{' then parse_set
       when '(' then parse_fn
       when 'r' then parse_regex
-      when 'q' then parse_quotation(AST::StringLiteral, false)
-      when 'Q' then parse_quotation(AST::StringLiteral, true)
-      when 'i' then parse_quotation(AST::Identifier, false)
-      when 'I' then parse_quotation(AST::Identifier, true)
+      when 'q' then parse_quotation(false)
+      when 'Q' then parse_quotation(true)
       else syntax_error "Unknown reader macro: ##{@char}"
       end
     end
@@ -292,7 +290,7 @@ module Apricot
       options
     end
 
-    def parse_quotation(klass, double_quote)
+    def parse_quotation(double_quote)
       line = @line
       next_char # skip the prefix
       delimiter = delimiter_helper(@char)
@@ -302,7 +300,7 @@ module Apricot
       while @char
         if @char == delimiter
           next_char # consume delimiter
-          return klass.new(line, string)
+          return AST::StringLiteral.new(line, string)
         end
 
         if double_quote
