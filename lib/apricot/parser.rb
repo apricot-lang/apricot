@@ -2,12 +2,17 @@ require 'stringio'
 
 module Apricot
   class SyntaxError < StandardError
-    attr_accessor :filename, :line, :msg
+    attr_reader :filename, :line, :msg
 
-    def initialize(filename, line, msg)
+    def initialize(filename, line, msg, incomplete = false)
       @filename = filename
       @line = line
       @msg = msg
+      @incomplete = incomplete
+    end
+
+    def incomplete?
+      @incomplete
     end
 
     def to_s
@@ -85,7 +90,7 @@ module Apricot
       end
 
       # Can only reach here if we run out of chars without getting a terminator
-      syntax_error "Unexpected end of program, expected #{terminator}"
+      incomplete_error "Unexpected end of program, expected #{terminator}"
     end
 
     # Parse a single Lisp form
@@ -138,7 +143,7 @@ module Apricot
           break unless peek_char == '_'
           next_char; next_char # skip #_
           skip_whitespace
-          syntax_error "Unexpected end of program after #_, expected a form" unless @char
+          incomplete_error "Unexpected end of program after #_, expected a form" unless @char
           parse_form # discard next form
         else
           next_char
@@ -205,7 +210,7 @@ module Apricot
       end
 
       # Can only reach here if we run out of chars without getting a "
-      syntax_error "Unexpected end of program while parsing string"
+      incomplete_error "Unexpected end of program while parsing string"
     end
 
     def parse_string_char
@@ -225,7 +230,7 @@ module Apricot
              else
                consume_char
              end
-      syntax_error "Unexpected end of file while parsing character escape" unless char
+      incomplete_error "Unexpected end of file while parsing character escape" unless char
       char
     end
 
@@ -272,7 +277,7 @@ module Apricot
         regex << consume_char
       end
 
-      syntax_error "Unexpected end of program while parsing regex"
+      incomplete_error "Unexpected end of program while parsing regex"
     end
 
     def regex_options_helper
@@ -314,7 +319,7 @@ module Apricot
         end
       end
 
-      syntax_error "Unexpected end of program while parsing quotation"
+      incomplete_error "Unexpected end of program while parsing quotation"
     end
 
     def parse_symbol
@@ -328,7 +333,7 @@ module Apricot
           break if @char == '"'
           symbol << parse_string_char
         end
-        syntax_error "Unexpected end of program while parsing symbol" unless @char == '"'
+        incomplete_error "Unexpected end of program while parsing symbol" unless @char == '"'
         next_char # skip closing "
       else
         while @char =~ IDENTIFIER
@@ -435,7 +440,7 @@ module Apricot
         identifier << parse_string_char
       end
 
-      syntax_error "Unexpected end of program while parsing pipe identifier"
+      incomplete_error "Unexpected end of program while parsing pipe identifier"
     end
 
     def consume_char
@@ -463,6 +468,10 @@ module Apricot
 
     def syntax_error(message)
       raise SyntaxError.new(@filename, @line, message)
+    end
+
+    def incomplete_error(message)
+      raise SyntaxError.new(@filename, @line, message, true)
     end
   end
 end
