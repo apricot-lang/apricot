@@ -30,9 +30,18 @@ module Apricot
     end
 
     def inspect
-      @name.to_s
+      case @name
+      when :true, :false, :nil # These would be parsed as keywords
+        "#|#{@name.to_s}|"
+      when /^#{Apricot::Parser::IDENTIFIER}+$/
+        @name.to_s
+      else
+        "#|#{@name.to_s.inspect[1..-2]}|"
+      end
     end
 
-    alias_method :to_s, :inspect
+    def to_s
+      @name.to_s
+    end
   end
 end
