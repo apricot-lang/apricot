@@ -118,6 +118,10 @@ module Apricot
       when '{' then parse_set
       when '(' then parse_fn
       when 'r' then parse_regex
+      when 'q' then parse_quotation(AST::StringLiteral, false)
+      when 'Q' then parse_quotation(AST::StringLiteral, true)
+      when 'i' then parse_quotation(AST::Identifier, false)
+      when 'I' then parse_quotation(AST::Identifier, true)
       else syntax_error "Unknown reader macro: ##{@char}"
       end
     end
@@ -239,16 +243,20 @@ module Apricot
       number.to_i(base).chr
     end
 
+    def delimiter_helper(c)
+      case c
+      when '(' then ')'
+      when '[' then ']'
+      when '{' then '}'
+      when '<' then '>'
+      else c
+      end
+    end
+
     def parse_regex
       line = @line
       next_char # skip the r
-      delimiter = case @char
-                  when '(' then ')'
-                  when '[' then ']'
-                  when '{' then '}'
-                  when '<' then '>'
-                  else @char
-                  end
+      delimiter = delimiter_helper(@char)
       next_char # skip delimiter
       regex = ""
 
@@ -282,6 +290,32 @@ module Apricot
       end
 
       options
+    end
+
+    def parse_quotation(klass, double_quote)
+      line = @line
+      next_char # skip the prefix
+      delimiter = delimiter_helper(@char)
+      next_char # skip delimiter
+      string = ""
+
+      while @char
+        if @char == delimiter
+          next_char # consume delimiter
+          return klass.new(line, string)
+        end
+
+        if double_quote
+          string << parse_string_char
+        elsif @char == "\\" && peek_char == delimiter
+          next_char
+          string << consume_char
+        else
+          string << consume_char
+        end
+      end
+
+      syntax_error "Unexpected end of program while parsing quotation"
     end
 
     def parse_symbol
