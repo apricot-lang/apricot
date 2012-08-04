@@ -37,6 +37,14 @@ describe Apricot::Parser do
     @first.name.should == :example
   end
 
+  it 'parses pipe identifiers' do
+    parse_one('#|example|', Apricot::AST::Identifier).name.should == :example
+    parse_one('#|foo bar|', Apricot::AST::Identifier).name.should == :"foo bar"
+    parse_one('#|foo\nbar|', Apricot::AST::Identifier).name.should == :"foo\nbar"
+    parse_one('#|foo\|bar|', Apricot::AST::Identifier).name.should == :"foo|bar"
+    parse_one('#|foo"bar|', Apricot::AST::Identifier).name.should == :'foo"bar'
+  end
+
   it 'parses constants' do
     parse_one('Example', Apricot::AST::Constant)
     @first.names.should == [:Example]
