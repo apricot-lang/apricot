@@ -115,6 +115,7 @@ module Apricot
     def parse_dispatch
       next_char # skip #
       case @char
+      when '|' then parse_pipe_identifier
       when '{' then parse_set
       when '(' then parse_fn
       when 'r' then parse_regex
@@ -418,6 +419,23 @@ module Apricot
       else
         AST::Identifier.new(@line, identifier)
       end
+    end
+
+    def parse_pipe_identifier
+      line = @line
+      next_char # skip the |
+      identifier = ""
+
+      while @char
+        if @char == '|'
+          next_char # consume the |
+          return AST::Identifier.new(line, identifier.to_sym)
+        end
+
+        identifier << parse_string_char
+      end
+
+      syntax_error "Unexpected end of program while parsing pipe identifier"
     end
 
     def consume_char
