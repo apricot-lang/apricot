@@ -87,7 +87,7 @@ class Symbol
   def apricot_inspect
     str = to_s
 
-    if str =~ /\a#{Apricot::Parser::IDENTIFIER}+\z/
+    if str =~ /\A#{Apricot::Parser::IDENTIFIER}+\z/
       ":#{str}"
     else
       ":#{str.inspect}"
