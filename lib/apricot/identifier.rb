@@ -33,7 +33,7 @@ module Apricot
       case @name
       when :true, :false, :nil # These would be parsed as keywords
         "#|#{@name.to_s}|"
-      when /^#{Apricot::Parser::IDENTIFIER}+$/
+      when /\a#{Apricot::Parser::IDENTIFIER}+\z/
         @name.to_s
       else
         "#|#{@name.to_s.inspect[1..-2]}|"
