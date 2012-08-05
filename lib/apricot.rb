@@ -32,7 +32,6 @@ module Apricot
       method = Identifier.intern(name_s[1..-1])
       List[dot, args.first, method, *args.tail]
     elsif Apricot.current_namespace.macros.include? name
-      args.map!(&:to_value)
       Apricot.current_namespace.get_var(name).call(*args)
     else
       form
