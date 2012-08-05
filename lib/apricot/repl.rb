@@ -1,4 +1,5 @@
 require 'readline'
+require 'yaml'
 
 module Apricot
   class REPL
@@ -117,21 +118,30 @@ module Apricot
 
     ensure
       save_history
-      system('stty', terminal_state) # Restore the terminal
+      system('stty', terminal_state) if terminal_state # Restore the terminal
     end
 
     def load_history
       if File.exist?(@history_file)
-        File.open(@history_file) do |f|
-          f.each {|line| Readline::HISTORY << line.chomp }
+        hist = YAML.load_file @history_file
+
+        if hist.is_a? Array
+          hist.each {|x| Readline::HISTORY << x }
+        else
+          File.open(@history_file) do |f|
+            f.each {|line| Readline::HISTORY << line.chomp }
+          end
         end
       end
     end
 
     def save_history
+      return if Readline::HISTORY.empty?
+
       File.open(@history_file, "w") do |f|
         hist = Readline::HISTORY.to_a
-        f.puts(hist[-MAX_HISTORY_LINES..-1] || hist)
+        hist.shift(hist.size - MAX_HISTORY_LINES) if hist.size > MAX_HISTORY_LINES
+        YAML.dump(hist, f, header: true)
       end
     end
 
