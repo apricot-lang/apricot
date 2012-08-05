@@ -77,6 +77,25 @@ module Apricot
           value = Rubinius.run_script cm
           puts "=> #{value.apricot_inspect}"
           e = nil
+        rescue Apricot::SyntaxError => e
+          if e.incomplete?
+            begin
+              more_code = Readline.readline(' ' * @prompt.length, false)
+              if more_code
+                code << "\n" << more_code
+                Readline::HISTORY << Readline::HISTORY.pop + "\n" + more_code
+                retry
+              else
+                print "\r" # print the exception at the start of the line
+              end
+            rescue Interrupt
+              # This is raised by Ctrl-C. Stop trying to read more code and
+              # just give up. Remove the current input from history.
+              current_code = Readline::HISTORY.pop
+              @line -= current_code.count "\n"
+              e = nil # ignore the syntax error since the code was Ctrl-C'd
+            end
+          end
         rescue Interrupt => e
           # Raised by Ctrl-C. Print a newline so the error message is on the
           # next line.
@@ -91,7 +110,7 @@ module Apricot
           puts "#{e.class}: #{e.message}"
         end
 
-        @line += 1
+        @line += 1 + code.count("\n")
       end
 
       puts # Print a newline after Ctrl-D (EOF)
@@ -122,7 +141,7 @@ module Apricot
     #   3. Remove from history if empty or dup
     def readline_with_history
       line = Readline.readline(@prompt, true)
-      return if line.nil?
+      return nil if line.nil?
 
       if line =~ /^\s*$/ || (Readline::HISTORY.size > 1 &&
                              Readline::HISTORY[-2] == line)
