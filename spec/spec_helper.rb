@@ -7,3 +7,4 @@ unless Rubinius.ruby19?
 end
 
 require 'apricot'
+include Apricot

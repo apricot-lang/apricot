@@ -88,12 +88,12 @@ describe 'Apricot' do
     form = apricot(%q|'(.meth recv arg1 arg2)|)
     ex = Apricot.macroexpand(form)
 
-    dot  = Apricot::Identifier.intern(:'.')
-    recv = Apricot::Identifier.intern(:recv)
-    meth = Apricot::Identifier.intern(:meth)
-    arg1 = Apricot::Identifier.intern(:arg1)
-    arg2 = Apricot::Identifier.intern(:arg2)
-    ex.should == Apricot::List[dot, recv, meth, arg1, arg2]
+    dot  = Identifier.intern(:'.')
+    recv = Identifier.intern(:recv)
+    meth = Identifier.intern(:meth)
+    arg1 = Identifier.intern(:arg1)
+    arg2 = Identifier.intern(:arg2)
+    ex.should == List[dot, recv, meth, arg1, arg2]
   end
 
   it 'compiles constant defs' do
@@ -227,23 +227,23 @@ describe 'Apricot' do
 
   it 'compiles quoted forms' do
     apricot(%q|'1|).should == 1
-    apricot(%q|'a|).should == Apricot::Identifier.intern(:a)
-    apricot(%q|''a|).should == Apricot::List[
-      Apricot::Identifier.intern(:quote),
-      Apricot::Identifier.intern(:a)
+    apricot(%q|'a|).should == Identifier.intern(:a)
+    apricot(%q|''a|).should == List[
+      Identifier.intern(:quote),
+      Identifier.intern(:a)
     ]
     apricot(%q|'1.2|).should == 1.2
     apricot(%q|'1/2|).should == Rational(1,2)
     apricot(%q|':a|).should == :a
-    apricot(%q|'()|).should == Apricot::List::EmptyList
-    apricot(%q|'(1)|).should == Apricot::List[1]
-    apricot(%q|'[a]|).should == [Apricot::Identifier.intern(:a)]
-    apricot(%q|'{a 1}|).should == {Apricot::Identifier.intern(:a) => 1}
+    apricot(%q|'()|).should == List::EmptyList
+    apricot(%q|'(1)|).should == List[1]
+    apricot(%q|'[a]|).should == [Identifier.intern(:a)]
+    apricot(%q|'{a 1}|).should == {Identifier.intern(:a) => 1}
     apricot(%q|'"foo"|).should == "foo"
     apricot(%q|'true|).should == true
     apricot(%q|'false|).should == false
     apricot(%q|'nil|).should == nil
-    apricot(%q|'self|).should == Apricot::Identifier.intern(:self)
-    apricot(%q|'Foo::Bar|).should == Apricot::Constant.new(:Foo, :Bar)
+    apricot(%q|'self|).should == Identifier.intern(:self)
+    apricot(%q|'Foo::Bar|).should == Constant.new(:Foo, :Bar)
   end
 end

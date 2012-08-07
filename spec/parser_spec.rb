@@ -12,7 +12,7 @@ describe Apricot::Parser do
   end
 
   def expect_syntax_error(s)
-    expect { parse(s) }.to raise_error(Apricot::SyntaxError)
+    expect { parse(s) }.to raise_error(SyntaxError)
   end
 
   it 'parses nothing' do
@@ -33,20 +33,20 @@ describe Apricot::Parser do
   end
 
   it 'parses identifiers' do
-    parse_one('example', Apricot::AST::Identifier)
+    parse_one('example', AST::Identifier)
     @first.name.should == :example
   end
 
   it 'parses pipe identifiers' do
-    parse_one('#|example|', Apricot::AST::Identifier).name.should == :example
-    parse_one('#|foo bar|', Apricot::AST::Identifier).name.should == :"foo bar"
-    parse_one('#|foo\nbar|', Apricot::AST::Identifier).name.should == :"foo\nbar"
-    parse_one('#|foo\|bar|', Apricot::AST::Identifier).name.should == :"foo|bar"
-    parse_one('#|foo"bar|', Apricot::AST::Identifier).name.should == :'foo"bar'
+    parse_one('#|example|', AST::Identifier).name.should == :example
+    parse_one('#|foo bar|', AST::Identifier).name.should == :"foo bar"
+    parse_one('#|foo\nbar|', AST::Identifier).name.should == :"foo\nbar"
+    parse_one('#|foo\|bar|', AST::Identifier).name.should == :"foo|bar"
+    parse_one('#|foo"bar|', AST::Identifier).name.should == :'foo"bar'
   end
 
   it 'parses constants' do
-    parse_one('Example', Apricot::AST::Constant)
+    parse_one('Example', AST::Constant)
     @first.names.should == [:Example]
   end
 
@@ -55,7 +55,7 @@ describe Apricot::Parser do
   end
 
   it 'parses scoped constants' do
-    parse_one('Foo::Bar::Baz', Apricot::AST::Constant)
+    parse_one('Foo::Bar::Baz', AST::Constant)
     @first.names.should == [:Foo, :Bar, :Baz]
   end
 
@@ -68,38 +68,38 @@ describe Apricot::Parser do
 
   it 'parses true, false, nil, and self' do
     parse('true false nil self').length.should == 4
-    @ast[0].should be_a(Apricot::AST::Literal)
+    @ast[0].should be_a(AST::Literal)
     @ast[0].value.should == :true
-    @ast[1].should be_a(Apricot::AST::Literal)
+    @ast[1].should be_a(AST::Literal)
     @ast[1].value.should == :false
-    @ast[2].should be_a(Apricot::AST::Literal)
+    @ast[2].should be_a(AST::Literal)
     @ast[2].value.should == :nil
-    @ast[3].should be_a(Apricot::AST::Identifier)
+    @ast[3].should be_a(AST::Identifier)
     @ast[3].name.should == :self
   end
 
   it 'parses fixnums' do
-    parse_one('123', Apricot::AST::Literal)
+    parse_one('123', AST::Literal)
     @first.value.should == 123
   end
 
   it 'parses bignums' do
-    parse_one('12345678901234567890', Apricot::AST::BignumLiteral)
+    parse_one('12345678901234567890', AST::BignumLiteral)
     @first.value.should == 12345678901234567890
   end
 
   it 'parses radix integers' do
-    parse_one('2r10', Apricot::AST::Literal)
+    parse_one('2r10', AST::Literal)
     @first.value.should == 2
   end
 
   it 'parses floats' do
-    parse_one('1.23', Apricot::AST::FloatLiteral)
+    parse_one('1.23', AST::FloatLiteral)
     @first.value.should == 1.23
   end
 
   it 'parses rationals' do
-    parse_one('12/34', Apricot::AST::RationalLiteral)
+    parse_one('12/34', AST::RationalLiteral)
     @first.numerator.should == 12
     @first.denominator.should == 34
   end
@@ -109,17 +109,17 @@ describe Apricot::Parser do
   end
 
   it 'parses empty strings' do
-    parse_one('""', Apricot::AST::StringLiteral)
+    parse_one('""', AST::StringLiteral)
     @first.value.should == ''
   end
 
   it 'parses strings' do
-    parse_one('"Hello, world!"', Apricot::AST::StringLiteral)
+    parse_one('"Hello, world!"', AST::StringLiteral)
     @first.value.should == 'Hello, world!'
   end
 
   it 'parses multiline strings' do
-    parse_one(%{"This is\na test"}, Apricot::AST::StringLiteral)
+    parse_one(%{"This is\na test"}, AST::StringLiteral)
     @first.value.should == "This is\na test"
   end
 
@@ -128,17 +128,17 @@ describe Apricot::Parser do
   end
 
   it 'parses strings with character escapes' do
-    parse_one('"\\a\\b\\t\\n\\v\\f\\r\\e\\"\\\\"', Apricot::AST::StringLiteral)
+    parse_one('"\\a\\b\\t\\n\\v\\f\\r\\e\\"\\\\"', AST::StringLiteral)
     @first.value.should == "\a\b\t\n\v\f\r\e\"\\"
   end
 
   it 'parses strings with octal escapes' do
-    parse_one('"\\1\\01\\001"', Apricot::AST::StringLiteral)
+    parse_one('"\\1\\01\\001"', AST::StringLiteral)
     @first.value.should == "\001\001\001"
   end
 
   it 'parses strings with hex escapes' do
-    parse_one('"\\x1\\x01"', Apricot::AST::StringLiteral)
+    parse_one('"\\x1\\x01"', AST::StringLiteral)
     @first.value.should == "\001\001"
   end
 
@@ -147,28 +147,28 @@ describe Apricot::Parser do
   end
 
   it 'stops parsing hex/octal escapes in strings at non-hex/octal digits' do
-    parse_one('"\xAZ\082"', Apricot::AST::StringLiteral)
+    parse_one('"\xAZ\082"', AST::StringLiteral)
     @first.value.should == "\x0AZ\00082"
   end
 
   it 'parses regexes' do
-    parse_one('#r!!', Apricot::AST::RegexLiteral).pattern.should == ''
-    parse_one('#r!egex!', Apricot::AST::RegexLiteral).pattern.should == 'egex'
-    parse_one('#r(egex)', Apricot::AST::RegexLiteral).pattern.should == 'egex'
-    parse_one('#r[egex]', Apricot::AST::RegexLiteral).pattern.should == 'egex'
-    parse_one('#r{egex}', Apricot::AST::RegexLiteral).pattern.should == 'egex'
-    parse_one('#r<egex>', Apricot::AST::RegexLiteral).pattern.should == 'egex'
-    parse_one('#r!\!!', Apricot::AST::RegexLiteral).pattern.should == '!'
-    parse_one('#r!foo\bar!', Apricot::AST::RegexLiteral).pattern.should == 'foo\bar'
-    parse_one('#r!\\\\!', Apricot::AST::RegexLiteral).pattern.should == "\\\\"
+    parse_one('#r!!', AST::RegexLiteral).pattern.should == ''
+    parse_one('#r!egex!', AST::RegexLiteral).pattern.should == 'egex'
+    parse_one('#r(egex)', AST::RegexLiteral).pattern.should == 'egex'
+    parse_one('#r[egex]', AST::RegexLiteral).pattern.should == 'egex'
+    parse_one('#r{egex}', AST::RegexLiteral).pattern.should == 'egex'
+    parse_one('#r<egex>', AST::RegexLiteral).pattern.should == 'egex'
+    parse_one('#r!\!!', AST::RegexLiteral).pattern.should == '!'
+    parse_one('#r!foo\bar!', AST::RegexLiteral).pattern.should == 'foo\bar'
+    parse_one('#r!\\\\!', AST::RegexLiteral).pattern.should == "\\\\"
   end
 
   it 'parses regexes with trailing options' do
-    parse_one('#r//i', Apricot::AST::RegexLiteral)
+    parse_one('#r//i', AST::RegexLiteral)
     @first.options.should == Regexp::IGNORECASE
-    parse_one('#r/foo/x', Apricot::AST::RegexLiteral)
+    parse_one('#r/foo/x', AST::RegexLiteral)
     @first.options.should == Regexp::EXTENDED
-    parse_one('#r//im', Apricot::AST::RegexLiteral)
+    parse_one('#r//im', AST::RegexLiteral)
     @first.options.should == Regexp::IGNORECASE | Regexp::MULTILINE
   end
 
@@ -177,12 +177,12 @@ describe Apricot::Parser do
   end
 
   it 'parses symbols' do
-    parse_one(':example', Apricot::AST::SymbolLiteral)
+    parse_one(':example', AST::SymbolLiteral)
     @first.value.should == :example
   end
 
   it 'parses quoted symbols' do
-    parse_one(':"\x01()"', Apricot::AST::SymbolLiteral)
+    parse_one(':"\x01()"', AST::SymbolLiteral)
     @first.value.should == :"\x01()"
   end
 
@@ -195,41 +195,41 @@ describe Apricot::Parser do
   end
 
   it 'does parse empty quoted symbols' do
-    parse_one(':""', Apricot::AST::SymbolLiteral)
+    parse_one(':""', AST::SymbolLiteral)
     @first.value.should == :""
   end
 
   it 'parses empty lists' do
-    parse_one('()', Apricot::AST::List)
+    parse_one('()', AST::List)
     @first.elements.should be_empty
   end
 
   it 'parses lists' do
-    parse_one('(1 two)', Apricot::AST::List)
-    @first[0].should be_a(Apricot::AST::Literal)
-    @first[1].should be_a(Apricot::AST::Identifier)
+    parse_one('(1 two)', AST::List)
+    @first[0].should be_a(AST::Literal)
+    @first[1].should be_a(AST::Identifier)
   end
 
   it 'parses empty arrays' do
-    parse_one('[]', Apricot::AST::ArrayLiteral)
+    parse_one('[]', AST::ArrayLiteral)
     @first.elements.should be_empty
   end
 
   it 'parses arrays' do
-    parse_one('[1 two]', Apricot::AST::ArrayLiteral)
-    @first[0].should be_a(Apricot::AST::Literal)
-    @first[1].should be_a(Apricot::AST::Identifier)
+    parse_one('[1 two]', AST::ArrayLiteral)
+    @first[0].should be_a(AST::Literal)
+    @first[1].should be_a(AST::Identifier)
   end
 
   it 'parses empty hashes' do
-    parse_one('{}', Apricot::AST::HashLiteral)
+    parse_one('{}', AST::HashLiteral)
     @first.elements.should be_empty
   end
 
   it 'parses hashes' do
-    parse_one('{:example 1}', Apricot::AST::HashLiteral)
-    @first[0].should be_a(Apricot::AST::SymbolLiteral)
-    @first[1].should be_a(Apricot::AST::Literal)
+    parse_one('{:example 1}', AST::HashLiteral)
+    @first[0].should be_a(AST::SymbolLiteral)
+    @first[1].should be_a(AST::Literal)
   end
 
   it 'does not parse invalid hashes' do
@@ -237,28 +237,28 @@ describe Apricot::Parser do
   end
 
   it 'parses empty sets' do
-    parse_one('#{}', Apricot::AST::SetLiteral)
+    parse_one('#{}', AST::SetLiteral)
     @first.elements.should be_empty
   end
 
   it 'parses sets' do
-    parse_one('#{1 two}', Apricot::AST::SetLiteral)
-    @first[0].should be_a(Apricot::AST::Literal)
-    @first[1].should be_a(Apricot::AST::Identifier)
+    parse_one('#{1 two}', AST::SetLiteral)
+    @first[0].should be_a(AST::Literal)
+    @first[1].should be_a(AST::Identifier)
   end
 
   it 'parses multiple forms' do
     parse('foo bar').length.should == 2
-    @ast[0].should be_a(Apricot::AST::Identifier)
-    @ast[1].should be_a(Apricot::AST::Identifier)
+    @ast[0].should be_a(AST::Identifier)
+    @ast[1].should be_a(AST::Identifier)
   end
 
   it 'parses quoted forms' do
-    parse_one("'test", Apricot::AST::List)
+    parse_one("'test", AST::List)
     @first.elements.length.should == 2
-    @first[0].should be_a(Apricot::AST::Identifier)
+    @first[0].should be_a(AST::Identifier)
     @first[0].name.should == :quote
-    @first[1].should be_a(Apricot::AST::Identifier)
+    @first[1].should be_a(AST::Identifier)
     @first[1].name.should == :test
   end
 
