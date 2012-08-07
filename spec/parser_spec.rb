@@ -12,7 +12,7 @@ describe Apricot::Parser do
   end
 
   def expect_syntax_error(s)
-    expect { parse(s) }.to raise_error(SyntaxError)
+    expect { parse(s) }.to raise_error(Apricot::SyntaxError)
   end
 
   it 'parses nothing' do
