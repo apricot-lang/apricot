@@ -29,6 +29,8 @@ describe 'Apricot' do
 
   it 'compiles regexes' do
     apricot(%q|#r"foo"|).should == /foo/
+    apricot(%q|#r/foo/x|).should == /foo/x
+    apricot(%q|#r[foo]xim|).should == /foo/xim
   end
 
   it 'compiles arrays' do
@@ -58,6 +60,13 @@ describe 'Apricot' do
     apricot(%q|(#{:a :b} :c)|).should == nil
     apricot(%q|({:a 1} :a)|).should == 1
     apricot(%q|({:a 1} :b)|).should == nil
+  end
+
+  it 'compiles symbol call forms' do
+    apricot(%q|(:a {:a 1 :b 2})|).should == 1
+    apricot(%q|(:c {:a 1 :b 2})|).should == nil
+    apricot(%q|(:a #{:a :b})|).should == :a
+    apricot(%q|(:c #{:a :b})|).should == nil
   end
 
   it 'compiles send forms' do
