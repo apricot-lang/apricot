@@ -25,6 +25,7 @@ Here are a few of the ways you can use Apricot.
 
 ### Using Ruby Methods
 
+````clojure
     ;    (. receiver method args*)
     ;    (. receiver method args* | block)
     ;    (. receiver (method args*))
@@ -38,21 +39,24 @@ Here are a few of the ways you can use Apricot.
     ; => 1
     ; => 2
     ; => 3
+````
 
 ### Defining variables
 
+````clojure
     ; (def name value)
 
     (def color "RAINBOW")
 
     (.puts STDOUT color)
     ; => RAINBOW
-
+````
 
 ### Conditionals
 
 #### If
 
+````clojure
     ; (if cond body else_body)
 
     (if (.eql? 4 ( 2 2)) (.puts STDOUT "1 is indeed larger than zero"))
@@ -60,10 +64,11 @@ Here are a few of the ways you can use Apricot.
     (if (.eql? color "RAINBOW")
       (.puts STDOUT "Its soo pretty")
       (.puts STDOUT "Ew."))
-
+````
 
 ### Defining Functions
 
+````clojure
     (def foo (fn []
                "Hello"))
 
@@ -79,12 +84,12 @@ Here are a few of the ways you can use Apricot.
     (def puts (fn [obj]
                 (.puts STDOUT obj)))
 
-
     (puts (foo))
     ; => "Hello"
 
     (puts (bar))
     ; => "Hello World!"
+````
 
 ## License
 
