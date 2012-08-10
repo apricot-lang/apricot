@@ -39,7 +39,7 @@ module Apricot::AST
     when Fixnum
       Literal.new(line, value)
     else
-      raise "#{value} is not an integer"
+      raise TypeError, "#{value} is not an integer"
     end
   end
 

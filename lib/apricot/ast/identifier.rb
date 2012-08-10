@@ -20,7 +20,7 @@ module Apricot
 
       # called by (def <identifier> <value>)
       def assign_bytecode(g, value)
-        raise ArgumentError, "Can't change the value of self" if @name == :self
+        g.compile_error "Can't change the value of self" if @name == :self
 
         g.push_cpath_top
         g.find_const :Apricot

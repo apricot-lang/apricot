@@ -35,7 +35,7 @@ module Apricot
   # (. receiver (method args*))
   # (. receiver (method args* | block))
   SpecialForm.define(:'.') do |g, args|
-    raise ArgumentError, "Too few arguments to send expression, expecting (. receiver method ...)" if args.length < 2
+    g.compile_error "Too few arguments to send expression, expecting (. receiver method ...)" if args.length < 2
 
     receiver, method_or_list = args.shift(2)
 
@@ -43,22 +43,22 @@ module Apricot
     if method_or_list.is_a? AST::List
       method = method_or_list.elements.shift
 
-      raise ArgumentError, "Invalid send expression, expecting (. receiver (method ...))" unless args.empty?
+      g.compile_error "Invalid send expression, expecting (. receiver (method ...))" unless args.empty?
 
       args = method_or_list.elements
     else
       method = method_or_list
     end
 
-    raise TypeError, "Method in send expression must be an identifier" unless method.is_a? AST::Identifier
+    g.compile_error "Method in send expression must be an identifier" unless method.is_a? AST::Identifier
 
     block_arg = nil
 
     if i = args.find_index {|arg| arg.is_a?(AST::Identifier) && arg.name == :| }
       block_arg = args[i + 1]
 
-      raise ArgumentError, "Expected block argument after | in send expression" unless block_arg
-      raise ArgumentError, "Unexpected arguments after block argument in send expression" if args[i + 2]
+      g.compile_error "Expected block argument after | in send expression" unless block_arg
+      g.compile_error "Unexpected arguments after block argument in send expression" if args[i + 2]
 
       args = args[0...i]
     end
@@ -120,8 +120,8 @@ module Apricot
 
   # (def name value?)
   SpecialForm.define(:def) do |g, args|
-    raise ArgumentError, "Too few arguments to def" if args.length < 1
-    raise ArgumentError, "Too many arguments to def" if args.length > 2
+    g.compile_error "Too few arguments to def" if args.length < 1
+    g.compile_error "Too many arguments to def" if args.length > 2
 
     target, value = *args
 
@@ -131,14 +131,14 @@ module Apricot
     when AST::Identifier, AST::Constant
       target.assign_bytecode(g, value)
     else
-      raise ArgumentError, "First argument to def must be an identifier or constant"
+      g.compile_error "First argument to def must be an identifier or constant"
     end
   end
 
   # (if cond body else_body?)
   SpecialForm.define(:if) do |g, args|
-    raise ArgumentError, "Too few arguments to if" if args.length < 2
-    raise ArgumentError, "Too many arguments to if" if args.length > 3
+    g.compile_error "Too few arguments to if" if args.length < 2
+    g.compile_error "Too many arguments to if" if args.length > 3
 
     cond, body, else_body = args
     else_label, end_label = g.new_label, g.new_label
@@ -174,26 +174,26 @@ module Apricot
 
   # (quote form)
   SpecialForm.define(:quote) do |g, args|
-    raise ArgumentError, "Too few arguments to quote" if args.length < 1
-    raise ArgumentError, "Too many arguments to quote" if args.length > 1
+    g.compile_error "Too few arguments to quote" if args.length < 1
+    g.compile_error "Too many arguments to quote" if args.length > 1
 
     args.first.quote_bytecode(g)
   end
 
   # Code shared between let and loop. type is :let or :loop
   def self.let(g, args, type)
-    raise ArgumentError, "Too few arguments to #{type}" if args.length < 1
-    raise TypeError, "First argument to #{type} must be an array literal" unless args.first.is_a? AST::ArrayLiteral
+    g.compile_error "Too few arguments to #{type}" if args.length < 1
+    g.compile_error "First argument to #{type} must be an array literal" unless args.first.is_a? AST::ArrayLiteral
 
     bindings = args.shift.elements
 
-    raise ArgumentError, "Bindings array for #{type} must contain an even number of forms" if bindings.length.odd?
+    g.compile_error "Bindings array for #{type} must contain an even number of forms" if bindings.length.odd?
 
     scope = AST::LetScope.new(g.scope)
     g.scopes << scope
 
     bindings.each_slice(2) do |name, value|
-      raise TypeError, "Binding targets in let must be identifiers" unless name.is_a? AST::Identifier
+      g.compile_error "Binding targets in let must be identifiers" unless name.is_a? AST::Identifier
 
       value.bytecode(g)
       g.set_local scope.new_local(name)
@@ -228,10 +228,11 @@ module Apricot
   # recur bindings.)
   SpecialForm.define(:recur) do |g, args|
     target = g.scope.find_recur_target
+    g.compile_error "No recursion target found for recur" unless target
     vars = target.variables.values
 
     # TODO: check for fns with rest (splat) args
-    raise ArgumentError, "Arity of recur does not match enclosing loop or fn" unless vars.length == args.length
+    g.compile_error "Arity of recur does not match enclosing loop or fn" unless vars.length == args.length
 
     args.each {|arg| arg.bytecode(g) }
 
@@ -249,7 +250,7 @@ module Apricot
   SpecialForm.define(:fn) do |g, args|
     name = args.shift.name if args.first.is_a? AST::Identifier
 
-    raise TypeError, "Argument list for fn must be an array literal" unless args.first.is_a? AST::ArrayLiteral
+    g.compile_error "Argument list for fn must be an array literal" unless args.first.is_a? AST::ArrayLiteral
 
     arg_list = args.shift.elements
 
@@ -266,7 +267,7 @@ module Apricot
     splat_index = nil
 
     arg_list.each_with_index do |arg, i|
-      raise TypeError, "Arguments in fn form must be identifiers" unless arg.is_a? AST::Identifier
+      g.compile_error "Arguments in fn form must be identifiers" unless arg.is_a? AST::Identifier
 
       if arg.name == :&
         splat_index = i
@@ -278,8 +279,8 @@ module Apricot
 
     if splat_index
       splat_arg = arg_list[splat_index + 1] # arg after &
-      raise ArgumentError, "Expected identifier following & in argument list" unless splat_arg
-      raise ArgumentError, "Unexpected arguments after rest argument" if arg_list[splat_index + 2]
+      g.compile_error "Expected identifier following & in argument list" unless splat_arg
+      g.compile_error "Unexpected arguments after rest argument" if arg_list[splat_index + 2]
 
       scope.new_local(splat_arg.name)
       scope.splat = true
@@ -322,7 +323,7 @@ module Apricot
       if arg.is_a?(AST::List) && arg[0].is_a?(AST::Identifier) && arg[0].name == :rescue
         rescue_clauses << arg[1..-1] # Chop off the rescue identifier
       else
-        raise ArgumentError, "Unexpected form after rescue clause" unless rescue_clauses.empty?
+        g.compile_error "Unexpected form after rescue clause" unless rescue_clauses.empty?
         body << arg
       end
     end
@@ -366,9 +367,9 @@ module Apricot
       elsif clause[0].is_a?(AST::ArrayLiteral)
         conditions = clause.shift.elements
         name = conditions.shift
-        raise TypeError, "Expected identifier as first form of rescue clause binding" unless name.is_a?(AST::Identifier)
+        g.compile_error "Expected identifier as first form of rescue clause binding" unless name.is_a?(AST::Identifier)
       else
-        raise TypeError, "Expected identifier or array as first form of rescue clause"
+        g.compile_error "Expected identifier or array as first form of rescue clause"
       end
 
       # Default to StandardError for (rescue e body) and (rescue [e] body)

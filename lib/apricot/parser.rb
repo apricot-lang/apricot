@@ -1,25 +1,6 @@
 require 'stringio'
 
 module Apricot
-  class SyntaxError < StandardError
-    attr_reader :filename, :line, :msg
-
-    def initialize(filename, line, msg, incomplete = false)
-      @filename = filename
-      @line = line
-      @msg = msg
-      @incomplete = incomplete
-    end
-
-    def incomplete?
-      @incomplete
-    end
-
-    def to_s
-      "#{@filename}:#{@line}: #{@msg}"
-    end
-  end
-
   class Parser
     IDENTIFIER   = /[A-Za-z0-9`~!@#\$%^&*_=+<.>\/?:\\|-]/
     OCTAL        = /[0-7]/

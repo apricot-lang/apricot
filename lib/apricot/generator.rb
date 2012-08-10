@@ -7,5 +7,9 @@ module Apricot
     def scope
       @scopes.last
     end
+
+    def compile_error(msg)
+      raise CompileError.new(file, line, msg)
+    end
   end
 end

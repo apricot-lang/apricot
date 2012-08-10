@@ -45,7 +45,7 @@ module Apricot
       # A (recur) is looking for a recursion target. Since this is the top
       # level, which has no parent, the lookup has failed.
       def find_recur_target
-        raise "No recursion target for recur found"
+        nil
       end
     end
   end
