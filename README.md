@@ -20,6 +20,72 @@ To start Apricot
 Once in the repl you can ask for help by using `!help` and you can exit with `!exit`
 
 
+## Using Apricot
+Here are a few of the ways you can use Apricot.
+
+### Using Ruby Methods
+
+    ;    (. receiver method args*)
+    ;    (. receiver method args* | block)
+    ;    (. receiver (method args*))
+    ;    (. receiver (method args* | block))
+
+    (.puts STDOUT "HELLO")
+    ; => "HELLO"
+
+    (.each [1,2,3] | (fn [msg]
+                       (.puts STDOUT msg)))
+    ; => 1
+    ; => 2
+    ; => 3
+
+### Defining variables
+
+    ; (def name value)
+
+    (def color "RAINBOW")
+
+    (.puts STDOUT color)
+    ; => RAINBOW
+
+
+### Conditionals
+
+#### If
+
+    ; (if cond body else_body)
+
+    (if (.eql? 4 ( 2 2)) (.puts STDOUT "1 is indeed larger than zero"))
+
+    (if (.eql? color "RAINBOW")
+      (.puts STDOUT "Its soo pretty")
+      (.puts STDOUT "Ew."))
+
+
+### Defining Functions
+
+    (def foo (fn []
+               "Hello"))
+
+    (def str (fn [& args]
+               (.reduce args "" :+)))
+
+    (def bar (fn []
+               (str (foo) " " "World!")))
+
+    (def print (fn [obj]
+                 (.print STDOUT obj)))
+
+    (def puts (fn [obj]
+                (.puts STDOUT obj)))
+
+
+    (puts (foo))
+    ; => "Hello"
+
+    (puts (bar))
+    ; => "Hello World!"
+
 ## License
 
 Copyright (c) 2012, Curtis McEnroe <programble@gmail.com>
