@@ -47,14 +47,11 @@ Here are a few of the ways you can use Apricot.
     ; (def name value)
 
     (def color "RAINBOW")
-
     (.puts STDOUT color)
     ; => RAINBOW
 ````
 
 ### Conditionals
-
-#### If
 
 ````clojure
     ; (if cond body else_body)
