@@ -32,7 +32,10 @@ end
 class Hash
   # Adapted from Hash#inspect. Outputs Apricot hash syntax, e.g. {:a 1, :b 2}
   def apricot_inspect
+    return '{}' if size == 0
+
     str = '{'
+
     return '{...}' if Thread.detect_recursion self do
       each_item do |item|
         str << item.key.apricot_inspect
@@ -41,6 +44,7 @@ class Hash
         str << ', '
       end
     end
+
     str.shorten!(2)
     str << '}'
   end
