@@ -24,7 +24,7 @@ module Apricot
     end
 
     def self.parse_file(filename)
-      File.open(filename) {|f| new(f, filename).parse }
+      File.open(filename) {|f| new(f, filename).parse(true) }
     end
 
     def self.parse_string(source, filename = "(none)", line = 1)
@@ -32,7 +32,7 @@ module Apricot
     end
 
     # @return [Array<AST::Node>] a list of the forms in the program
-    def parse
+    def parse(evaluate = false)
       program = []
       next_char
 
@@ -42,7 +42,7 @@ module Apricot
         skip_whitespace
       end
 
-      Apricot::AST::TopLevel.new(program, @filename)
+      Apricot::AST::TopLevel.new(program, @filename, 1, evaluate)
     end
 
     # @return AST::Node an AST node representing the form read

@@ -22,7 +22,7 @@ module Apricot
     def self.compile_node(node, file = "(none)", line = 1, debug = false)
       compiler = new :apricot_bytecode, :compiled_method
 
-      compiler.generator.input AST::TopLevel.new([node], file)
+      compiler.generator.input AST::TopLevel.new([node], file, line, false)
       compiler.packager.print(BytecodePrinter) if debug
 
       compiler.run

@@ -5,10 +5,11 @@ module Apricot
 
       attr_reader :elements, :file
 
-      def initialize(elements, file)
+      def initialize(elements, file, line = 1, evaluate = false)
         @elements = elements
         @file = file
-        @line = 1
+        @line = line
+        @evaluate = evaluate
       end
 
       def bytecode(g)
@@ -18,7 +19,20 @@ module Apricot
         g.scopes << self
 
         pos(g)
-        SpecialForm[:do].bytecode(g, @elements)
+
+        if @elements.empty?
+          g.push_nil
+        else
+          @elements.each_with_index do |e, i|
+            g.pop unless i == 0
+            e.bytecode(g)
+            # We evaluate top level forms as we generate the bytecode for them
+            # so macros defined in a file can be used immediately after the
+            # definition.
+            Apricot::Compiler.eval(e, @file) if @evaluate
+          end
+        end
+
         g.ret
 
         g.scopes.pop
