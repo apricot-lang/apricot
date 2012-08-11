@@ -19,7 +19,7 @@
   (list 'do
         (concat (list 'defn name args) body)
         (list '.<< (list '.macros '*ns*) (.name name))
-        nil))
+        name))
 (.<< (.macros *ns*) :defmacro)
 
 (defn cons [head tail]
