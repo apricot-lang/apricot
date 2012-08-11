@@ -1,4 +1,4 @@
-; The core clojure library
+; The core apricot library
 
 (ns Apricot::Core)
 
