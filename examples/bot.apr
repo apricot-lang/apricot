@@ -1,26 +1,21 @@
 ; An example IRC bot. This does not reflect our vision for Apricot, just what
 ; features we currently have working.
 
-(. Kernel require "socket")
+(require "socket")
 
-(def str (fn [& args]
-           (.reduce args "" :+)))
+(defn log [prefix line]
+  (puts (str prefix line)))
 
-(def log (fn [prefix line]
-           (. Kernel puts (str prefix line))))
-
-(def send (fn [io & msgs]
-            (.each msgs | (fn [msg]
-                            (log "<< " msg)
-                            (.puts io (str msg "\r\n"))))))
+(defn send [io & msgs]
+  (each [msg msgs]
+    (log "<< " msg)
+    (.puts io (str msg "\r\n"))))
 
 (let [irc (.new TCPSocket "irc.tenthbit.net" 6667)]
   (send irc "NICK apribot" "USER apr * * :Apribot")
-  (loop []
-    (let [line (.gets irc)]
+  (while-let [line (.gets irc)]
       (log ">> " line)
       (if (.start_with? line "PING")
         (send irc (.sub line "PING" "PONG")))
       (if (.include? line "001")
-        (send irc "JOIN #programming" "PRIVMSG #programming :yes, I'm real!"))
-      (recur))))
+        (send irc "JOIN #programming" "PRIVMSG #programming :yes, I'm real!"))))
