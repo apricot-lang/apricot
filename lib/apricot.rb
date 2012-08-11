@@ -57,7 +57,11 @@ module Apricot
   end)
   Core.macros << :ns
 
-  # TODO: load core.apr
+  # TODO: add and use a proper code loader
+  file = __FILE__
+  file = File.readlink(file) while File.symlink? file
+  file = File.expand_path('../../kernel/core.apr', file)
+  Apricot::Compiler.compile(file)
 
 #  ::User = Namespace.new
   Apricot.current_namespace = Core

@@ -1,0 +1,63 @@
+; The core clojure library
+
+(ns Apricot::Core)
+
+(def list
+  (fn [& args]
+    (.to_list args)))
+
+(def concat
+  (fn [& args]
+    (.to_list (.reduce (.map args | :to_a) [] :+))))
+
+(def defn
+  (fn [name args & body]
+    (list 'def name (concat (list 'fn args) body))))
+(.<< (.macros *ns*) :defn)
+
+(defn defmacro [name args & body]
+  (list 'do
+        (concat (list 'defn name args) body)
+        (list '.<< (list '.macros '*ns*) (.name name))
+        nil))
+(.<< (.macros *ns*) :defmacro)
+
+(defn cons [head tail]
+  (.cons tail head))
+
+(defn inc [x]
+  (.succ x))
+
+(defn dec [x]
+  (.pred x))
+
+(defn + [& args]
+  (.reduce args 0 :+))
+
+(defn * [& args]
+  (.reduce args 1 :*))
+
+(defn str [& args]
+  (.reduce (.map args | :to_s) "" :+))
+
+(defmacro when [test & body]
+  (list 'if test (cons 'do (.to_list body))))
+
+(defmacro when-not [test & body]
+  (list 'if test nil (cons 'do (.to_list body))))
+
+(defmacro each [binding & body]
+  (list '.each (.last binding) '|
+        (concat (list 'fn [(.first binding)]) body)))
+
+(defmacro while-let [binding & body]
+  (list 'loop []
+        (list 'let binding
+              (concat (list 'when (.first binding))
+                      body
+                      '((recur))))))
+
+(def puts (. Kernel method :puts))
+(def require (. Kernel method :require))
+(def macroexpand (. Apricot method :macroexpand))
+(def macroexpand-1 (. Apricot method :macroexpand_1))
