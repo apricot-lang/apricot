@@ -1,4 +1,3 @@
-require 'rational'
 require 'set'
 
 # TODO: Move gensym and macroexpand to a more appropriate file
