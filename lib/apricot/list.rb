@@ -64,6 +64,10 @@ module Apricot
 
     private :initialize_copy
 
+    def to_list
+      self
+    end
+
     def inspect
       return '()' if empty?
 
