@@ -14,8 +14,8 @@
 (let [irc (.new TCPSocket "irc.tenthbit.net" 6667)]
   (send irc "NICK apribot" "USER apr * * :Apribot")
   (while-let [line (.gets irc)]
-      (log ">> " line)
-      (if (.start_with? line "PING")
-        (send irc (.sub line "PING" "PONG")))
-      (if (.include? line "001")
-        (send irc "JOIN #programming" "PRIVMSG #programming :yes, I'm real!"))))
+    (log ">> " line)
+    (if (.start_with? line "PING")
+      (send irc (.sub line "PING" "PONG")))
+    (if (.include? line "001")
+      (send irc "JOIN #programming" "PRIVMSG #programming :yes, I'm real!"))))
