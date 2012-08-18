@@ -77,7 +77,11 @@ end
 
 class Rational
   def apricot_inspect
-    to_s
+    if @denominator == 1
+      @numerator.to_s
+    else
+      to_s
+    end
   end
 end
 
