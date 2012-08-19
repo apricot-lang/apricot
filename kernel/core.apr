@@ -24,6 +24,10 @@
 
 (defn identity [x] x)
 
+(defn nil? [x] (.nil? x))
+
+(defn identical? [x y] (.equal? x y))
+
 (defn cons [head tail]
   (.cons tail head))
 
