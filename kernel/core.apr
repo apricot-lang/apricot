@@ -13,14 +13,14 @@
 (def defn
   (fn [name args & body]
     (list 'def name (concat (list 'fn args) body))))
-(.<< (.macros *ns*) :defn)
+(.add (.macros *ns*) :defn)
 
 (defn defmacro [name args & body]
   (list 'do
         (concat (list 'defn name args) body)
         (list '.<< (list '.macros '*ns*) (.name name))
         name))
-(.<< (.macros *ns*) :defmacro)
+(.add (.macros *ns*) :defmacro)
 
 (defn identity [x] x)
 
