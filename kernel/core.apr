@@ -31,6 +31,23 @@
 (defn cons [head tail]
   (.cons tail head))
 
+; Number predicates
+
+(defn zero? [x]
+  (.zero? x))
+
+(defn pos? [x]
+  (. x > 0))
+
+(defn neg? [x]
+  (. x < 0))
+
+(defn even? [x]
+  (.even? x))
+
+(defn odd? [x]
+  (.odd? x))
+
 (defn inc [x]
   (.succ x))
 
