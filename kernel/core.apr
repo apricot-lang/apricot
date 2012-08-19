@@ -22,6 +22,8 @@
         name))
 (.<< (.macros *ns*) :defmacro)
 
+(defn identity [x] x)
+
 (defn cons [head tail]
   (.cons tail head))
 
