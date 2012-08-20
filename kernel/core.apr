@@ -34,6 +34,14 @@
       h)
     (.raise Kernel ArgumentError "hash requires an even number of arguments")))
 
+(defn cons [head tail]
+  (.cons (.to_list tail) head))
+
+(defn apply [f x & more]
+  (if (.empty? more)
+    (.apricot_call f & x)
+    (.apricot_call f & (cons x (.concat more (.pop more))))))
+
 (defn identity [x] x)
 
 (defn nil? [x]
@@ -47,9 +55,6 @@
 
 (defn identical? [x y]
   (.equal? x y))
-
-(defn cons [head tail]
-  (.cons tail head))
 
 ; Number predicates
 
