@@ -2,7 +2,7 @@ require 'stringio'
 
 module Apricot
   class Parser
-    IDENTIFIER   = /[A-Za-z0-9`~!@#\$%^&*_=+<.>\/?:\\|-]/
+    IDENTIFIER   = /[A-Za-z0-9!@#\$%^&*_=+<.>\/?:\\|-]/
     OCTAL        = /[0-7]/
     HEX          = /[0-9a-fA-F]/
     DIGITS       = ('0'..'9').to_a + ('a'..'z').to_a
@@ -80,6 +80,8 @@ module Apricot
       case @char
       when '#' then parse_dispatch
       when "'" then parse_quote
+      when "`" then parse_syntax_quote
+      when "~" then parse_unquote
       when '(' then parse_list
       when '[' then parse_array
       when '{' then parse_hash
@@ -137,6 +139,75 @@ module Apricot
       form = parse_form
       quote = AST::Identifier.new(@line, :quote)
       AST::List.new(@line, [quote, form])
+    end
+
+    def parse_syntax_quote
+      next_char # skip the `
+      syntax_quote(parse_form)
+    end
+
+    def syntax_quote(form)
+      concat = AST::Identifier.new(@line, :concat)
+      quote = AST::Identifier.new(@line, :quote)
+
+      case form
+      when AST::List
+        if is_unquote?(form)
+          form[1]
+        elsif is_unquote_splicing?(form)
+          syntax_error "splicing unquote (~@) not in list"
+        else
+          AST::List.new(@line, [concat] + syntax_quote_list(form.elements))
+        end
+      when AST::ArrayLiteral
+        raise "TODO array `"
+      when AST::SetLiteral
+        raise "TODO set `"
+      when AST::HashLiteral
+        raise "TODO hash `"
+      else
+        AST::List.new(@line, [quote, form])
+      end
+    end
+
+    def syntax_quote_list(elements)
+      list = AST::Identifier.new(@line, :list)
+
+      elements.map do |form|
+        if is_unquote?(form)
+          AST::List.new(@line, [list, form[1]])
+        elsif is_unquote_splicing?(form)
+          form[1]
+        else
+          AST::List.new(@line, [list, syntax_quote(form)])
+        end
+      end
+    end
+
+    def is_unquote?(form)
+      form.is_a?(AST::List)          &&
+      form[0].is_a?(AST::Identifier) &&
+      form[0].name == :unquote
+    end
+
+    def is_unquote_splicing?(form)
+      form.is_a?(AST::List)          &&
+      form[0].is_a?(AST::Identifier) &&
+      form[0].name == :'unquote-splicing'
+    end
+
+    def parse_unquote
+      unquote = :unquote
+      next_char # skip the ~
+
+      if @char == '@'
+        next_char # skip the ~@
+        unquote = :'unquote-splicing'
+      end
+
+      form = parse_form
+      unquote = AST::Identifier.new(@line, unquote)
+      AST::List.new(@line, [unquote, form])
     end
 
     def parse_fn
