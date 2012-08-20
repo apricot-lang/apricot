@@ -149,6 +149,7 @@ module Apricot
     def syntax_quote(form)
       concat = AST::Identifier.new(@line, :concat)
       quote = AST::Identifier.new(@line, :quote)
+      apply = AST::Identifier.new(@line, :apply)
 
       case form
       when AST::List
@@ -160,11 +161,19 @@ module Apricot
           AST::List.new(@line, [concat] + syntax_quote_list(form.elements))
         end
       when AST::ArrayLiteral
-        raise "TODO array `"
+        array = AST::Identifier.new(@line, :array)
+        list = AST::List.new(@line, [concat] + syntax_quote_list(form.elements))
+        AST::List.new(@line, [apply, array, list])
       when AST::SetLiteral
-        raise "TODO set `"
+        set = AST::Identifier.new(@line, :set)
+        list = AST::List.new(@line, [concat] + syntax_quote_list(form.elements))
+        AST::List.new(@line, [apply, set, list])
       when AST::HashLiteral
-        raise "TODO hash `"
+        hash = AST::Identifier.new(@line, :hash)
+        list = AST::List.new(@line, [concat] + syntax_quote_list(form.elements))
+        AST::List.new(@line, [apply, hash, list])
+      when AST::BasicLiteral
+        form
       else
         AST::List.new(@line, [quote, form])
       end
