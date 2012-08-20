@@ -22,6 +22,18 @@
         name))
 (.add (.macros *ns*) :defmacro)
 
+(defn array [& args] args)
+
+(defn set [& args]
+  (.new Set args))
+
+(defn hash [& args]
+  (if (.even? (.length args))
+    (let [h {}]
+      (.each_slice args 2 | #(.store h %1 %2))
+      h)
+    (.raise Kernel ArgumentError "hash requires an even number of arguments")))
+
 (defn identity [x] x)
 
 (defn nil? [x]
