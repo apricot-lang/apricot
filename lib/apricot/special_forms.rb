@@ -31,9 +31,13 @@ module Apricot
   }
 
   # (. receiver method args*)
+  # (. receiver method args* & rest)
   # (. receiver method args* | block)
+  # (. receiver method args* & rest | block)
   # (. receiver (method args*))
+  # (. receiver (method args* & rest))
   # (. receiver (method args* | block))
+  # (. receiver (method args* & rest | block))
   SpecialForm.define(:'.') do |g, args|
     g.compile_error "Too few arguments to send expression, expecting (. receiver method ...)" if args.length < 2
 
@@ -53,36 +57,57 @@ module Apricot
     g.compile_error "Method in send expression must be an identifier" unless method.is_a? AST::Identifier
 
     block_arg = nil
+    splat_arg = nil
 
-    if i = args.find_index {|arg| arg.is_a?(AST::Identifier) && arg.name == :| }
-      block_arg = args[i + 1]
+    if args[-2].is_a?(AST::Identifier) && args[-2].name == :|
+      block_arg = args.last
+      args.pop(2)
+    end
 
-      g.compile_error "Expected block argument after | in send expression" unless block_arg
-      g.compile_error "Unexpected arguments after block argument in send expression" if args[i + 2]
+    if args[-2].is_a?(AST::Identifier) && args[-2].name == :&
+      splat_arg = args.last
+      args.pop(2)
+    end
 
-      args = args[0...i]
+    args.each do |arg|
+      next unless arg.is_a?(AST::Identifier)
+      g.compile_error "Incorrect use of & in send expression" if arg.name == :&
+      g.compile_error "Incorrect use of | in send expression" if arg.name == :|
     end
 
     receiver.bytecode(g)
 
-    if block_arg
+    if block_arg || splat_arg
       args.each {|a| a.bytecode(g) }
 
-      nil_block = g.new_label
-      block_arg.bytecode(g)
-      g.dup
-      g.is_nil
-      g.git nil_block
+      if splat_arg
+        splat_arg.bytecode(g)
+        g.cast_array unless splat_arg.is_a?(AST::ArrayLiteral)
+      end
 
-      g.push_cpath_top
-      g.find_const :Proc
+      if block_arg
+        nil_block = g.new_label
+        block_arg.bytecode(g)
+        g.dup
+        g.is_nil
+        g.git nil_block
 
-      g.swap
-      g.send :__from_block__, 1
+        g.push_cpath_top
+        g.find_const :Proc
 
-      nil_block.set!
+        g.swap
+        g.send :__from_block__, 1
 
-      g.send_with_block method.name, args.length
+        nil_block.set!
+      else
+        g.push_nil
+      end
+
+      if splat_arg
+        g.send_with_splat method.name, args.length
+      else
+        g.send_with_block method.name, args.length
+      end
 
     elsif args.length == 1 && op = FastMathOps[method.name]
       args.each {|a| a.bytecode(g) }
