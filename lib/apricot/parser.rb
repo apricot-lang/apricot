@@ -136,6 +136,9 @@ module Apricot
 
     def parse_quote
       next_char # skip the '
+      skip_whitespace
+      incomplete_error "Unexpected end of program after quote ('), expected a form" unless @char
+
       form = parse_form
       quote = AST::Identifier.new(@line, :quote)
       AST::List.new(@line, [quote, form])
@@ -143,6 +146,9 @@ module Apricot
 
     def parse_syntax_quote
       next_char # skip the `
+      skip_whitespace
+      incomplete_error "Unexpected end of program after syntax quote (`), expected a form" unless @char
+
       syntax_quote(parse_form)
     end
 
@@ -212,6 +218,13 @@ module Apricot
       if @char == '@'
         next_char # skip the ~@
         unquote = :'unquote-splicing'
+      end
+
+      skip_whitespace
+      if unquote == :unquote
+        incomplete_error "Unexpected end of program after ~, expected a form" unless @char
+      else
+        incomplete_error "Unexpected end of program after ~@, expected a form" unless @char
       end
 
       form = parse_form
