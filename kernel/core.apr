@@ -42,6 +42,8 @@
     (.apricot_call f & x)
     (.apricot_call f & (cons x (.concat more (.pop more))))))
 
+;; At this point everything is defined that syntax quote requires
+
 (defn identity [x] x)
 
 (defn nil? [x]
@@ -88,27 +90,36 @@
 (defn str [& args]
   (.reduce (.map args | :to_s) "" :+))
 
+(defn first [coll]
+  (.first coll))
+
+(defn last [coll]
+  (.last coll))
+
+(defn empty? [coll]
+  (.empty? coll))
+
 (defmacro when [test & body]
-  (list 'if test (cons 'do (.to_list body))))
+  `(if ~test (do ~@body)))
 
 (defmacro when-not [test & body]
-  (list 'if test nil (cons 'do (.to_list body))))
+  `(if ~test nil (do ~@body)))
 
 (defmacro each [binding & body]
-  (list '.each (.last binding) '|
-        (concat (list 'fn [(.first binding)]) body)))
+  `(.each ~(last binding)
+          | (fn [~(first binding)] ~@body)))
 
 (defmacro while-let [binding & body]
-  (list 'loop []
-        (list 'let binding
-              (concat (list 'when (.first binding))
-                      body
-                      '((recur))))))
+  `(loop []
+     (let ~binding
+       (when ~(first binding)
+         ~@body
+         (recur)))))
 
 (defmacro .. [x form & more]
-  (if (.empty? more)
-    (list '. x form)
-    (concat (list '.. (list '. x form)) more)))
+  (if (empty? more)
+    `(. ~x ~form)
+    `(.. (. ~x ~form) ~@more)))
 
 (def puts (. Kernel method :puts))
 (def require (. Kernel method :require))
