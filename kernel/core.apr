@@ -101,6 +101,11 @@
     (. x -@) ; Ruby's horribly named -@ method is the negation operator
     (.reduce (.unshift more x) :-)))
 
+(defn / [x & more]
+  (if (empty? more)
+    (.quo 1 x)
+    (.reduce (.unshift more x) :quo)))
+
 (defn str [& args]
   (.reduce (.map args | :to_s) "" :+))
 
