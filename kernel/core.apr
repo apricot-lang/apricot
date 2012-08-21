@@ -154,6 +154,20 @@
        ~(second clauses)
        (cond ~@(drop 2 clauses)))))
 
+(defmacro and [& forms]
+  (cond
+    (empty? forms) true
+    (= (count forms) 1) (first forms)
+    :else `(let [and# ~(first forms)]
+             (if and# (and ~@(rest forms)) and#))))
+
+(defmacro or [& forms]
+  (cond
+    (empty? forms) false
+    (= (count forms) 1) (first forms)
+    :else `(let [or# ~(first forms)]
+             (if or# or# (or ~@(rest forms))))))
+
 ; Equality and inequality
 
 (defn identical? [x y]
