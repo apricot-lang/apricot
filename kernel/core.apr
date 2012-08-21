@@ -84,12 +84,6 @@
 (defn odd? [x]
   (.odd? x))
 
-(defn inc [x]
-  (.succ x))
-
-(defn dec [x]
-  (.pred x))
-
 (defn + [& args]
   (.reduce args 0 :+))
 
@@ -105,6 +99,9 @@
   (if (empty? more)
     (.quo 1 x)
     (.reduce (.unshift more x) :quo)))
+
+(defn inc [x] (+ x 1))
+(defn dec [x] (- x 1))
 
 (defn str [& args]
   (.reduce (.map args | :to_s) "" :+))
