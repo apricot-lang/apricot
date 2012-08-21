@@ -150,6 +150,16 @@
     true
     (.. (.unshift more x) (each_cons 2) (all? | #(. %1 <= %2)))))
 
+(defn max [x & more]
+  (if (empty? more)
+    x
+    (.max (.unshift more x))))
+
+(defn min [x & more]
+  (if (empty? more)
+    x
+    (.min (.unshift more x))))
+
 ; Miscellaneous (to be sorted)
 
 (defmacro each [binding & body]
