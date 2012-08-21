@@ -21,6 +21,7 @@ module Apricot
       @line = line
 
       @fn_state = []
+      @syntax_quote_gensyms = []
     end
 
     def self.parse_file(filename)
@@ -149,7 +150,11 @@ module Apricot
       skip_whitespace
       incomplete_error "Unexpected end of program after syntax quote (`), expected a form" unless @char
 
-      syntax_quote(parse_form)
+      @syntax_quote_gensyms << {}
+      form = syntax_quote(parse_form)
+      @syntax_quote_gensyms.pop
+
+      form
     end
 
     def syntax_quote(form)
@@ -178,6 +183,15 @@ module Apricot
         hash = AST::Identifier.new(@line, :hash)
         list = AST::List.new(@line, [concat] + syntax_quote_list(form.elements))
         AST::List.new(@line, [apply, hash, list])
+      when AST::Identifier
+        name = form.name
+        if name.to_s.end_with?('#')
+          @syntax_quote_gensyms.last[name] ||= Apricot.gensym(name)
+          id = AST::Identifier.new(@line, @syntax_quote_gensyms.last[name])
+          AST::List.new(@line, [quote, id])
+        else
+          AST::List.new(@line, [quote, form])
+        end
       when AST::BasicLiteral
         form
       else
