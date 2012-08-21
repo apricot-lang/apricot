@@ -44,11 +44,16 @@
 
 ;; At this point everything is defined that syntax quote requires
 
+; Collection functions
+
 (defn first [coll]
   (.first coll))
 
 (defn rest [coll]
   (.drop coll 1))
+
+(defn second [coll]
+  (first (rest coll)))
 
 (defn last [coll]
   (.last coll))
@@ -57,6 +62,15 @@
   (if (empty? coll)
     []
     (.take coll (. (.count coll) - 1))))
+
+(defn count [coll]
+  (.count coll))
+
+(defn take [n coll]
+  (.take coll n))
+
+(defn drop [n coll]
+  (.drop coll n))
 
 (defn empty? [coll]
   (.empty? coll))
@@ -73,6 +87,22 @@
   (if (empty? more)
     `(. ~x ~form)
     `(.. (. ~x ~form) ~@more)))
+
+; TODO make else optional
+(defmacro if-let [bindings then else]
+  `(let [temp# ~(bindings 1)]
+     (if temp#
+       (let ~bindings
+         ~then)
+       ~else)))
+
+(defmacro cond [& clauses]
+  (when-not (.even? (.count clauses))
+    (.raise Kernel ArgumentError "cond requires an even number of forms"))
+  (when-not (empty? clauses)
+    `(if ~(first clauses)
+       ~(second clauses)
+       (cond ~@(drop 2 clauses)))))
 
 ; Basic logic predicates and functions
 
