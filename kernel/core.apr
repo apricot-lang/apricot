@@ -53,7 +53,20 @@
 (defn empty? [coll]
   (.empty? coll))
 
-(defn identity [x] x)
+; Useful macros
+
+(defmacro when [test & body]
+  `(if ~test (do ~@body)))
+
+(defmacro when-not [test & body]
+  `(if ~test nil (do ~@body)))
+
+(defmacro .. [x form & more]
+  (if (empty? more)
+    `(. ~x ~form)
+    `(.. (. ~x ~form) ~@more)))
+
+; Basic logic predicates and functions
 
 (defn nil? [x]
   (.nil? x))
@@ -64,10 +77,10 @@
 (defn false? [x]
   (.equal? x false))
 
-(defn identical? [x y]
-  (.equal? x y))
+(defn not [x]
+  (if x false true))
 
-; Number predicates
+; Number predicates and functions
 
 (defn zero? [x]
   (.zero? x))
@@ -103,14 +116,41 @@
 (defn inc [x] (+ x 1))
 (defn dec [x] (- x 1))
 
-(defn str [& args]
-  (.reduce (.map args | :to_s) "" :+))
+; Equality and inequality
 
-(defmacro when [test & body]
-  `(if ~test (do ~@body)))
+(defn identical? [x y]
+  (.equal? x y))
 
-(defmacro when-not [test & body]
-  `(if ~test nil (do ~@body)))
+(defn = [x & more]
+  (.all? more | #(. x == %)))
+
+(defn not= [x & more]
+  (not (apply = x more)))
+
+(defn compare [x y]
+  (. x <=> y))
+
+(defn > [x & more]
+  (if (empty? more)
+    true
+    (.. (.unshift more x) (each_cons 2) (all? | #(. %1 > %2)))))
+
+(defn >= [x & more]
+  (if (empty? more)
+    true
+    (.. (.unshift more x) (each_cons 2) (all? | #(. %1 >= %2)))))
+
+(defn < [x & more]
+  (if (empty? more)
+    true
+    (.. (.unshift more x) (each_cons 2) (all? | #(. %1 < %2)))))
+
+(defn <= [x & more]
+  (if (empty? more)
+    true
+    (.. (.unshift more x) (each_cons 2) (all? | #(. %1 <= %2)))))
+
+; Miscellaneous (to be sorted)
 
 (defmacro each [binding & body]
   `(.each ~(last binding)
@@ -123,10 +163,10 @@
          ~@body
          (recur)))))
 
-(defmacro .. [x form & more]
-  (if (empty? more)
-    `(. ~x ~form)
-    `(.. (. ~x ~form) ~@more)))
+(defn str [& args]
+  (.reduce (.map args | :to_s) "" :+))
+
+(defn identity [x] x)
 
 (def puts (. Kernel method :puts))
 (def require (. Kernel method :require))
