@@ -47,8 +47,16 @@
 (defn first [coll]
   (.first coll))
 
+(defn rest [coll]
+  (.drop coll 1))
+
 (defn last [coll]
   (.last coll))
+
+(defn butlast [coll]
+  (if (empty? coll)
+    []
+    (.take coll (. (.count coll) - 1))))
 
 (defn empty? [coll]
   (.empty? coll))
