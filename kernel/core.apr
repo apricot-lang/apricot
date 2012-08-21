@@ -44,6 +44,15 @@
 
 ;; At this point everything is defined that syntax quote requires
 
+(defn first [coll]
+  (.first coll))
+
+(defn last [coll]
+  (.last coll))
+
+(defn empty? [coll]
+  (.empty? coll))
+
 (defn identity [x] x)
 
 (defn nil? [x]
@@ -87,17 +96,13 @@
 (defn * [& args]
   (.reduce args 1 :*))
 
+(defn - [x & more]
+  (if (empty? more)
+    (. x -@) ; Ruby's horribly named -@ method is the negation operator
+    (.reduce (.unshift more x) :-)))
+
 (defn str [& args]
   (.reduce (.map args | :to_s) "" :+))
-
-(defn first [coll]
-  (.first coll))
-
-(defn last [coll]
-  (.last coll))
-
-(defn empty? [coll]
-  (.empty? coll))
 
 (defmacro when [test & body]
   `(if ~test (do ~@body)))
