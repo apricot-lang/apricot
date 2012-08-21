@@ -75,35 +75,6 @@
 (defn empty? [coll]
   (.empty? coll))
 
-; Useful macros
-
-(defmacro when [test & body]
-  `(if ~test (do ~@body)))
-
-(defmacro when-not [test & body]
-  `(if ~test nil (do ~@body)))
-
-(defmacro .. [x form & more]
-  (if (empty? more)
-    `(. ~x ~form)
-    `(.. (. ~x ~form) ~@more)))
-
-; TODO make else optional
-(defmacro if-let [bindings then else]
-  `(let [temp# ~(bindings 1)]
-     (if temp#
-       (let ~bindings
-         ~then)
-       ~else)))
-
-(defmacro cond [& clauses]
-  (when-not (.even? (.count clauses))
-    (.raise Kernel ArgumentError "cond requires an even number of forms"))
-  (when-not (empty? clauses)
-    `(if ~(first clauses)
-       ~(second clauses)
-       (cond ~@(drop 2 clauses)))))
-
 ; Basic logic predicates and functions
 
 (defn nil? [x]
@@ -153,6 +124,35 @@
 
 (defn inc [x] (+ x 1))
 (defn dec [x] (- x 1))
+
+; Useful macros
+
+(defmacro when [test & body]
+  `(if ~test (do ~@body)))
+
+(defmacro when-not [test & body]
+  `(if ~test nil (do ~@body)))
+
+(defmacro .. [x form & more]
+  (if (empty? more)
+    `(. ~x ~form)
+    `(.. (. ~x ~form) ~@more)))
+
+; TODO make else optional
+(defmacro if-let [bindings then else]
+  `(let [temp# ~(bindings 1)]
+     (if temp#
+       (let ~bindings
+         ~then)
+       ~else)))
+
+(defmacro cond [& clauses]
+  (when-not (even? (count clauses))
+    (.raise Kernel ArgumentError "cond requires an even number of forms"))
+  (when-not (empty? clauses)
+    `(if ~(first clauses)
+       ~(second clauses)
+       (cond ~@(drop 2 clauses)))))
 
 ; Equality and inequality
 
