@@ -44,6 +44,65 @@
 
 ;; At this point everything is defined that syntax quote requires
 
+; Type predicates
+
+(defn instance? [c x]
+  (.is_a? x c))
+
+(defn module? [x]
+  (instance? Module x))
+
+(defn class? [x]
+  (instance? Class x))
+
+(defn array? [x]
+  (instance? Array x))
+
+(defn list? [x]
+  (instance? Apricot::List x))
+
+(defn hash? [x]
+  (instance? Hash x))
+
+(defn set? [x]
+  (instance? Set x))
+
+(defn string? [x]
+  (instance? String x))
+
+(defn regexp? [x]
+  (instance? Regexp x))
+
+(defn identifier? [x]
+  (instance? Apricot::Identifier x))
+
+(defn symbol? [x]
+  (instance? Symbol x))
+
+(defn number? [x]
+  (instance? Numeric x))
+
+(defn ratio? [x]
+  (instance? Rational x))
+
+(defn integer? [x]
+  (instance? Integer x))
+
+(defn float? [x]
+  (instance? Float x))
+
+(defn complex? [x]
+  (instance? Complex x))
+
+(defn range? [x]
+  (instance? Range x))
+
+(defn comparable? [x]
+  (instance? Comparable x))
+
+(defn enumerable? [x]
+  (instance? Enumerable x))
+
 ; Collection functions
 
 (defn first [coll]
