@@ -232,6 +232,31 @@
        ~(second clauses)
        (cond ~@(drop 2 clauses)))))
 
+; (case form when* else?)
+;   when = [expr+] expr
+;   else = expr
+;
+; Works like Ruby's case/when syntax (uses the === method).
+;
+; Example:
+; (case x
+;   [Array] "x is an array"
+;   [String Symbol] "x is a string or symbol"
+;   "x is unknown")
+(defmacro case [x & forms]
+  (let [else (if (odd? (count forms))
+               (.pop forms))
+        val (gensym "case")
+        expand (fn expand [& forms]
+                 (if (empty? forms)
+                   else
+                   `(if (or ~@(map (fn [test] `(. ~test === ~val))
+                                   (first forms)))
+                      ~(second forms)
+                      ~(apply expand (drop 2 forms)))))]
+    `(let [~val ~x]
+       ~(apply expand forms))))
+
 (defmacro and [& forms]
   (cond
     (empty? forms) true
