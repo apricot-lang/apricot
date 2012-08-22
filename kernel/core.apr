@@ -148,6 +148,11 @@
 (defn empty? [coll]
   (.empty? coll))
 
+(defn map [f coll & colls]
+  (if (empty? colls)
+    (.map coll | f)
+    (.map (.zip coll & colls) | #(apply f %))))
+
 ; Basic logic predicates and functions
 
 (defn nil? [x]
