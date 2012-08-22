@@ -46,6 +46,18 @@
 
 ;; At this point everything is defined that syntax quote requires
 
+(defn identifier [name]
+  (.intern Apricot::Identifier name))
+
+; TODO make prefix optional
+(defn gensym [prefix]
+  (identifier (.gensym Apricot prefix)))
+
+(def puts (. Kernel method :puts))
+(def require (. Kernel method :require))
+(def macroexpand (. Apricot method :macroexpand))
+(def macroexpand-1 (. Apricot method :macroexpand_1))
+
 ; Type predicates
 
 (defn instance? [c x]
@@ -290,8 +302,3 @@
   (.reduce (.map args | :to_s) "" :+))
 
 (defn identity [x] x)
-
-(def puts (. Kernel method :puts))
-(def require (. Kernel method :require))
-(def macroexpand (. Apricot method :macroexpand))
-(def macroexpand-1 (. Apricot method :macroexpand_1))
