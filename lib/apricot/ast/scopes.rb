@@ -41,14 +41,27 @@ module Apricot
     class FnScope < Scope
       include StorageScope
 
+      attr_reader :name, :self_reference
       attr_accessor :splat
       alias_method :splat?, :splat
+
+      def initialize(parent, name)
+        super(parent)
+
+        if name
+          @name = name
+          name_slot = @parent.store_new_local(name)
+          @self_reference = LocalReference.new(name_slot, 1)
+        end
+      end
 
       # An identifier or a nested scope is looking up a variable. If the
       # variable is found here, return a reference to it. Otherwise look it up
       # on the parent and increment its depth because it is beyond the bounds
       # of the current block of code (fn).
       def find_var(name, depth = 0)
+        return @self_reference if name == @name
+
         if slot = @variables[name]
           LocalReference.new(slot, depth)
         else

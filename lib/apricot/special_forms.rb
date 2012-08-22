@@ -283,7 +283,7 @@ module Apricot
     fn.name = name || :__fn__
     fn.file = g.file
 
-    scope = AST::FnScope.new(g.scope)
+    scope = AST::FnScope.new(g.scope, name)
     fn.scopes << scope
 
     fn.definition_line g.line
@@ -332,6 +332,7 @@ module Apricot
     g.find_const :Kernel
     g.create_block fn
     g.send_with_block :lambda, 0
+    g.set_local scope.self_reference.slot if name
   end
 
   # (try body* (rescue name|[name condition*] body*)* (ensure body*)?)

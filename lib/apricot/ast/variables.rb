@@ -1,6 +1,8 @@
 module Apricot
   module AST
     class LocalReference
+      attr_reader :slot, :depth
+
       def initialize(slot, depth = 0)
         @slot = slot
         @depth = depth

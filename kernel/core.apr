@@ -12,7 +12,7 @@
 
 (def defn
   (fn [name args & body]
-    (list 'def name (concat (list 'fn args) body))))
+    (list 'def name (concat (list 'fn name args) body))))
 (.add (.macros *ns*) :defn)
 
 (defn defmacro [name args & body]
