@@ -2,6 +2,8 @@
 
 (ns Apricot::Core)
 
+(def raise (. Kernel method :raise))
+
 (def list
   (fn [& args]
     (.to_list args)))
@@ -32,7 +34,7 @@
     (let [h {}]
       (.each_slice args 2 | #(.store h %1 %2))
       h)
-    (.raise Kernel ArgumentError "hash requires an even number of arguments")))
+    (raise ArgumentError "hash requires an even number of arguments")))
 
 (defn cons [head tail]
   (.cons (.to_list tail) head))
@@ -207,7 +209,7 @@
 
 (defmacro cond [& clauses]
   (when-not (even? (count clauses))
-    (.raise Kernel ArgumentError "cond requires an even number of forms"))
+    (raise ArgumentError "cond requires an even number of forms"))
   (when-not (empty? clauses)
     `(if ~(first clauses)
        ~(second clauses)
