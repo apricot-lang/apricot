@@ -275,6 +275,16 @@
     :else `(let [or# ~(first forms)]
              (if or# or# (or ~@(rest forms))))))
 
+(defmacro doto [x & forms]
+  (let [gx (gensym "doto")]
+    `(let [~gx ~x]
+       ~@(map (fn [f]
+                (if (list? f)
+                  `(~(first f) ~gx ~@(rest f))
+                  `(~f ~gx)))
+              forms)
+       ~gx)))
+
 ; Equality and inequality
 
 (defn identical? [x y]
