@@ -1,13 +1,12 @@
 (require "cinch")
 
-(let [bot (.new Cinch::Bot)]
-  (.configure bot
-              | (fn [c]
-                  (.server= c "irc.tenthbit.net")
-                  (.nick= c "apribot")
-                  (.channels= c ["#programming"])))
+(doto (.new Cinch::Bot)
+  (.configure | #(doto %
+                   (.server= "irc.tenthbit.net")
+                   (.nick= "apribot")
+                   (.channels= ["#programming"])))
 
-  (.on bot :message #r/^apribot[:,]?\s+(.+)/
+  (.on :message #r/^apribot[:,]?\s+(.+)/
        | (fn [m msg] (.reply m msg true)))
 
-  (.start bot))
+  .start)
