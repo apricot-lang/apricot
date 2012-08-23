@@ -2,7 +2,7 @@ require 'stringio'
 
 module Apricot
   class Parser
-    IDENTIFIER   = /[A-Za-z0-9!@#\$%^&*_=+<.>\/?:\\|-]/
+    IDENTIFIER   = /[^'`~()\[\]{}";,\s]/
     OCTAL        = /[0-7]/
     HEX          = /[0-9a-fA-F]/
     DIGITS       = ('0'..'9').to_a + ('a'..'z').to_a
