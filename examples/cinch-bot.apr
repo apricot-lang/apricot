@@ -1,0 +1,13 @@
+(require "cinch")
+
+(let [bot (.new Cinch::Bot)]
+  (.configure bot
+              | (fn [c]
+                  (.server= c "irc.tenthbit.net")
+                  (.nick= c "apribot")
+                  (.channels= c ["#programming"])))
+
+  (.on bot :message #r/^apribot[:,]?\s+(.+)/
+       | (fn [m msg] (.reply m msg true)))
+
+  (.start bot))
