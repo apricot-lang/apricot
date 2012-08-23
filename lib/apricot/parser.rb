@@ -158,9 +158,7 @@ module Apricot
     end
 
     def syntax_quote(form)
-      concat = AST::Identifier.new(@line, :concat)
       quote = AST::Identifier.new(@line, :quote)
-      apply = AST::Identifier.new(@line, :apply)
 
       case form
       when AST::List
@@ -169,20 +167,15 @@ module Apricot
         elsif is_unquote_splicing?(form)
           syntax_error "splicing unquote (~@) not in list"
         else
+          concat = AST::Identifier.new(@line, :concat)
           AST::List.new(@line, [concat] + syntax_quote_list(form.elements))
         end
       when AST::ArrayLiteral
-        array = AST::Identifier.new(@line, :array)
-        list = AST::List.new(@line, [concat] + syntax_quote_list(form.elements))
-        AST::List.new(@line, [apply, array, list])
+        syntax_quote_coll(:array, form.elements)
       when AST::SetLiteral
-        set = AST::Identifier.new(@line, :set)
-        list = AST::List.new(@line, [concat] + syntax_quote_list(form.elements))
-        AST::List.new(@line, [apply, set, list])
+        syntax_quote_coll(:set, form.elements)
       when AST::HashLiteral
-        hash = AST::Identifier.new(@line, :hash)
-        list = AST::List.new(@line, [concat] + syntax_quote_list(form.elements))
-        AST::List.new(@line, [apply, hash, list])
+        syntax_quote_coll(:hash, form.elements)
       when AST::Identifier
         name = form.name
         if name.to_s.end_with?('#')
@@ -197,6 +190,14 @@ module Apricot
       else
         AST::List.new(@line, [quote, form])
       end
+    end
+
+    def syntax_quote_coll(creator_name, elements)
+      apply = AST::Identifier.new(@line, :apply)
+      concat = AST::Identifier.new(@line, :concat)
+      creator = AST::Identifier.new(@line, creator_name)
+      list = AST::List.new(@line, [concat] + syntax_quote_list(elements))
+      AST::List.new(@line, [apply, creator, list])
     end
 
     def syntax_quote_list(elements)
