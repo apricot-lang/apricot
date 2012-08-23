@@ -31,8 +31,11 @@ module Apricot
 
     def inspect
       case @name
-      when :true, :false, :nil # These would be parsed as keywords
-        "#|#{@name.to_s}|"
+      when :true, :false, :nil, lambda {|name| name =~ /\A(?:\+|-)?\d/ }
+        # Use arbitrary identifier syntax for identifiers that would otherwise
+        # be parsed as keywords or numbers
+        str = @name.to_s.gsub(/(\\.)|\|/) { $1 || '\|' }
+        "#|#{str}|"
       when /\A#{Apricot::Parser::IDENTIFIER}+\z/
         @name.to_s
       else
