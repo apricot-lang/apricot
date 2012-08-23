@@ -53,8 +53,12 @@
 (defn gensym [prefix]
   (identifier (.gensym Apricot prefix)))
 
+(defn require [& files]
+  ; (. Kernel require %) does not call the Rubygems custom require for some
+  ; reason, so we use this method. (MAIN is the special toplevel object).
+  (.each files | #(. MAIN send :require %)))
+
 (def puts (. Kernel method :puts))
-(def require (. Kernel method :require))
 (def macroexpand (. Apricot method :macroexpand))
 (def macroexpand-1 (. Apricot method :macroexpand_1))
 
