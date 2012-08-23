@@ -392,7 +392,8 @@ module Apricot
         conditions = []
       elsif clause[0].is_a?(AST::ArrayLiteral)
         conditions = clause.shift.elements
-        name = conditions.shift
+        name = conditions.first
+        conditions = conditions.drop(1)
         g.compile_error "Expected identifier as first form of rescue clause binding" unless name.is_a?(AST::Identifier)
       else
         g.compile_error "Expected identifier or array as first form of rescue clause"
