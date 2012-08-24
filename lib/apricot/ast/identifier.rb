@@ -9,7 +9,11 @@ module Apricot
       end
 
       def reference(g)
-        @reference ||= g.scope.find_var(name)
+        @reference ||= if @name == :self
+                         SelfReference.new
+                       else
+                         g.scope.find_var(name)
+                       end
       end
 
       def bytecode(g)
