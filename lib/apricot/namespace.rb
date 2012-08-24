@@ -27,22 +27,21 @@ module Apricot
     def set_var(name, val)
       @vars[name] = val
 
-      case val
-      when Proc, Proc::Method, Method, UnboundMethod
-        if @fns.include?(name) || !self.respond_to?(name)
-          @fns.add name
-          define_singleton_method(name, val)
-        end
-      else
-        if @fns.include?(name)
-          @fns.delete name
-          singleton_class.send(:undef_method, name)
-        end
+      val = val.to_proc if val.is_a? Method
+
+      if val.is_a?(Proc) && (@fns.include?(name) || !self.respond_to?(name))
+        @fns.add name
+        define_singleton_method(name, val)
+      elsif @fns.include?(name)
+        @fns.delete name
+        singleton_class.send(:undef_method, name)
       end
     end
 
     def get_var(name)
-      raise NameError, "Undefined variable '#{name}' on #{self}" unless @vars.include? name
+      # raise may be a function defined on the namespace so we need to
+      # explicitly call the Ruby raise method.
+      Kernel.raise NameError, "Undefined variable '#{name}' on #{self}" unless @vars.include? name
       @vars[name]
     end
   end
