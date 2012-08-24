@@ -36,9 +36,21 @@ module Apricot::AST
         return
       end
 
-      callee.bytecode(g)
-      args.each {|arg| arg.bytecode(g) }
-      g.send :apricot_call, args.length
+      # Optimize simple (foo ...) calls where foo is a namespace function
+      if callee.is_a?(Identifier) && callee.reference(g).is_a?(NamespaceReference) && Apricot.current_namespace.fns.include?(callee.name)
+        g.push_cpath_top
+        # TODO: this is pretty hacky (should be better once namespace
+        # qualified identifiers are implemented)
+        Apricot.current_namespace.name.split('::').each do |name|
+          g.find_const name.to_sym
+        end
+        args.each {|arg| arg.bytecode(g) }
+        g.send callee.name, args.length
+      else
+        callee.bytecode(g)
+        args.each {|arg| arg.bytecode(g) }
+        g.send :apricot_call, args.length
+      end
     end
 
     def quote_bytecode(g)

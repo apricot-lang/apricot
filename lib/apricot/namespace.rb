@@ -16,15 +16,29 @@ module Apricot
       ns
     end
 
-    attr_accessor :vars, :macros
+    attr_reader :vars, :fns, :macros
 
     def initialize
       @vars = {}
+      @fns = Set[]
       @macros = Set[]
     end
 
     def set_var(name, val)
       @vars[name] = val
+
+      case val
+      when Proc, Proc::Method, Method, UnboundMethod
+        if @fns.include?(name) || !self.respond_to?(name)
+          @fns.add name
+          define_singleton_method(name, val)
+        end
+      else
+        if @fns.include?(name)
+          @fns.delete name
+          singleton_class.send(:undef_method, name)
+        end
+      end
     end
 
     def get_var(name)

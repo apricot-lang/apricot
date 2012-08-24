@@ -30,5 +30,12 @@ module Apricot
         g.send :get_var, 1
       end
     end
+
+    # For the 'self' identifier. Just like Ruby's 'self'.
+    class SelfReference
+      def bytecode(g)
+        g.push_self
+      end
+    end
   end
 end

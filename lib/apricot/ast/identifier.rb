@@ -8,14 +8,13 @@ module Apricot
         @name = name
       end
 
+      def reference(g)
+        @reference ||= g.scope.find_var(name)
+      end
+
       def bytecode(g)
         pos(g)
-
-        if @name == :self
-          g.push :self
-        else
-          g.scope.find_var(name).bytecode(g)
-        end
+        reference(g).bytecode(g)
       end
 
       # called by (def <identifier> <value>)
