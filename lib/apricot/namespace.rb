@@ -26,6 +26,7 @@ module Apricot
 
     def set_var(name, val)
       @vars[name] = val
+      @macros.delete name
 
       val = val.to_proc if val.is_a? Method
 
