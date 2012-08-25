@@ -43,6 +43,11 @@ module Apricot
         g.send :intern, 1
       end
 
+      def namespace_fn?(g)
+        reference(g).is_a?(NamespaceReference) &&
+          Apricot.current_namespace.fns.include?(@name)
+      end
+
       def to_value
         Apricot::Identifier.intern @name
       end

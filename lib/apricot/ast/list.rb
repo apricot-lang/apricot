@@ -37,7 +37,7 @@ module Apricot::AST
       end
 
       # Optimize simple (foo ...) calls where foo is a namespace function
-      if callee.is_a?(Identifier) && callee.reference(g).is_a?(NamespaceReference) && Apricot.current_namespace.fns.include?(callee.name)
+      if callee.is_a?(Identifier) && callee.namespace_fn?(g)
         g.push_cpath_top
         # TODO: this is pretty hacky (should be better once namespace
         # qualified identifiers are implemented)
