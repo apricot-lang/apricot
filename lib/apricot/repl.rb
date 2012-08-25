@@ -18,7 +18,7 @@ module Apricot
       "!bytecode" => [
         "Print the bytecode generated from the previous line",
         proc do
-          puts (@last_cm ? @last_cm.decode : "No previous line")
+          puts (@compiled_code ? @compiled_code.decode : "No previous line")
         end
       ],
 
@@ -72,10 +72,9 @@ module Apricot
         end
 
         begin
-          cm = Apricot::Compiler.compile_string(code, "(eval)", @line, @bytecode)
-          cm.scope = Rubinius::ConstantScope.new(Object)
-          @last_cm = cm
-          value = Rubinius.run_script cm
+          @compiled_code = Apricot::Compiler.compile_string(code, "(eval)",
+                                                            @line, @bytecode)
+          value = Rubinius.run_script @compiled_code
           puts "=> #{value.apricot_inspect}"
           e = nil
         rescue Apricot::SyntaxError => e

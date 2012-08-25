@@ -7,7 +7,7 @@ module Apricot
       compiler.packager.print(BytecodePrinter) if debug
       compiler.writer.name = output || Rubinius::Compiler.compiled_name(file)
 
-      compiler.run
+      prepare_compiled_code compiler.run
     end
 
     def self.compile_string(code, file = nil, line = 1, debug = false)
@@ -16,7 +16,7 @@ module Apricot
       compiler.parser.input(code, file || "(none)", line)
       compiler.packager.print(BytecodePrinter) if debug
 
-      compiler.run
+      prepare_compiled_code compiler.run
     end
 
     def self.compile_node(node, file = "(none)", line = 1, debug = false)
@@ -25,18 +25,22 @@ module Apricot
       compiler.generator.input AST::TopLevel.new([node], file, line, false)
       compiler.packager.print(BytecodePrinter) if debug
 
-      compiler.run
+      prepare_compiled_code compiler.run
+    end
+
+    def self.prepare_compiled_code(cc)
+      cc.scope = Rubinius::ConstantScope.new(Object)
+      cc
     end
 
     def self.eval(code, file = "(none)", line = 1, debug = false)
       if code.is_a? AST::Node
-        cm = compile_node(code, file, line, debug)
+        cc = compile_node(code, file, line, debug)
       else
-        cm = compile_string(code, file, line, debug)
+        cc = compile_string(code, file, line, debug)
       end
 
-      cm.scope = Rubinius::ConstantScope.new(Object)
-      Rubinius.run_script cm
+      Rubinius.run_script cc
     end
   end
 end
