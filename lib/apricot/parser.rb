@@ -400,7 +400,7 @@ module Apricot
 
         if double_quote
           string << parse_string_char
-        elsif @char == "\\" && peek_char == delimiter
+        elsif @char == "\\" && (peek_char == delimiter || peek_char == "\\")
           next_char
           string << consume_char
         else
