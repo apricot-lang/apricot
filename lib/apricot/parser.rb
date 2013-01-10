@@ -520,16 +520,14 @@ module Apricot
       @char = @io.getc
       return nil unless @char
       @location += 1
-      # .chr shouldn't be necessary (rubinius issue #1847)
-      @char = @char.chr
+      @char
     end
 
     def peek_char
       char = @io.getc
       return nil unless char
       @io.ungetc char
-      # .chr shouldn't be necessary (rubinius issue #1847)
-      char.chr
+      char
     end
 
     def syntax_error(message)
