@@ -25,7 +25,7 @@ module Apricot::AST
       end
 
       if macroexpand
-        form = Node.from_value(Apricot.macroexpand(self.to_value))
+        form = Node.from_value(Apricot.macroexpand(self.to_value), line)
 
         # Avoid recursing and macroexpanding again if expansion returns a list
         if form.is_a?(List)
