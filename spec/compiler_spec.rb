@@ -105,6 +105,28 @@ describe 'Apricot' do
     ex.should == List[dot, recv, meth, arg1, arg2]
   end
 
+  it 'compiles shorthand new forms' do
+    apricot(%q|(Range. 1 10)|).should == (1..10)
+    apricot(%q|(Array. 2 5)|).should == [5, 5]
+  end
+
+  it 'compiles shorthand new forms with block args' do
+    apricot(%q|(Array. 3 \| :to_s)|).should == ["0", "1", "2"]
+    apricot(%q|(Array. 5 \| #(* % %))|).should == [0, 1, 4, 9, 16]
+  end
+
+  it 'macroexpands shorthand new forms' do
+    form = apricot(%q|'(Klass. arg1 arg2)|)
+    ex = Apricot.macroexpand(form)
+
+    dot   = Identifier.intern(:'.')
+    klass = Identifier.intern(:Klass)
+    new   = Identifier.intern(:new)
+    arg1  = Identifier.intern(:arg1)
+    arg2  = Identifier.intern(:arg2)
+    ex.should == List[dot, klass, new, arg1, arg2]
+  end
+
   it 'compiles constant defs' do
     expect { Foo }.to raise_error(NameError)
     apricot(%q|(def Foo 1)|)
