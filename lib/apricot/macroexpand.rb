@@ -15,14 +15,25 @@ module Apricot
     args = form.tail
 
     # Handle the (.method receiver args*) send expression form
-    if name.length > 1 && name_s.start_with?('.') && name_s != '..'
+    if name.length > 1 && name_s != '..' && name_s.start_with?('.')
       raise ArgumentError, "Too few arguments to send expression, expecting (.method receiver ...)" if args.empty?
 
       dot = Identifier.intern(:'.')
       method = Identifier.intern(name_s[1..-1])
       List[dot, args.first, method, *args.tail]
+
+    # Handle the (Class. args*) shorthand new form
+    elsif name.length > 1 && name_s != '..' && name_s.end_with?('.')
+      dot = Identifier.intern(:'.')
+      klass = Identifier.intern(name_s[0..-2])
+      new = Identifier.intern(:new)
+      List[dot, klass, new, *args]
+
+    # Handle defined macros
     elsif Apricot.current_namespace.macros.include? name
       Apricot.current_namespace.get_var(name).call(*args)
+
+    # Default case
     else
       form
     end
