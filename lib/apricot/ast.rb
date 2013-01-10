@@ -30,7 +30,6 @@ module Apricot
         when Regexp   then RegexLiteral.new(0, val.source, val.options)
         when Array    then ArrayLiteral.new(0, val.map {|x| from_value x})
         when Set      then SetLiteral.new(0, val.map {|x| from_value x})
-        when Apricot::Constant   then Constant.new(0, val.names)
         when Apricot::Identifier then Identifier.new(0, val.name)
         when Apricot::List       then List.new(0, val.map {|x| from_value x})
         when Hash
@@ -45,6 +44,6 @@ module Apricot
   end
 end
 
-%w[literals identifier constant list scopes variables toplevel].each do |r|
+%w[literals identifier list scopes variables toplevel].each do |r|
   require "apricot/ast/#{r}"
 end

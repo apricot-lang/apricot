@@ -92,8 +92,6 @@ module Apricot
       when IDENTIFIER
         if @char =~ /[+-]/ && peek_char =~ /\d/
           parse_number
-        elsif @char =~ /[A-Z]/
-          parse_constant
         else
           parse_identifier
         end
@@ -459,27 +457,6 @@ module Apricot
       else
         syntax_error "Invalid number: #{number}"
       end
-    end
-
-    def parse_constant
-      constant = ""
-
-      while @char =~ IDENTIFIER
-        constant << @char
-        next_char
-      end
-
-      # A negative second argument to String#split means it won't trim empty
-      # strings off the end, so we can check for them afterwards.
-      names = constant.split('::', -1)
-
-      unless names.all? {|n| n =~ /^[A-Z]\w*$/ }
-        syntax_error "Invalid constant: #{constant}"
-      end
-
-      names.map! {|x| x.to_sym }
-
-      AST::Constant.new(@line, names)
     end
 
     def parse_identifier

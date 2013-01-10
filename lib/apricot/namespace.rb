@@ -1,7 +1,7 @@
 module Apricot
   class Namespace < Module
     def self.find_or_create(constant)
-      ns = constant.names.reduce(Object) do |mod, name|
+      ns = constant.const_names.reduce(Object) do |mod, name|
         if mod.const_defined? name
           next_mod = mod.const_get name
           raise TypeError, "#{mod}::#{name} (#{next_mod}) is not a Module" unless next_mod.is_a? Module

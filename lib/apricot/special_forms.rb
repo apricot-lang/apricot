@@ -400,7 +400,7 @@ module Apricot
       end
 
       # Default to StandardError for (rescue e body) and (rescue [e] body)
-      conditions << AST::Constant.new(name.line, [:StandardError]) if conditions.empty?
+      conditions << AST::Identifier.new(name.line, :StandardError) if conditions.empty?
 
       body = g.new_label
       next_rescue = g.new_label

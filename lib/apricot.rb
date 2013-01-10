@@ -39,7 +39,7 @@ module Apricot
 end
 
 %w[parser compiler ast generator stages printers special_forms errors list
-identifier constant ruby_ext namespace].each {|r| require "apricot/#{r}" }
+identifier ruby_ext namespace].each {|r| require "apricot/#{r}" }
 
 # Start "booting" apricot. Set up core namespace and load the core library.
 module Apricot

@@ -13,6 +13,20 @@ module Apricot
 
     def initialize(name)
       @name = name
+
+      if @name =~ /\A(?:[A-Z]\w*::)*[A-Z]\w*\z/
+        @constant = true
+        @const_names = @name.to_s.split('::').map(&:to_sym)
+      end
+    end
+
+    def constant?
+      @constant
+    end
+
+    def const_names
+      raise "#{@name} is not a constant" unless constant?
+      @const_names
     end
 
     # Copying Identifiers is not allowed.

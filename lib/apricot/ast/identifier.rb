@@ -6,6 +6,11 @@ module Apricot
       def initialize(line, name)
         super(line)
         @name = name
+
+        if @name =~ /\A(?:[A-Z]\w*::)*[A-Z]\w*\z/
+          @constant = true
+          @const_names = @name.to_s.split('::').map(&:to_sym)
+        end
       end
 
       def reference(g)
@@ -16,21 +21,44 @@ module Apricot
                        end
       end
 
+      def constant?
+        @constant
+      end
+
+      def const_names
+        raise "#{@name} is not a constant" unless constant?
+        @const_names
+      end
+
       def bytecode(g)
         pos(g)
-        reference(g).bytecode(g)
+
+        if constant?
+          g.push_cpath_top
+          @const_names.each {|n| g.find_const n }
+        else
+          reference(g).bytecode(g)
+        end
       end
 
       # called by (def <identifier> <value>)
       def assign_bytecode(g, value)
-        g.compile_error "Can't change the value of self" if @name == :self
+        if constant?
+          g.push_cpath_top
+          @const_names[0..-2].each {|n| g.find_const n }
+          g.push_literal @const_names.last
+          value.bytecode(g)
+          g.send :const_set, 2
+        else
+          g.compile_error "Can't change the value of self" if @name == :self
 
-        g.push_cpath_top
-        g.find_const :Apricot
-        g.send :current_namespace, 0
-        g.push_literal @name
-        value.bytecode(g)
-        g.send :set_var, 2
+          g.push_cpath_top
+          g.find_const :Apricot
+          g.send :current_namespace, 0
+          g.push_literal @name
+          value.bytecode(g)
+          g.send :set_var, 2
+        end
       end
 
       def quote_bytecode(g)
