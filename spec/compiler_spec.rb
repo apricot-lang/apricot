@@ -253,6 +253,6 @@ describe 'Apricot' do
     apricot(%q|'false|).should == false
     apricot(%q|'nil|).should == nil
     apricot(%q|'self|).should == Identifier.intern(:self)
-    apricot(%q|'Foo::Bar|).should == Constant.new(:Foo, :Bar)
+    apricot(%q|'Foo::Bar|).should == Identifier.intern(:'Foo::Bar')
   end
 end

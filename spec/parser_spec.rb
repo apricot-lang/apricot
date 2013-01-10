@@ -46,24 +46,31 @@ describe Apricot::Parser do
   end
 
   it 'parses constants' do
-    parse_one('Example', AST::Constant)
-    @first.names.should == [:Example]
+    parse_one('Example', AST::Identifier)
+    @first.constant?.should be_true
+    @first.const_names.should == [:Example]
   end
 
-  it 'does not parse invalid constants' do
-    expect_syntax_error 'Fo$o'
+  it 'parses invalid constants as identifiers' do
+    parse_one('Fo$o', AST::Identifier)
+    @first.constant?.should be_false
   end
 
   it 'parses scoped constants' do
-    parse_one('Foo::Bar::Baz', AST::Constant)
-    @first.names.should == [:Foo, :Bar, :Baz]
+    parse_one('Foo::Bar::Baz', AST::Identifier)
+    @first.constant?.should be_true
+    @first.const_names.should == [:Foo, :Bar, :Baz]
   end
 
-  it 'does not parse invalid scoped constants' do
-    expect_syntax_error 'Foo::'
-    expect_syntax_error 'Foo:'
-    expect_syntax_error 'Foo::a'
-    expect_syntax_error 'Foo::::Bar'
+  it 'parses invalid scoped constants as identifiers' do
+    parse_one('Foo::', AST::Identifier)
+    @first.constant?.should be_false
+    parse_one('Foo:', AST::Identifier)
+    @first.constant?.should be_false
+    parse_one('Foo::a', AST::Identifier)
+    @first.constant?.should be_false
+    parse_one('Foo::::Bar', AST::Identifier)
+    @first.constant?.should be_false
   end
 
   it 'parses true, false, nil, and self' do
