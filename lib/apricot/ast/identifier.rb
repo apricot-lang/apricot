@@ -7,8 +7,10 @@ module Apricot
       end
 
       def reference(g)
-        @reference ||= if @name == :self
+        @reference ||= if name == :self
                          SelfReference.new
+                       elsif qualified?
+                         NamespaceReference.new(unqualified_name, ns)
                        else
                          g.scope.find_var(name)
                        end
@@ -20,6 +22,18 @@ module Apricot
 
       def constant?
         @id.constant?
+      end
+
+      def qualified?
+        @id.qualified?
+      end
+
+      def ns
+        @id.ns
+      end
+
+      def unqualified_name
+        @id.unqualified_name
       end
 
       def const_names
@@ -68,8 +82,13 @@ module Apricot
       end
 
       def namespace_fn?(g)
-        reference(g).is_a?(NamespaceReference) &&
-          Apricot.current_namespace.fns.include?(name)
+        ref = reference(g)
+        ref.is_a?(NamespaceReference) && ref.fn?
+      end
+
+      def module_method?(g)
+        ref = reference(g)
+        ref.is_a?(NamespaceReference) && ref.method?
       end
 
       def to_value

@@ -36,16 +36,16 @@ module Apricot::AST
         return
       end
 
-      # Optimize simple (foo ...) calls where foo is a namespace function
-      if callee.is_a?(Identifier) && callee.namespace_fn?(g)
+      # Handle (foo ...) and (Foo/bar ...) calls
+      if callee.is_a?(Identifier) &&
+          (callee.namespace_fn?(g) || callee.module_method?(g))
         g.push_cpath_top
-        # TODO: this is pretty hacky (should be better once namespace
-        # qualified identifiers are implemented)
-        Apricot.current_namespace.name.split('::').each do |name|
-          g.find_const name.to_sym
-        end
+
+        ns_id = Apricot::Identifier.intern(callee.ns.name)
+        ns_id.const_names.each {|n| g.find_const(n) }
+
         args.each {|arg| arg.bytecode(g) }
-        g.send callee.name, args.length
+        g.send callee.unqualified_name, args.length
       else
         callee.bytecode(g)
         args.each {|arg| arg.bytecode(g) }

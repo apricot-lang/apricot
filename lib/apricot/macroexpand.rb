@@ -30,8 +30,8 @@ module Apricot
       List[dot, klass, new, *args]
 
     # Handle defined macros
-    elsif Apricot.current_namespace.macros.include? name
-      Apricot.current_namespace.get_var(name).call(*args)
+    elsif callee.ns.is_a?(Namespace) && callee.ns.macros.include?(callee.unqualified_name)
+      callee.ns.get_var(callee.unqualified_name).call(*args)
 
     # Default case
     else

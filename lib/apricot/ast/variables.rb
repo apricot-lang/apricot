@@ -18,16 +18,32 @@ module Apricot
     end
 
     class NamespaceReference
-      def initialize(name)
+      def initialize(name, ns = nil)
         @name = name
+        @ns = ns || Apricot.current_namespace
       end
 
       def bytecode(g)
         g.push_cpath_top
-        g.find_const :Apricot
-        g.send :current_namespace, 0
+
+        ns_id = Apricot::Identifier.intern(@ns.name)
+        ns_id.const_names.each {|n| g.find_const(n) }
+
         g.push_literal @name
-        g.send :get_var, 1
+
+        if @ns.is_a? Namespace
+          g.send :get_var, 1
+        else # @ns is a regular Ruby module
+          g.send :method, 1
+        end
+      end
+
+      def fn?
+        @ns.is_a?(Namespace) && @ns.fns.include?(@name)
+      end
+
+      def method?
+        !@ns.is_a?(Namespace) && @ns.respond_to?(@name)
       end
     end
 

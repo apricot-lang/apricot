@@ -1,6 +1,6 @@
 module Apricot
   class Identifier
-    attr_reader :name
+    attr_reader :name, :ns, :unqualified_name
 
     @table = {}
 
@@ -17,7 +17,28 @@ module Apricot
       if @name =~ /\A(?:[A-Z]\w*::)*[A-Z]\w*\z/
         @constant = true
         @const_names = @name.to_s.split('::').map(&:to_sym)
+      elsif @name =~ /\A(.+?)\/(.+)\z/
+        @qualified = true
+        ns_id = Identifier.intern($1)
+        raise 'namespace in identifier must be a constant' unless ns_id.constant?
+
+        @ns = ns_id.const_names.reduce(Object) do |mod, name|
+          mod.const_get(name)
+        end
+
+        @unqualified_name = $2.to_sym
+      else
+        @ns = Apricot.current_namespace
+        @unqualified_name = name
       end
+    end
+
+    def qualified?
+      @qualified
+    end
+
+    def unqualified_name
+      @unqualified_name
     end
 
     def constant?
