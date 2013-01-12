@@ -2,7 +2,7 @@
 
 (ns Apricot::Core)
 
-(def raise (. Kernel method :raise))
+(def raise Kernel/raise)
 
 (def list
   (fn [& args]
@@ -27,7 +27,7 @@
 (defn array [& args] args)
 
 (defn set [& args]
-  (.new Set args))
+  (Set. args))
 
 (defn hash [& args]
   (if (.even? (.length args))
@@ -58,9 +58,9 @@
   ; reason, so we use this method. (MAIN is the special toplevel object).
   (.each files | #(. MAIN send :require %)))
 
-(def puts (. Kernel method :puts))
-(def macroexpand (. Apricot method :macroexpand))
-(def macroexpand-1 (. Apricot method :macroexpand_1))
+(def puts Kernel/puts)
+(def macroexpand Apricot/macroexpand)
+(def macroexpand-1 Apricot/macroexpand_1)
 
 ; Type predicates
 
