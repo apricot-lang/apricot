@@ -153,10 +153,10 @@ module Apricot
     value ||= AST::Literal.new(0, :nil)
 
     case target
-    when AST::Identifier, AST::Constant
+    when AST::Identifier
       target.assign_bytecode(g, value)
     else
-      g.compile_error "First argument to def must be an identifier or constant"
+      g.compile_error "First argument to def must be an identifier"
     end
   end
 
