@@ -1,6 +1,6 @@
 (require "cinch")
 
-(doto (.new Cinch::Bot)
+(doto (Cinch::Bot.)
   (.configure | #(doto %
                    (.server= "irc.tenthbit.net")
                    (.nick= "apribot")
