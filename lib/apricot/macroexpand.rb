@@ -8,7 +8,7 @@ module Apricot
     return form unless form.is_a? List
 
     callee = form.first
-    return form unless callee.is_a? Identifier
+    return form unless callee.is_a?(Identifier) && !callee.constant?
 
     name = callee.name
     name_s = name.to_s
