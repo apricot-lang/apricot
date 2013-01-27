@@ -184,6 +184,12 @@ describe 'Apricot' do
     apricot(%q|((fn [x & y] y) 1 2 3)|).should == [2, 3]
   end
 
+  it 'compiles fn forms with optional and splat arguments' do
+    apricot(%q|((fn [x [y 2] & z] [x y z]) 1)|).should == [1, 2, []]
+    apricot(%q|((fn [x [y 2] & z] [x y z]) 1 3)|).should == [1, 3, []]
+    apricot(%q|((fn [x [y 2] & z] [x y z]) 1 3 4 5)|).should == [1, 3, [4, 5]]
+  end
+
   it 'compiles loop and recur forms' do
     apricot(%q|(loop [])|).should == nil
     apricot(%q|(loop [a 1])|).should == nil
