@@ -290,16 +290,26 @@ module Apricot
     fn.set_line g.line
 
     splat_index = nil
+    optional_args = {}
 
     arg_list.each_with_index do |arg, i|
-      g.compile_error "Arguments in fn form must be identifiers" unless arg.is_a? AST::Identifier
+      case arg
+      when AST::Identifier
+        if arg.name == :&
+          splat_index = i
+          break
+        end
 
-      if arg.name == :&
-        splat_index = i
-        break
+        scope.new_local(arg.name)
+      when AST::ArrayLiteral
+        g.compile_error "Arguments in fn form must be identifiers" unless arg[0].is_a? AST::Identifier
+        g.compile_error "Arguments in fn form can have only one optional value" unless arg.elements.length == 2
+
+        optional_args[i] = arg[1]
+        scope.new_local(arg[0].name)
+      else
+        g.compile_error "Arguments in fn form must be identifiers"
       end
-
-      scope.new_local(arg.name)
     end
 
     if splat_index
@@ -311,7 +321,21 @@ module Apricot
       scope.splat = true
     end
 
-    scope.loop_label = fn.new_label
+    next_optional = fn.new_label
+
+    optional_args.each do |i, value|
+      fn.passed_arg i
+      fn.git next_optional
+
+      value.bytecode(fn)
+      fn.set_local i
+      fn.pop
+
+      next_optional.set!
+      next_optional = fn.new_label
+    end
+
+    scope.loop_label = next_optional
     scope.loop_label.set!
 
     SpecialForm[:do].bytecode(fn, args)
@@ -326,7 +350,8 @@ module Apricot
 
     args_count = arg_list.length
     args_count -= 2 if splat_index # don't count the & or splat arg itself
-    fn.required_args = fn.total_args = args_count
+    fn.total_args = args_count
+    fn.required_args = args_count - optional_args.length
 
     g.push_cpath_top
     g.find_const :Kernel
