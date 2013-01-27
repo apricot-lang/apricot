@@ -49,8 +49,7 @@
 (defn identifier [name]
   (.intern Apricot::Identifier name))
 
-; TODO make prefix optional
-(defn gensym [prefix]
+(defn gensym [[prefix "g"]]
   (identifier (.gensym Apricot prefix)))
 
 (defn require [& files]
