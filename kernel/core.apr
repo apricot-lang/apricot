@@ -219,8 +219,7 @@
     `(. ~x ~form)
     `(.. (. ~x ~form) ~@more)))
 
-; TODO make else optional
-(defmacro if-let [bindings then else]
+(defmacro if-let [bindings then [else nil]]
   `(let [temp# ~(bindings 1)]
      (if temp#
        (let ~bindings
