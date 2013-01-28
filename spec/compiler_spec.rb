@@ -190,6 +190,16 @@ describe 'Apricot' do
     apricot(%q|((fn [x [y 2] & z] [x y z]) 1 3 4 5)|).should == [1, 3, [4, 5]]
   end
 
+  it 'does not compile invalid fn forms' do
+    expect { apricot(%q|(fn :foo)|) }.to raise_error(CompileError)
+    expect { apricot(%q|(fn [1])|) }.to raise_error(CompileError)
+    expect { apricot(%q|(fn [[x 1] y])|) }.to raise_error(CompileError)
+    expect { apricot(%q|(fn [[1 1]])|) }.to raise_error(CompileError)
+    expect { apricot(%q|(fn [[x]])|) }.to raise_error(CompileError)
+    expect { apricot(%q|(fn [&])|) }.to raise_error(CompileError)
+    expect { apricot(%q|(fn [& x y])|) }.to raise_error(CompileError)
+  end
+
   it 'compiles loop and recur forms' do
     apricot(%q|(loop [])|).should == nil
     apricot(%q|(loop [a 1])|).should == nil
