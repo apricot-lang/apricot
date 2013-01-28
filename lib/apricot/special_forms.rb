@@ -300,6 +300,9 @@ module Apricot
           break
         end
 
+        # Required argument after optional argument
+        g.compile_error "Optional arguments in fn form must be last" if optional_args.any?
+
         scope.new_local(arg.name)
       when AST::ArrayLiteral
         g.compile_error "Arguments in fn form must be identifiers" unless arg[0].is_a? AST::Identifier
