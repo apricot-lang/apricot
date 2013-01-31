@@ -3,6 +3,10 @@ describe 'Apricot' do
     Apricot::Compiler.eval code
   end
 
+  def bad_apricot(code)
+    expect { apricot(code) }.to raise_error(CompileError)
+  end
+
   it 'compiles an empty program' do
     apricot(%q||).should == nil
   end
@@ -191,13 +195,29 @@ describe 'Apricot' do
   end
 
   it 'does not compile invalid fn forms' do
-    expect { apricot(%q|(fn :foo)|) }.to raise_error(CompileError)
-    expect { apricot(%q|(fn [1])|) }.to raise_error(CompileError)
-    expect { apricot(%q|(fn [[x 1] y])|) }.to raise_error(CompileError)
-    expect { apricot(%q|(fn [[1 1]])|) }.to raise_error(CompileError)
-    expect { apricot(%q|(fn [[x]])|) }.to raise_error(CompileError)
-    expect { apricot(%q|(fn [&])|) }.to raise_error(CompileError)
-    expect { apricot(%q|(fn [& x y])|) }.to raise_error(CompileError)
+    bad_apricot(%q|(fn :foo)|)
+    bad_apricot(%q|(fn [1])|)
+    bad_apricot(%q|(fn [[x 1] y])|)
+    bad_apricot(%q|(fn [[1 1]])|)
+    bad_apricot(%q|(fn [[x]])|)
+    bad_apricot(%q|(fn [&])|)
+    bad_apricot(%q|(fn [& x y])|)
+  end
+
+  it 'does not compile invalid arity-overloaded fn forms' do
+    bad_apricot(%q|(fn ([] 1) :foo)|)
+    bad_apricot(%q|(fn ([] 1) ([] 2))|)
+    bad_apricot(%q|(fn ([[o 1]] 1) ([] 2))|)
+    bad_apricot(%q|(fn ([] 1) ([[o 2]] 2))|)
+    bad_apricot(%q|(fn ([[o 1]] 1) ([[o 2]] 2))|)
+    bad_apricot(%q|(fn ([x [o 1]] 1) ([x] 2))|)
+    bad_apricot(%q|(fn ([x [o 1]] 1) ([[o 2]] 2))|)
+    bad_apricot(%q|(fn ([x y z [o 1]] 1) ([x y z & rest] 2))|)
+    bad_apricot(%q|(fn ([x [o 1] [p 2] [q 3]] 1) ([x y z] 2))|)
+    bad_apricot(%q|(fn ([x & rest] 1) ([x y] 2))|)
+    bad_apricot(%q|(fn ([x & rest] 1) ([x [o 1]] 2))|)
+    bad_apricot(%q|(fn ([x & rest] 1) ([[o 1]] 2))|)
+    bad_apricot(%q|(fn ([x [o 1] & rest] 1) ([x] 2))|)
   end
 
   it 'compiles loop and recur forms' do
