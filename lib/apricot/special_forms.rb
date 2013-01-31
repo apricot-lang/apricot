@@ -271,7 +271,8 @@ module Apricot
   end
 
   class ArgList
-    attr_reader :required_args, :optional_args, :rest_arg
+    attr_reader :required_args, :optional_args, :rest_arg,
+      :num_required, :num_optional, :num_total
 
     def initialize(args, g)
       @required_args = []
@@ -305,10 +306,12 @@ module Apricot
       end
 
       g.compile_error "Expected identifier following & in argument list" if next_is_rest
+
+      @num_required = @required_args.length
+      @num_optional = @optional_args.length
+      @num_total = @num_required + @num_optional
     end
   end
-
-  Overload = Struct.new(:arglist, :body)
 
   # (fn name? [args*] body*)
   # (fn name? [args* & rest] body*)
@@ -327,30 +330,50 @@ module Apricot
         arglist, *body = overload.elements
         g.compile_error "Argument list in overload must be an array literal" unless arglist.is_a? AST::ArrayLiteral
         arglist = ArgList.new(arglist.elements, g)
-        overloads << Overload.new(arglist, body)
+        overloads << [arglist, body]
       end
     when AST::ArrayLiteral
       # This is the single-arity form (fn name? [args*] body*)
       arglist, *body = args
       arglist = ArgList.new(arglist.elements, g)
-      overloads << Overload.new(arglist, body)
+      overloads << [arglist, body]
     else
       # Didn't match any of the legal forms.
       g.compile_error "Expected argument list or arity overload in fn definition"
     end
 
+    # Check that the overloads do not conflict with each other.
     if overloads.length > 1
+      # Sort the overloads by ascending number of required arguments.
+      overloads.sort_by! {|(arglist1, _)| arglist1.num_required }
+
+      # There should not be more than one variadic overload.
+      num_rest_args = overloads.select {|(arglist1, _)| arglist1.rest_arg }.length
+      g.compile_error "Can't have more than one variadic overload" if num_rest_args > 1
+
+      # If there is a variadic overload, it should be on the overload with the
+      # most required arguments.
+      if num_rest_args == 1 && !overloads.last[0].rest_arg
+        g.compile_error "Can't have a fixed arity overload with more params than a variadic overload"
+      end
+
+      # Compare each consecutive two overloads.
+      overloads.each_cons(2) do |(arglist1, _), (arglist2, _)|
+        # Can't have two overloads with same number of required args unless
+        # they have no optional args and one of them is the variadic overload.
+        if arglist1.num_required == arglist2.num_required
+          unless arglist2.rest_arg && arglist1.num_optional == 0 && arglist2.num_optional == 0
+            g.compile_error "Can't have two overloads with the same arity"
+          end
+        elsif arglist1.num_total >= arglist2.num_required
+          g.compile_error "Can't have an overload with more total (required + optional) arguments than another overload with more required arguments"
+        end
+      end
+
       g.compile_error "Arity overloading is not fully implemented yet"
     end
 
-    # Possible ways to fudge up your overloads
-    #   - use same arity twice
-    #   - more than one overload with & rest arg
-    #   - overload with more required args than another overload with & rest arg
-    #   - optional args??
-
-    arg_list = overloads.first.arglist
-    body = overloads.first.body
+    arglist, body = overloads.first
 
     fn = g.class.new
     fn.name = fn_name || :__fn__
@@ -363,14 +386,14 @@ module Apricot
     fn.set_line g.line
 
     # Allocate slots for the required arguments
-    arg_list.required_args.each {|arg| scope.new_local(arg) }
+    arglist.required_args.each {|arg| scope.new_local(arg) }
 
     next_optional = fn.new_label
 
-    arg_list.optional_args.each_with_index do |(name, value), i|
+    arglist.optional_args.each_with_index do |(name, value), i|
       # Calculate the position of this optional arg, off the end of the
       # required args
-      arg_index = arg_list.required_args.length + i
+      arg_index = arglist.num_required + i
 
       # Allocate a slot for this optional argument
       scope.new_local(name)
@@ -386,9 +409,9 @@ module Apricot
       next_optional = fn.new_label
     end
 
-    if arg_list.rest_arg
+    if arglist.rest_arg
       # Allocate the slot for the rest argument
-      scope.new_local(arg_list.rest_arg)
+      scope.new_local(arglist.rest_arg)
       scope.splat = true
     end
 
@@ -402,14 +425,12 @@ module Apricot
 
     fn.scopes.pop
 
-    arg_count = arg_list.required_args.length + arg_list.optional_args.length
-
     # If there is a rest arg, it will appear after all the required and
     # optional arguments.
-    fn.splat_index = arg_count if arg_list.rest_arg
+    fn.splat_index = arglist.num_total if arglist.rest_arg
 
-    fn.total_args = arg_count
-    fn.required_args = arg_list.required_args.length
+    fn.total_args = arglist.num_total
+    fn.required_args = arglist.num_required
 
     fn.local_count = scope.local_count
     fn.local_names = scope.local_names
