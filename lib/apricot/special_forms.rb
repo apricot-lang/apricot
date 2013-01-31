@@ -368,7 +368,7 @@ module Apricot
       end
 
       # Compare each consecutive two non-variadic overloads.
-      overloads.each_cons(2) do |(arglist1, _), (arglist2, _)|
+      normals.each_cons(2) do |(arglist1, _), (arglist2, _)|
         if arglist1.num_required == arglist2.num_required
           g.compile_error "Can't have two overloads with the same arity"
         elsif arglist1.num_total >= arglist2.num_required
