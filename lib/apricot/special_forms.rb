@@ -348,12 +348,13 @@ module Apricot
       overloads.sort_by! {|(arglist1, _)| arglist1.num_required }
 
       # There should not be more than one variadic overload.
-      num_rest_args = overloads.select {|(arglist1, _)| arglist1.rest_arg }.length
-      g.compile_error "Can't have more than one variadic overload" if num_rest_args > 1
+      rest_args = overloads.select {|(arglist1, _)| arglist1.rest_arg }
+      g.compile_error "Can't have more than one variadic overload" if rest_args.length > 1
 
       # If there is a variadic overload, it should be on the overload with the
       # most required arguments.
-      if num_rest_args == 1 && !overloads.last[0].rest_arg
+      largest_required = overloads.map {|(arglist1, _)| arglist1.num_required }.max
+      if rest_args.length == 1 && rest_args[0][0].num_required < largest_required
         g.compile_error "Can't have a fixed arity overload with more params than a variadic overload"
       end
 
@@ -362,7 +363,7 @@ module Apricot
         # Can't have two overloads with same number of required args unless
         # they have no optional args and one of them is the variadic overload.
         if arglist1.num_required == arglist2.num_required
-          unless arglist2.rest_arg && arglist1.num_optional == 0 && arglist2.num_optional == 0
+          unless (arglist1.rest_arg || arglist2.rest_arg) && arglist1.num_optional == 0 && arglist2.num_optional == 0
             g.compile_error "Can't have two overloads with the same arity"
           end
         elsif arglist1.num_total >= arglist2.num_required
