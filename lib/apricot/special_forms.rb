@@ -270,17 +270,90 @@ module Apricot
     g.goto target.loop_label
   end
 
+  class ArgList
+    attr_reader :required_args, :optional_args, :rest_arg
+
+    def initialize(args, g)
+      @required_args = []
+      @optional_args = []
+      @rest_arg = nil
+
+      next_is_rest = false
+
+      args.each do |arg|
+        g.compile_error "Unexpected arguments after rest argument" if @rest_arg
+
+        case arg
+        when AST::ArrayLiteral
+          g.compile_error "Arguments in fn form must be identifiers" unless arg[0].is_a? AST::Identifier
+          g.compile_error "Arguments in fn form can have only one optional value" unless arg.elements.length == 2
+
+          optional_args << [arg[0].name, arg[1]]
+        when AST::Identifier
+          if next_is_rest
+            @rest_arg = arg.name
+            next_is_rest = false
+          elsif arg.name == :&
+            next_is_rest = true
+          else
+            g.compile_error "Optional arguments in fn form must be last" if @optional_args.any?
+            @required_args << arg.name
+          end
+        else
+          g.compile_error "Arguments in fn form must be identifiers or 2-element arrays"
+        end
+      end
+
+      g.compile_error "Expected identifier following & in argument list" if next_is_rest
+    end
+  end
+
+  Overload = Struct.new(:arglist, :body)
+
   # (fn name? [args*] body*)
   # (fn name? [args* & rest] body*)
+  # (fn name? ([args*] body*) ... ([args*] body*))
   SpecialForm.define(:fn) do |g, args|
-    name = args.shift.name if args.first.is_a? AST::Identifier
+    fn_name = args.shift.name if args.first.is_a? AST::Identifier
 
-    g.compile_error "Argument list for fn must be an array literal" unless args.first.is_a? AST::ArrayLiteral
+    overloads = []
 
-    arg_list = args.shift.elements
+    case args.first
+    when AST::List
+      # This is the multi-arity form (fn name? ([args*] body*) ... ([args*] body*))
+      args.each do |overload|
+        # Each overload is of the form ([args*] body*)
+        g.compile_error "Expected an arity overload (a list)" unless overload.is_a? AST::List
+        arglist, *body = overload.elements
+        g.compile_error "Argument list in overload must be an array literal" unless arglist.is_a? AST::ArrayLiteral
+        arglist = ArgList.new(arglist.elements, g)
+        overloads << Overload.new(arglist, body)
+      end
+    when AST::ArrayLiteral
+      # This is the single-arity form (fn name? [args*] body*)
+      arglist, *body = args
+      arglist = ArgList.new(arglist.elements, g)
+      overloads << Overload.new(arglist, body)
+    else
+      # Didn't match any of the legal forms.
+      g.compile_error "Expected argument list or arity overload in fn definition"
+    end
+
+    if overloads.length > 1
+      g.compile_error "Arity overloading is not fully implemented yet"
+    end
+
+    # Possible ways to fudge up your overloads
+    #   - use same arity twice
+    #   - more than one overload with & rest arg
+    #   - overload with more required args than another overload with & rest arg
+    #   - optional args??
+
+    arg_list = overloads.first.arglist
+    body = overloads.first.body
 
     fn = g.class.new
-    fn.name = name || :__fn__
+    fn.name = fn_name || :__fn__
     fn.file = g.file
 
     scope = AST::FnScope.new(g.scope, name)
@@ -289,78 +362,63 @@ module Apricot
     fn.definition_line g.line
     fn.set_line g.line
 
-    splat_index = nil
-    optional_args = {}
-
-    arg_list.each_with_index do |arg, i|
-      case arg
-      when AST::Identifier
-        if arg.name == :&
-          splat_index = i
-          break
-        end
-
-        # Required argument after optional argument
-        g.compile_error "Optional arguments in fn form must be last" if optional_args.any?
-
-        scope.new_local(arg.name)
-      when AST::ArrayLiteral
-        g.compile_error "Arguments in fn form must be identifiers" unless arg[0].is_a? AST::Identifier
-        g.compile_error "Arguments in fn form can have only one optional value" unless arg.elements.length == 2
-
-        optional_args[i] = arg[1]
-        scope.new_local(arg[0].name)
-      else
-        g.compile_error "Arguments in fn form must be identifiers"
-      end
-    end
-
-    if splat_index
-      splat_arg = arg_list[splat_index + 1] # arg after &
-      g.compile_error "Expected identifier following & in argument list" unless splat_arg
-      g.compile_error "Unexpected arguments after rest argument" if arg_list[splat_index + 2]
-
-      scope.new_local(splat_arg.name)
-      scope.splat = true
-    end
+    # Allocate slots for the required arguments
+    arg_list.required_args.each {|arg| scope.new_local(arg) }
 
     next_optional = fn.new_label
 
-    optional_args.each do |i, value|
-      fn.passed_arg i
+    arg_list.optional_args.each_with_index do |(name, value), i|
+      # Calculate the position of this optional arg, off the end of the
+      # required args
+      arg_index = arg_list.required_args.length + i
+
+      # Allocate a slot for this optional argument
+      scope.new_local(name)
+
+      fn.passed_arg arg_index
       fn.git next_optional
 
       value.bytecode(fn)
-      fn.set_local i
+      fn.set_local arg_index
       fn.pop
 
       next_optional.set!
       next_optional = fn.new_label
     end
 
+    if arg_list.rest_arg
+      # Allocate the slot for the rest argument
+      scope.new_local(arg_list.rest_arg)
+      scope.splat = true
+    end
+
     scope.loop_label = next_optional
     scope.loop_label.set!
 
-    SpecialForm[:do].bytecode(fn, args)
+    SpecialForm[:do].bytecode(fn, body)
 
     fn.ret
     fn.close
 
     fn.scopes.pop
-    fn.splat_index = splat_index if splat_index
+
+    arg_count = arg_list.required_args.length + arg_list.optional_args.length
+
+    # If there is a rest arg, it will appear after all the required and
+    # optional arguments.
+    fn.splat_index = arg_count if arg_list.rest_arg
+
+    fn.total_args = arg_count
+    fn.required_args = arg_list.required_args.length
+
     fn.local_count = scope.local_count
     fn.local_names = scope.local_names
-
-    args_count = arg_list.length
-    args_count -= 2 if splat_index # don't count the & or splat arg itself
-    fn.total_args = args_count
-    fn.required_args = args_count - optional_args.length
 
     g.push_cpath_top
     g.find_const :Kernel
     g.create_block fn
     g.send_with_block :lambda, 0
-    g.set_local scope.self_reference.slot if name
+    g.set_local scope.self_reference.slot if fn_name
   end
 
   # (try body* (rescue name|[name condition*] body*)* (ensure body*)?)
