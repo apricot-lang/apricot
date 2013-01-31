@@ -344,32 +344,39 @@ module Apricot
 
     # Check that the overloads do not conflict with each other.
     if overloads.length > 1
-      # Sort the overloads by ascending number of required arguments.
-      overloads.sort_by! {|(arglist1, _)| arglist1.num_required }
+      variadic, normals = overloads.partition {|(arglist1, _)| arglist1.rest_arg }
 
-      # There should not be more than one variadic overload.
-      rest_args = overloads.select {|(arglist1, _)| arglist1.rest_arg }
-      g.compile_error "Can't have more than one variadic overload" if rest_args.length > 1
+      g.compile_error "Can't have more than one variadic overload" if variadic.length > 1
 
-      # If there is a variadic overload, it should be on the overload with the
-      # most required arguments.
-      largest_required = overloads.map {|(arglist1, _)| arglist1.num_required }.max
-      if rest_args.length == 1 && rest_args[0][0].num_required < largest_required
-        g.compile_error "Can't have a fixed arity overload with more params than a variadic overload"
-      end
+      # Sort the non-variadic overloads by ascending number of required arguments.
+      normals.sort_by! {|(arglist1, _)| arglist1.num_required }
 
-      # Compare each consecutive two overloads.
-      overloads.each_cons(2) do |(arglist1, _), (arglist2, _)|
+      if variadic.length == 1
+        # If there is a variadic overload, it should have at least as many
+        # required arguments as the next highest overload.
+        variadic_arglist = variadic[0][0]
+        if variadic_arglist.num_required < normals.last[0].num_required
+          g.compile_error "Can't have a fixed arity overload with more params than a variadic overload"
+        end
+
         # Can't have two overloads with same number of required args unless
         # they have no optional args and one of them is the variadic overload.
+        if variadic_arglist.num_required == normals.last[0].num_required &&
+          (variadic_arglist.num_optional != 0 || normals.last[0].num_optional == 0)
+          g.compile_error "Can't have two overloads with the same arity"
+        end
+      end
+
+      # Compare each consecutive two non-variadic overloads.
+      overloads.each_cons(2) do |(arglist1, _), (arglist2, _)|
         if arglist1.num_required == arglist2.num_required
-          unless (arglist1.rest_arg || arglist2.rest_arg) && arglist1.num_optional == 0 && arglist2.num_optional == 0
-            g.compile_error "Can't have two overloads with the same arity"
-          end
+          g.compile_error "Can't have two overloads with the same arity"
         elsif arglist1.num_total >= arglist2.num_required
           g.compile_error "Can't have an overload with more total (required + optional) arguments than another overload with more required arguments"
         end
       end
+
+      overloads = normals + variadic
 
       g.compile_error "Arity overloading is not fully implemented yet"
     end
