@@ -381,73 +381,81 @@ module Apricot
       g.compile_error "Arity overloading is not fully implemented yet"
     end
 
-    arglist, body = overloads.first
-
     fn = g.class.new
     fn.name = fn_name || :__fn__
     fn.file = g.file
 
-    scope = AST::FnScope.new(g.scope, name)
-    fn.scopes << scope
-
     fn.definition_line g.line
     fn.set_line g.line
 
-    # Allocate slots for the required arguments
-    arglist.required_args.each {|arg| scope.new_local(arg) }
+    fn.total_args = 0
+    fn.required_args = 0
+    fn.local_count = 0
+    fn.local_names = []
 
-    next_optional = fn.new_label
+    fn_scope = AST::FnScope.new(g.scope, fn_name)
 
-    arglist.optional_args.each_with_index do |(name, value), i|
-      # Calculate the position of this optional arg, off the end of the
-      # required args
-      arg_index = arglist.num_required + i
+    overloads.each do |arglist, body|
+      overload_scope = AST::OverloadScope.new(fn_scope)
+      fn.scopes << overload_scope
 
-      # Allocate a slot for this optional argument
-      scope.new_local(name)
+      # Allocate slots for the required arguments
+      arglist.required_args.each {|arg| overload_scope.new_local(arg) }
 
-      fn.passed_arg arg_index
-      fn.git next_optional
-
-      value.bytecode(fn)
-      fn.set_local arg_index
-      fn.pop
-
-      next_optional.set!
       next_optional = fn.new_label
+
+      arglist.optional_args.each_with_index do |(name, value), i|
+        # Calculate the position of this optional arg, off the end of the
+        # required args
+        arg_index = arglist.num_required + i
+
+        # Allocate a slot for this optional argument
+        overload_scope.new_local(name)
+
+        fn.passed_arg arg_index
+        fn.git next_optional
+
+        value.bytecode(fn)
+        fn.set_local arg_index
+        fn.pop
+
+        next_optional.set!
+        next_optional = fn.new_label
+      end
+
+      if arglist.rest_arg
+        # Allocate the slot for the rest argument
+        overload_scope.new_local(arglist.rest_arg)
+        overload_scope.splat = true
+      end
+
+      overload_scope.loop_label = next_optional
+      overload_scope.loop_label.set!
+
+      SpecialForm[:do].bytecode(fn, body)
+
+      fn.total_args += arglist.num_total
+      fn.required_args += arglist.num_required
+
+      fn.local_count += overload_scope.local_count
+      fn.local_names += overload_scope.local_names
+
+      # If there is a rest arg, it will appear after all the required and
+      # optional arguments.
+      fn.splat_index = arglist.num_total if arglist.rest_arg
+
+      # Pop the overload scope
+      fn.scopes.pop
     end
-
-    if arglist.rest_arg
-      # Allocate the slot for the rest argument
-      scope.new_local(arglist.rest_arg)
-      scope.splat = true
-    end
-
-    scope.loop_label = next_optional
-    scope.loop_label.set!
-
-    SpecialForm[:do].bytecode(fn, body)
 
     fn.ret
     fn.close
-
-    fn.scopes.pop
-
-    # If there is a rest arg, it will appear after all the required and
-    # optional arguments.
-    fn.splat_index = arglist.num_total if arglist.rest_arg
-
-    fn.total_args = arglist.num_total
-    fn.required_args = arglist.num_required
-
-    fn.local_count = scope.local_count
-    fn.local_names = scope.local_names
 
     g.push_cpath_top
     g.find_const :Kernel
     g.create_block fn
     g.send_with_block :lambda, 0
-    g.set_local scope.self_reference.slot if fn_name
+    g.set_local fn_scope.self_reference.slot if fn_name
   end
 
   # (try body* (rescue name|[name condition*] body*)* (ensure body*)?)

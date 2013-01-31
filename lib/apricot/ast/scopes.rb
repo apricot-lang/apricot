@@ -39,11 +39,7 @@ module Apricot
     end
 
     class FnScope < Scope
-      include StorageScope
-
       attr_reader :name, :self_reference
-      attr_accessor :splat
-      alias_method :splat?, :splat
 
       def initialize(parent, name)
         super(parent)
@@ -62,6 +58,31 @@ module Apricot
       def find_var(name, depth = 0)
         return @self_reference if name == @name
 
+        @parent.find_var(name, depth + 1)
+      end
+
+      # A (recur) is looking for a recursion target (ie. a loop or a fn
+      # overload scope).
+      def find_recur_target
+        @parent.find_recur_target
+      end
+    end
+
+    class OverloadScope < Scope
+      include StorageScope
+
+      attr_accessor :splat
+      alias_method :splat?, :splat
+
+      def initialize(parent_fn)
+        super(parent_fn)
+      end
+
+      # An identifier or a nested scope is looking up a variable. If the
+      # variable is found here, return a reference to it. Otherwise look it up
+      # on the parent and increment its depth because it is beyond the bounds
+      # of the current fn overload.
+      def find_var(name, depth = 0)
         if slot = @variables[name]
           LocalReference.new(slot, depth)
         else
@@ -75,7 +96,8 @@ module Apricot
         @variables[name] = store_new_local(name)
       end
 
-      # A (recur) is looking for a recursion target. This, being a fn, is one.
+      # A (recur) is looking for a recursion target. This, being a fn
+      # overload, is one.
       def find_recur_target
         self
       end
