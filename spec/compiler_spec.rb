@@ -202,6 +202,12 @@ describe 'Apricot' do
     bad_apricot(%q|(fn [[x]])|)
     bad_apricot(%q|(fn [&])|)
     bad_apricot(%q|(fn [& x y])|)
+    bad_apricot(%q|(fn [x x])|)
+    bad_apricot(%q|(fn [a b x c d x e f])|)
+    bad_apricot(%q|(fn [a x b [x 1]])|)
+    bad_apricot(%q|(fn [a b x c d & x])|)
+    bad_apricot(%q|(fn [a b c[x 1] [y 2] [x 3]])|)
+    bad_apricot(%q|(fn [a b [x 1] & x])|)
   end
 
   it 'does not compile invalid arity-overloaded fn forms' do
