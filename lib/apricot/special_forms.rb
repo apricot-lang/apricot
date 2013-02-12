@@ -313,6 +313,8 @@ module Apricot
     end
   end
 
+  Overload = Struct.new(:arglist, :body)
+
   # (fn name? [args*] body*)
   # (fn name? [args* & rest] body*)
   # (fn name? ([args*] body*) ... ([args*] body*))
@@ -330,13 +332,13 @@ module Apricot
         arglist, *body = overload.elements
         g.compile_error "Argument list in overload must be an array literal" unless arglist.is_a? AST::ArrayLiteral
         arglist = ArgList.new(arglist.elements, g)
-        overloads << [arglist, body]
+        overloads << Overload.new(arglist, body)
       end
     when AST::ArrayLiteral
       # This is the single-arity form (fn name? [args*] body*)
       arglist, *body = args
       arglist = ArgList.new(arglist.elements, g)
-      overloads << [arglist, body]
+      overloads << Overload.new(arglist, body)
     else
       # Didn't match any of the legal forms.
       g.compile_error "Expected argument list or arity overload in fn definition"
@@ -344,41 +346,41 @@ module Apricot
 
     # Check that the overloads do not conflict with each other.
     if overloads.length > 1
-      variadic, normals = overloads.partition {|(arglist1, _)| arglist1.rest_arg }
+      variadic, normals = overloads.partition {|overload| overload.arglist.rest_arg }
 
       g.compile_error "Can't have more than one variadic overload" if variadic.length > 1
 
       # Sort the non-variadic overloads by ascending number of required arguments.
-      normals.sort_by! {|(arglist1, _)| arglist1.num_required }
+      normals.sort_by! {|overload| overload.arglist.num_required }
 
       if variadic.length == 1
         # If there is a variadic overload, it should have at least as many
         # required arguments as the next highest overload.
-        variadic_arglist = variadic[0][0]
-        if variadic_arglist.num_required < normals.last[0].num_required
+        variadic_arglist = variadic.first.arglist
+        if variadic_arglist.num_required < normals.last.arglist.num_required
           g.compile_error "Can't have a fixed arity overload with more params than a variadic overload"
         end
 
         # Can't have two overloads with same number of required args unless
         # they have no optional args and one of them is the variadic overload.
-        if variadic_arglist.num_required == normals.last[0].num_required &&
-          (variadic_arglist.num_optional != 0 || normals.last[0].num_optional == 0)
+        if variadic_arglist.num_required == normals.last.arglist.num_required &&
+          (variadic_arglist.num_optional != 0 || normals.last.arglist.num_optional != 0)
           g.compile_error "Can't have two overloads with the same arity"
         end
       end
 
       # Compare each consecutive two non-variadic overloads.
-      normals.each_cons(2) do |(arglist1, _), (arglist2, _)|
+      normals.each_cons(2) do |o1, o2|
+        arglist1 = o1.arglist
+        arglist2 = o2.arglist
         if arglist1.num_required == arglist2.num_required
           g.compile_error "Can't have two overloads with the same arity"
         elsif arglist1.num_total >= arglist2.num_required
-          g.compile_error "Can't have an overload with more total (required + optional) arguments than another overload with more required arguments"
+          g.compile_error "Can't have an overload with as many total (required + optional) arguments as another overload has required arguments"
         end
       end
 
       overloads = normals + variadic
-
-      g.compile_error "Arity overloading is not fully implemented yet"
     end
 
     fn = g.class.new
@@ -395,9 +397,67 @@ module Apricot
 
     fn_scope = AST::FnScope.new(g.scope, fn_name)
 
-    overloads.each do |arglist, body|
+    # Generate the code that selects and jumps to the correct overload based
+    # on the number of arguments passed.
+    if overloads.length > 1
+      overload_labels = overloads.map { fn.new_label }
+      nomatch_possible = false # Is it possible to match no overload?
+      nomatch = fn.new_label
+
+      last_args = overloads.last.arglist
+      if last_args.rest_arg
+        if overloads[-2].arglist.num_required == last_args.num_required
+          fn.passed_arg last_args.num_required
+        else
+          fn.passed_arg last_args.num_required - 1
+        end
+        fn.git overload_labels.last
+      else
+        fn.passed_arg last_args.num_required - 1
+        fn.git overload_labels.last
+      end
+
+      prev_num_required = last_args.num_required
+
+      (overloads.length - 2).downto(0) do |i|
+        arglist = overloads[i].arglist
+
+        jump = prev_num_required - arglist.num_total
+        if jump > 1
+          nomatch_possible = true
+          fn.passed_arg prev_num_required - 2
+          fn.git nomatch
+        end
+
+        if arglist.num_required == 0
+          if nomatch_possible
+            fn.goto overload_labels[i]
+          end
+        else
+          fn.passed_arg arglist.num_required - 1
+          fn.git overload_labels[i]
+        end
+
+        prev_num_required = arglist.num_required
+      end
+
+      if nomatch_possible
+        nomatch.set!
+        fn.push_cpath_top
+        fn.find_const :ArgumentError
+        fn.push_literal "No matching overload"
+        fn.string_dup
+        fn.send :new, 1
+        fn.raise_exc
+      end
+    end
+
+    overloads.each_with_index do |overload, i|
+      arglist, body = overload.arglist, overload.body
       overload_scope = AST::OverloadScope.new(fn_scope)
       fn.scopes << overload_scope
+
+      overload_labels[i].set! if overloads.length > 1
 
       # Allocate slots for the required arguments
       arglist.required_args.each {|arg| overload_scope.new_local(arg) }
@@ -433,23 +493,26 @@ module Apricot
       overload_scope.loop_label.set!
 
       SpecialForm[:do].bytecode(fn, body)
+      fn.ret
 
-      fn.total_args += arglist.num_total
-      fn.required_args += arglist.num_required
-
+      # TODO: does this make any sense with overloads?
       fn.local_count += overload_scope.local_count
       fn.local_names += overload_scope.local_names
-
-      # If there is a rest arg, it will appear after all the required and
-      # optional arguments.
-      fn.splat_index = arglist.num_total if arglist.rest_arg
 
       # Pop the overload scope
       fn.scopes.pop
     end
 
-    fn.ret
     fn.close
+
+    # Use the maximum total args
+    fn.total_args = overloads.last.arglist.num_total
+    # Use the minimum required args
+    fn.required_args = overloads.first.arglist.num_required
+
+    # If there is a rest arg, it will appear after all the required and
+    # optional arguments.
+    fn.splat_index = overloads.last.arglist.num_total if overloads.last.arglist.rest_arg
 
     g.push_cpath_top
     g.find_const :Kernel
