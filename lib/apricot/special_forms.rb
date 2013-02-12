@@ -425,7 +425,7 @@ module Apricot
         jump = prev_num_required - arglist.num_total
         if jump > 1
           nomatch_possible = true
-          fn.passed_arg prev_num_required - 2
+          fn.passed_arg arglist.num_total
           fn.git nomatch
         end
 
