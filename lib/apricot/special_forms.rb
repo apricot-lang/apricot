@@ -457,6 +457,12 @@ module Apricot
       overload_scope = AST::OverloadScope.new(fn_scope)
       fn.scopes << overload_scope
 
+      # Check if there are any duplicate names in the argument list.
+      argnames = arglist.required_args + arglist.optional_args.map(&:first)
+      argnames << arglist.rest_arg if arglist.rest_arg
+      dup_name = argnames.detect {|name| argnames.count(name) > 1 }
+      g.compile_error "Duplicate argument name '#{dup_name}'" if dup_name
+
       overload_labels[i].set! if overloads.length > 1
 
       # Allocate slots for the required arguments
