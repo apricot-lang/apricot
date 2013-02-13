@@ -80,13 +80,14 @@ module Apricot
 
       # An identifier or a nested scope is looking up a variable. If the
       # variable is found here, return a reference to it. Otherwise look it up
-      # on the parent and increment its depth because it is beyond the bounds
-      # of the current fn overload.
+      # on the parent (a fn). Don't increase the depth, the lookup on the fn
+      # will do that, and if we do it twice then the generated
+      # push_local_depth instructions look up too many scopes.
       def find_var(name, depth = 0)
         if slot = @variables[name]
           LocalReference.new(slot, depth)
         else
-          @parent.find_var(name, depth + 1)
+          @parent.find_var(name, depth)
         end
       end
 
