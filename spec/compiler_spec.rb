@@ -206,7 +206,7 @@ describe 'Apricot' do
     bad_apricot(%q|(fn [a b x c d x e f])|)
     bad_apricot(%q|(fn [a x b [x 1]])|)
     bad_apricot(%q|(fn [a b x c d & x])|)
-    bad_apricot(%q|(fn [a b c[x 1] [y 2] [x 3]])|)
+    bad_apricot(%q|(fn [a b c [x 1] [y 2] [x 3]])|)
     bad_apricot(%q|(fn [a b [x 1] & x])|)
   end
 
