@@ -222,7 +222,6 @@ describe 'Apricot' do
     bad_apricot(%q|(fn ([x [o 1] [p 2] [q 3]] 1) ([x y z] 2))|)
     bad_apricot(%q|(fn ([x & rest] 1) ([x y] 2))|)
     bad_apricot(%q|(fn ([x & rest] 1) ([x [o 1]] 2))|)
-    bad_apricot(%q|(fn ([x & rest] 1) ([[o 1]] 2))|)
     bad_apricot(%q|(fn ([x [o 1] & rest] 1) ([x] 2))|)
   end
 

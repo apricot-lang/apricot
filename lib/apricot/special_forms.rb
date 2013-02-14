@@ -366,8 +366,8 @@ module Apricot
         if variadic_arglist.num_required == normals.last.arglist.num_required &&
           (variadic_arglist.num_optional != 0 || normals.last.arglist.num_optional != 0)
           g.compile_error "Can't have two overloads with the same arity"
-        elsif normals.last.arglist.num_total >= variadic_arglist.num_required
-          g.compile_error "Can't have an overload with as many total (required + optional) arguments as another overload has required arguments"
+        elsif normals.last.arglist.num_total > variadic_arglist.num_required
+          g.compile_error "Can't have an overload with more total (required + optional) arguments than the variadic overload has required argument"
         end
       end
 
