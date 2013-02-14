@@ -210,6 +210,32 @@ describe 'Apricot' do
     bad_apricot(%q|(fn [a b [x 1] & x])|)
   end
 
+  it 'compiles arity-overloaded fn forms' do
+    apricot(%q|((fn ([] 0)))|) == 0
+    apricot(%q|((fn ([x] x)) 42)|) == 42
+    apricot(%q|((fn ([[x 42]] x)))|) == 42
+    apricot(%q|((fn ([& rest] rest)) 1 2 3)|) == [1, 2, 3]
+    apricot(%q|((fn ([] 0) ([x] x)))|) == 0
+    apricot(%q|((fn ([] 0) ([x] x)) 42)|) == 42
+    apricot(%q|((fn ([x] x) ([x y] y)) 42)|) == 42
+    apricot(%q|((fn ([x] x) ([x y] y)) 42 13)|) == 13
+
+    add_fn = apricot(<<-END)
+      (fn
+        ([] 0)
+        ([x] x)
+        ([x y] (.+ x y))
+        ([x y & more]
+         (.reduce more (.+ x y) :+)))
+    END
+
+    add_fn.call.should == 0
+    add_fn.call(42).should == 42
+    add_fn.call(1,2).should == 3
+    add_fn.call(1,2,3).should == 6
+    add_fn.call(1,2,3,4,5,6,7,8).should == 36
+  end
+
   it 'does not compile invalid arity-overloaded fn forms' do
     bad_apricot(%q|(fn ([] 1) :foo)|)
     bad_apricot(%q|(fn ([] 1) ([] 2))|)
