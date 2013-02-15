@@ -39,10 +39,11 @@
 (defn cons [head tail]
   (.cons (.to_list tail) head))
 
-(defn apply [f x & more]
-  (if (.empty? more)
-    (.apricot_call f & x)
-    (.apricot_call f & (cons x (.concat more (.pop more))))))
+(defn apply
+  ([f x]
+   (.apricot_call f & x))
+  ([f x & more]
+   (.apricot_call f & (cons x (.concat more (.pop more))))))
 
 ;; At this point everything is defined that syntax quote requires
 
@@ -151,10 +152,11 @@
 (defn empty? [coll]
   (.empty? coll))
 
-(defn map [f coll & colls]
-  (if (empty? colls)
-    (.map coll | f)
-    (.map (.zip coll & colls) | #(apply f %))))
+(defn map
+  ([f coll]
+   (.map coll | f))
+  ([f coll & colls]
+   (.map (.zip coll & colls) | #(apply f %))))
 
 ; Basic logic predicates and functions
 
@@ -187,21 +189,31 @@
 (defn odd? [x]
   (.odd? x))
 
-(defn + [& args]
-  (.reduce args 0 :+))
+(defn +
+  ([] 0)
+  ([x] x)
+  ([x y] (.+ x y))
+  ([x y & more]
+   (.reduce more (.+ x y) :+)))
 
-(defn * [& args]
-  (.reduce args 1 :*))
+(defn *
+  ([] 1)
+  ([x] x)
+  ([x y] (.* x y))
+  ([x y & more]
+   (.reduce more (.* x y) :*)))
 
-(defn - [x & more]
-  (if (empty? more)
-    (. x -@) ; Ruby's horribly named -@ method is the negation operator
-    (.reduce (.unshift more x) :-)))
+(defn -
+  ([x] (. x -@)) ; Ruby's horribly named -@ method is the negation operator
+  ([x y] (.- x y))
+  ([x y & more]
+   (.reduce more (.- x y) :-)))
 
-(defn / [x & more]
-  (if (empty? more)
-    (.quo 1 x)
-    (.reduce (.unshift more x) :quo)))
+(defn /
+  ([x] (.quo 1 x))
+  ([x y] (.quo x y))
+  ([x y & more]
+   (.reduce more (.quo x y) :quo)))
 
 (defn inc [x] (+ x 1))
 (defn dec [x] (- x 1))
@@ -214,10 +226,11 @@
 (defmacro when-not [test & body]
   `(if ~test nil (do ~@body)))
 
-(defmacro .. [x form & more]
-  (if (empty? more)
-    `(. ~x ~form)
-    `(.. (. ~x ~form) ~@more)))
+(defmacro ..
+  ([x form]
+   `(. ~x ~form))
+  ([x form & more]
+   `(.. (. ~x ~form) ~@more)))
 
 (defmacro if-let [bindings then [else nil]]
   `(let [temp# ~(bindings 1)]
@@ -259,19 +272,19 @@
     `(let [~val ~x]
        ~(apply expand forms))))
 
-(defmacro and [& forms]
-  (cond
-    (empty? forms) true
-    (= (count forms) 1) (first forms)
-    :else `(let [and# ~(first forms)]
-             (if and# (and ~@(rest forms)) and#))))
+(defmacro and
+  ([] true)
+  ([x] x)
+  ([x & more]
+   `(let [and# ~x]
+      (if and# (and ~@more) and#))))
 
-(defmacro or [& forms]
-  (cond
-    (empty? forms) false
-    (= (count forms) 1) (first forms)
-    :else `(let [or# ~(first forms)]
-             (if or# or# (or ~@(rest forms))))))
+(defmacro or
+  ([] false)
+  ([x] x)
+  ([x & more]
+   `(let [or# ~x]
+      (if or# or# (or ~@more)))))
 
 (defmacro doto [x & forms]
   (let [gx (gensym "doto")]
@@ -288,44 +301,64 @@
 (defn identical? [x y]
   (.equal? x y))
 
-(defn = [x & more]
-  (.all? more | #(. x == %)))
+(defn =
+  ([x] true)
+  ([x y] (. x == y))
+  ([x y & more]
+   (and
+     (. x == y)
+     (.all? more | #(. x == %)))))
 
-(defn not= [x & more]
-  (not (apply = x more)))
+(defn not=
+  ([x] false)
+  ([x y] (. x != y))
+  ([x y & more]
+   (not (apply = x y more))))
 
 (defn compare [x y]
   (. x <=> y))
 
-(defn > [x & more]
-  (if (empty? more)
-    true
-    (.. (.unshift more x) (each_cons 2) (all? | #(. %1 > %2)))))
+(defn >
+  ([x] true)
+  ([x y] (. x > y))
+  ([x y & more]
+   (and
+     (. x > y)
+     (.all? (.each_cons (cons y more) 2) | #(. %1 > %2)))))
 
-(defn >= [x & more]
-  (if (empty? more)
-    true
-    (.. (.unshift more x) (each_cons 2) (all? | #(. %1 >= %2)))))
+(defn <
+  ([x] true)
+  ([x y] (. x < y))
+  ([x y & more]
+   (and
+     (. x < y)
+     (.all? (.each_cons (cons y more) 2) | #(. %1 < %2)))))
 
-(defn < [x & more]
-  (if (empty? more)
-    true
-    (.. (.unshift more x) (each_cons 2) (all? | #(. %1 < %2)))))
+(defn >=
+  ([x] true)
+  ([x y] (. x >= y))
+  ([x y & more]
+   (and
+     (. x >= y)
+     (.all? (.each_cons (cons y more) 2) | #(. %1 >= %2)))))
 
-(defn <= [x & more]
-  (if (empty? more)
-    true
-    (.. (.unshift more x) (each_cons 2) (all? | #(. %1 <= %2)))))
+(defn <=
+  ([x] true)
+  ([x y] (. x <= y))
+  ([x y & more]
+   (and
+     (. x <= y)
+     (.all? (.each_cons (cons y more) 2) | #(. %1 <= %2)))))
 
-(defn max [x & more]
-  (if (empty? more)
-    x
-    (.max (.unshift more x))))
+(defn max
+  ([x] x)
+  ([x & more]
+   (.max (cons x more))))
 
-(defn min [x & more]
-  (if (empty? more)
-    x
-    (.min (.unshift more x))))
+(defn min
+  ([x] x)
+  ([x & more]
+   (.min (cons x more))))
 
 ; Miscellaneous (to be sorted)
 
