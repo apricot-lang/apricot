@@ -244,6 +244,22 @@ describe 'Apricot' do
     expect { two_or_three.call(1,2,3,4,5) }.to raise_error(ArgumentError)
   end
 
+  it 'compiles arity-overloaded fns with no matching overloads for some arities' do
+    zero_or_two = apricot(%q|(fn ([] 0) ([x y] 2))|)
+    zero_or_two.call.should == 0
+    expect { zero_or_two.call(1) }.to raise_error(ArgumentError)
+    zero_or_two.call(1,2).should == 2
+    expect { zero_or_two.call(1,2,3) }.to raise_error(ArgumentError)
+
+    one_or_four = apricot(%q|(fn ([w] 1) ([w x y z] 4))|)
+    expect { one_or_four.call }.to raise_error(ArgumentError)
+    one_or_four.call(1).should == 1
+    expect { one_or_four.call(1,2) }.to raise_error(ArgumentError)
+    expect { one_or_four.call(1,2,3) }.to raise_error(ArgumentError)
+    one_or_four.call(1,2,3,4).should == 4
+    expect { one_or_four.call(1,2,3,4,5) }.to raise_error(ArgumentError)
+  end
+
   it 'does not compile invalid arity-overloaded fn forms' do
     bad_apricot(%q|(fn ([] 1) :foo)|)
     bad_apricot(%q|(fn ([] 1) ([] 2))|)
