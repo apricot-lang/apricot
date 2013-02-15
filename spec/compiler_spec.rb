@@ -234,6 +234,14 @@ describe 'Apricot' do
     add_fn.call(1,2).should == 3
     add_fn.call(1,2,3).should == 6
     add_fn.call(1,2,3,4,5,6,7,8).should == 36
+
+    two_or_three = apricot(%q|(fn ([x y] 2) ([x y z] 3))|)
+    expect { two_or_three.call }.to raise_error(ArgumentError)
+    expect { two_or_three.call(1) }.to raise_error(ArgumentError)
+    two_or_three.call(1,2).should == 2
+    two_or_three.call(1,2,3).should == 3
+    expect { two_or_three.call(1,2,3,4) }.to raise_error(ArgumentError)
+    expect { two_or_three.call(1,2,3,4,5) }.to raise_error(ArgumentError)
   end
 
   it 'does not compile invalid arity-overloaded fn forms' do
