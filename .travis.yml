@@ -1,6 +1,6 @@
 language: ruby
 rvm:
-  - rbx-rc1-19mode
+  - rbx-19mode
 
 notifications:
   webhooks:
