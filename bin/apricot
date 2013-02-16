@@ -52,7 +52,7 @@ evals.each do |type, *args|
   when :stdin
     Apricot::Compiler.eval(STDIN.read, "(stdin)", 1, bytecode)
   when :file
-    cm = Apricot::Compiler.compile(args.first, nil, bytecode)
-    Rubinius.run_script cm
+    # The code is executed as it compiles.
+    Apricot::Compiler.compile(args.first, nil, bytecode)
   end
 end
