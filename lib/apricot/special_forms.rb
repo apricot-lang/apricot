@@ -316,16 +316,18 @@ module Apricot
 
           optional_args << [arg[0].name, arg[1]]
         when AST::Identifier
-          if next_is_rest
+          if arg.name == :& && !@block_arg
+            g.compile_error "Can't have two rest arguments in one overload" if @rest_arg
+            next_is_rest = true
+          elsif arg.name == :|
+            g.compile_error "Can't have two block arguments in one overload" if @block_arg
+            next_is_block = true
+          elsif next_is_rest
             @rest_arg = arg.name
             next_is_rest = false
           elsif next_is_block
             @block_arg = arg.name
             next_is_block = false
-          elsif arg.name == :& && !@block_arg
-            next_is_rest = true
-          elsif arg.name == :|
-            next_is_block = true
           else
             g.compile_error "Unexpected arguments after rest argument" if @rest_arg
             g.compile_error "Optional arguments in fn form must be last" if @optional_args.any?
@@ -337,6 +339,7 @@ module Apricot
       end
 
       g.compile_error "Expected identifier following & in argument list" if next_is_rest
+      g.compile_error "Expected identifier following | in argument list" if next_is_block
 
       @num_required = @required_args.length
       @num_optional = @optional_args.length
@@ -506,6 +509,7 @@ module Apricot
       # Check if there are any duplicate names in the argument list.
       argnames = arglist.required_args + arglist.optional_args.map(&:first)
       argnames << arglist.rest_arg if arglist.rest_arg
+      argnames << arglist.block_arg if arglist.block_arg
       dup_name = argnames.detect {|name| argnames.count(name) > 1 }
       g.compile_error "Duplicate argument name '#{dup_name}'" if dup_name
 
