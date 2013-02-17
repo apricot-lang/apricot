@@ -301,6 +301,24 @@ describe 'Apricot' do
     CODE
   end
 
+  it 'compiles recur forms in fns with optional arguments' do
+    apricot(<<-CODE).should == 150
+      ((fn [x y [mult 10]]
+         (if (. x > 0)
+           (recur (. x - 1) (. y + x) mult)
+           (* y mult)))
+       5 0)
+    CODE
+
+    apricot(<<-CODE).should == 300
+      ((fn [x y [mult 10]]
+         (if (. x > 0)
+           (recur (. x - 1) (. y + x) mult)
+           (* y mult)))
+       5 0 20)
+    CODE
+  end
+
   it 'compiles try forms' do
     apricot(%q|(try)|).should == nil
     apricot(%q|(try :foo)|).should == :foo
