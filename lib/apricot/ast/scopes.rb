@@ -79,6 +79,8 @@ module Apricot
       attr_accessor :splat
       alias_method :splat?, :splat
 
+      attr_accessor :block_arg
+
       def initialize(parent_fn)
         super(parent_fn)
       end

@@ -256,6 +256,11 @@ module Apricot
     g.compile_error "No recursion target found for recur" unless target
     vars = target.variables.values
 
+    # If there is a block arg, ignore it.
+    if target.is_a?(AST::OverloadScope) && target.block_arg
+      vars.pop
+    end
+
     g.compile_error "Arity of recur does not match enclosing loop or fn" unless vars.length == args.length
 
     args.each {|arg| arg.bytecode(g) }
@@ -289,18 +294,20 @@ module Apricot
   end
 
   class ArgList
-    attr_reader :required_args, :optional_args, :rest_arg,
+    attr_reader :required_args, :optional_args, :rest_arg, :block_arg,
       :num_required, :num_optional, :num_total
 
     def initialize(args, g)
       @required_args = []
       @optional_args = []
       @rest_arg = nil
+      @block_arg = nil
 
       next_is_rest = false
+      next_is_block = false
 
       args.each do |arg|
-        g.compile_error "Unexpected arguments after rest argument" if @rest_arg
+        g.compile_error "Unexpected arguments after block argument" if @block_arg
 
         case arg
         when AST::ArrayLiteral
@@ -312,9 +319,15 @@ module Apricot
           if next_is_rest
             @rest_arg = arg.name
             next_is_rest = false
-          elsif arg.name == :&
+          elsif next_is_block
+            @block_arg = arg.name
+            next_is_block = false
+          elsif arg.name == :& && !@block_arg
             next_is_rest = true
+          elsif arg.name == :|
+            next_is_block = true
           else
+            g.compile_error "Unexpected arguments after rest argument" if @rest_arg
             g.compile_error "Optional arguments in fn form must be last" if @optional_args.any?
             @required_args << arg.name
           end
@@ -334,7 +347,9 @@ module Apricot
   Overload = Struct.new(:arglist, :body)
 
   # (fn name? [args*] body*)
+  # (fn name? [args* | block] body*)
   # (fn name? [args* & rest] body*)
+  # (fn name? [args* & rest | block] body*)
   # (fn name? ([args*] body*) ... ([args*] body*))
   SpecialForm.define(:fn) do |g, args|
     fn_name = args.shift.name if args.first.is_a? AST::Identifier
@@ -538,6 +553,15 @@ module Apricot
 
       overload_scope.loop_label = next_optional
       overload_scope.loop_label.set!
+
+      # Allocate the slot for the block argument
+      if arglist.block_arg
+        overload_scope.new_local(arglist.block_arg)
+        overload_scope.block_arg = arglist.block_arg
+        fn.push_proc
+        fn.set_local overload_scope.find_var(arglist.block_arg).slot
+        fn.pop
+      end
 
       SpecialForm[:do].bytecode(fn, body)
       fn.ret
