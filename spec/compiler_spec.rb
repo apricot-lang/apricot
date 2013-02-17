@@ -327,6 +327,39 @@ describe 'Apricot' do
     bad_apricot(%q|(fn [x & rest] (recur 1 2 3))|)
   end
 
+  it 'compiles recur forms in arity-overloaded fns' do
+    apricot(<<-CODE).should == 0
+      ((fn
+         ([] 0)
+         ([& args] (recur [])))
+        1 2 3)
+    CODE
+
+    apricot(<<-CODE).should == 0
+      ((fn
+         ([] 0)
+         ([& args] (recur (rest args))))
+        1 2 3)
+    CODE
+
+    apricot(<<-CODE).should == 6
+      ((fn
+         ([x] x)
+         ([x & args] (recur (.+ x (first args)) (rest args))))
+        1 2 3)
+    CODE
+
+    apricot(<<-CODE).should == 42
+      ((fn
+         ([] 0)
+         ([x y & args]
+          (if (.empty? args)
+            42
+            (recur x y (rest args)))))
+        1 2 3)
+    CODE
+  end
+
   it 'compiles try forms' do
     apricot(%q|(try)|).should == nil
     apricot(%q|(try :foo)|).should == :foo
