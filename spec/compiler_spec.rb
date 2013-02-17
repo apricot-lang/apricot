@@ -194,6 +194,28 @@ describe 'Apricot' do
     apricot(%q|((fn [x [y 2] & z] [x y z]) 1 3 4 5)|).should == [1, 3, [4, 5]]
   end
 
+  it 'compiles fn forms with block arguments' do
+    apricot(%q|((fn [\| block] block))|).should == nil
+    apricot(%q|(.call (fn [\| block] (block)) \| (fn [] 42))|).should == 42
+
+    fn = apricot(%q|(fn [x \| block] (block x))|)
+    # Without passing a block, 'block' is nil.
+    expect { fn.call(2) }.to raise_error(NoMethodError)
+    fn.call(2) {|x| x + 40 }.should == 42
+
+    reduce_args = apricot <<-CODE
+      (fn reduce-args
+        ([x] x)
+        ([x y | f] (f x y))
+        ([x y & more | f]
+         (recur (f x y) (first more) (rest more))))
+    CODE
+
+    reduce_args.call(1).should == 1
+    reduce_args.call(40, 2) {|x,y| x * y }.should == 80
+    reduce_args.call(1,2,3,4,5,6) {|x,y| x + y }.should == 21
+  end
+
   it 'does not compile invalid fn forms' do
     bad_apricot(%q|(fn :foo)|)
     bad_apricot(%q|(fn [1])|)
