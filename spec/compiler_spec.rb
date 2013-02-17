@@ -225,11 +225,21 @@ describe 'Apricot' do
     bad_apricot '(fn [&])'
     bad_apricot '(fn [& x y])'
     bad_apricot '(fn [x x])'
+    bad_apricot '(fn [x & rest1 & rest2])'
     bad_apricot '(fn [a b x c d x e f])'
     bad_apricot '(fn [a x b [x 1]])'
     bad_apricot '(fn [a b x c d & x])'
     bad_apricot '(fn [a b c [x 1] [y 2] [x 3]])'
     bad_apricot '(fn [a b [x 1] & x])'
+    bad_apricot '(fn [|])'
+    bad_apricot '(fn [| &])'
+    bad_apricot '(fn [| & a])'
+    bad_apricot '(fn [| a &])'
+    bad_apricot '(fn [& x |])'
+    bad_apricot '(fn [| x y])'
+    bad_apricot '(fn [| x & y])'
+    bad_apricot '(fn [x | x])'
+    bad_apricot '(fn [x | b1 | b2])'
   end
 
   it 'compiles arity-overloaded fn forms' do
