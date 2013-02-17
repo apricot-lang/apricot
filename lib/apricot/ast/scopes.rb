@@ -29,7 +29,12 @@ module Apricot
 
     class Scope
       attr_reader :parent, :variables
-      attr_accessor :loop_label
+      # The loop label stores the code location where a (recur) form should
+      # jump to. The secondary loop label is used in the case of recur in a fn
+      # overload with variadic arguments. If the array passed for the variadic
+      # arguments in the recur is empty, it should instead jump to the
+      # matching non-variadic overload, if applicable.
+      attr_accessor :loop_label, :secondary_loop_label
 
       def initialize(parent)
         @parent = parent

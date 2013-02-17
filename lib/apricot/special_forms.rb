@@ -256,14 +256,32 @@ module Apricot
     g.compile_error "No recursion target found for recur" unless target
     vars = target.variables.values
 
-    # TODO: check for fns with rest (splat) args
     g.compile_error "Arity of recur does not match enclosing loop or fn" unless vars.length == args.length
 
     args.each {|arg| arg.bytecode(g) }
 
+    # If the recur is in a variadic overload scope, and there is another
+    # overload with the same number of total arguments (not counting the
+    # variadic argument), then we must jump to that other overload if the
+    # list passed for the variadic argument list is empty.
+    variadic_with_secondary =
+      target.is_a?(AST::OverloadScope) &&
+      target.splat? &&
+      target.secondary_loop_label
+
+    if variadic_with_secondary
+      g.dup_top
+      g.move_down args.length # Save the variadic list behind the other args.
+    end
+
     vars.reverse_each do |var|
       g.set_local var
       g.pop
+    end
+
+    if variadic_with_secondary
+      g.send :empty?, 0 # Check if the variadic list is empty.
+      g.goto_if_true target.secondary_loop_label
     end
 
     g.check_interrupts
@@ -322,6 +340,10 @@ module Apricot
     fn_name = args.shift.name if args.first.is_a? AST::Identifier
 
     overloads = []
+    # The overload that a (recur ...) in a variadic overload must jump to if
+    # the variadic argument list passed is empty, and a matching non-variadic
+    # overload exists.
+    secondary_recur_overload = nil
 
     case args.first
     when AST::List
@@ -368,6 +390,13 @@ module Apricot
           g.compile_error "Can't have two overloads with the same arity"
         elsif normals.last.arglist.num_total > variadic_arglist.num_required
           g.compile_error "Can't have an overload with more total (required + optional) arguments than the variadic overload has required argument"
+        end
+
+        # If there is a normal overload with the same number of total
+        # arguments as the variadic overload, then a (recur ...) in the
+        # variadic overload may need to jump to the non-variadic overload.
+        if variadic_arglist.num_total == normals.last.arglist.num_total
+          secondary_recur_overload = normals.length - 1
         end
       end
 
@@ -495,6 +524,16 @@ module Apricot
         # Allocate the slot for the rest argument
         overload_scope.new_local(arglist.rest_arg)
         overload_scope.splat = true
+
+        # If there is another overload with the same number of arguments,
+        # excluding the variadic argument, a (recur ...) in this variadic
+        # overload may need to jump to that one (if recur is given an empty
+        # list for the variadic argument). Store the other overload's label in
+        # this variadic overload scope so (recur ...) can find it.
+        if secondary_recur_overload
+          overload_scope.secondary_loop_label =
+            overload_labels[secondary_recur_overload]
+        end
       end
 
       overload_scope.loop_label = next_optional
