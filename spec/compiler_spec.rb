@@ -319,6 +319,14 @@ describe 'Apricot' do
     CODE
   end
 
+  it 'does not compile invalid recur forms' do
+    bad_apricot(%q|(fn [] (recur 1))|)
+    bad_apricot(%q|(fn [x] (recur))|)
+    bad_apricot(%q|(fn [[x 10]] (recur))|)
+    bad_apricot(%q|(fn [x & rest] (recur 1))|)
+    bad_apricot(%q|(fn [x & rest] (recur 1 2 3))|)
+  end
+
   it 'compiles try forms' do
     apricot(%q|(try)|).should == nil
     apricot(%q|(try :foo)|).should == :foo
