@@ -275,6 +275,25 @@ describe 'Apricot' do
     bad_apricot(%q|(fn ([x [o 1] & rest] 1) ([x] 2))|)
   end
 
+  it 'compiles fn forms with self-reference' do
+    foo = apricot(%q|(fn foo [] foo)|)
+    foo.call.should == foo
+
+    # This one will stack overflow from the infinite loop.
+    expect { apricot(%q|((fn foo [] (foo)))|) }.to raise_error(SystemStackError)
+
+    add = apricot(<<-CODE)
+      (fn add
+        ([] 0)
+        ([& args]
+         (.+ (first args) (apply add (rest args)))))
+    CODE
+
+    add.call.should == 0
+    add.call(1).should == 1
+    add.call(1,2,3).should == 6
+  end
+
   it 'compiles loop and recur forms' do
     apricot(%q|(loop [])|).should == nil
     apricot(%q|(loop [a 1])|).should == nil
