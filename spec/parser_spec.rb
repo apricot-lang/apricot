@@ -269,6 +269,28 @@ describe Apricot::Parser do
     @first[1].name.should == :test
   end
 
+  it 'parses syntax quoted forms' do
+    begin
+      old_gensym = Apricot.instance_variable_get :@gensym
+      Apricot.instance_variable_set :@gensym, 41
+
+      parse_one("`(foo ~bar ~@baz quux#)", AST::List)
+      @first.should == AST::Node.from_value(
+        List[Identifier.intern(:concat),
+          List[Identifier.intern(:list),
+            List[Identifier.intern(:quote),
+              Identifier.intern(:foo)]],
+          List[Identifier.intern(:list),
+            Identifier.intern(:bar)],
+          Identifier.intern(:baz),
+          List[Identifier.intern(:list),
+            List[Identifier.intern(:quote),
+              Identifier.intern(:'quux#__42')]]])
+    ensure
+      Apricot.instance_variable_set :@gensym, old_gensym
+    end
+  end
+
   it 'parses #() shorthand' do
     Apricot.stub(:gensym).and_return(*:a..:z)
 
