@@ -6,18 +6,59 @@ Try to contain your excitement, please.
 
 
 ## Setup
-To get Apricot up and running, make sure you have rubinius and bundler installed.
+To get Apricot up and running, make sure you have Rubinius and Bundler installed.
+The easiest way to get Rubinius is with [RVM](https://rvm.io/). Whenever you are
+using Apricot you need to be running Rubinius in Ruby 1.9 mode. We make this easy
+in the Apricot repository with the `.ruby-version` file which RVM automatically
+reads to figure out which Ruby to switch to.
 
-    rvm install rubinius
-    gem install bundler
-    bundle
+``` sh
+$ rvm install rbx-head --1.9
+$ rvm use rbx-head
+$ gem install bundler
+$ bundle
+```
 
-## Starting Apricot
-To start Apricot
+## The REPL
+Apricot provides a nice read-eval-print-loop with line editing, history,
+tab-completion, and some interesting commands like `!bytecode` (see `!help`).
+To enter the REPL just run:
+``` sh
+$ bin/apricot
+```
 
-    ./bin/apricot
+Once in the repl you can ask for help by using `!help` and you can exit with `!exit`.
+Play around, read `kernel/core.apr` and try out our functions, make some of your own.
+Experiment. Tell us what you think!
+``` clojure
+apr> (+ 1 2 3)
+=> 6
+apr> (map (fn [x] (* x x)) (Range. 1 10))
+=> [1 4 9 16 25 36 49 64 81 100]
+apr> (defn square [x] (* x x))
+=> #<Proc:0x398@(eval):6 (lambda)>
+apr> (map square (Range. 1 10))
+=> [1 4 9 16 25 36 49 64 81 100]
+apr> (defn compose [f g] (fn [x] (f (g x))))
+=> #<Proc:0x3a8@(eval):8 (lambda)>
+apr> (map (compose str square) (Range. 1 10))
+=> ["1" "4" "9" "16" "25" "36" "49" "64" "81" "100"]
+```
 
-Once in the repl you can ask for help by using `!help` and you can exit with `!exit`
+## Hello World
+So you want to put your program in a file and not type it into the REPL? Sure:
+``` sh
+$ cat hello.apr
+(puts "Hello, world!")
+$ bin/apricot hello.apr
+Hello, world!
+```
+
+## Contact / Bug Reports
+Come visit us on [freenode](http://freenode.net/) in the #apricot channel, or
+drop one of us an email. Please send your bug reports to the GitHub
+[issue tracker](https://github.com/programble/apricot/issues). They will be
+greatly appreciated!
 
 
 ## License
