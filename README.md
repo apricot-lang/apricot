@@ -6,11 +6,11 @@ Try to contain your excitement, please.
 
 
 ## Setup
-To get Apricot up and running, make sure you have Rubinius and Bundler installed.
-The easiest way to get Rubinius is with [RVM](https://rvm.io/). Whenever you are
-using Apricot you need to be running Rubinius in Ruby 1.9 mode. We make this easy
-in the Apricot repository with the `.ruby-version` file which RVM automatically
-reads to figure out which Ruby to switch to.
+To get Apricot up and running, make sure you have Rubinius and Bundler
+installed.  The easiest way to get Rubinius is with [RVM](https://rvm.io/).
+Whenever you are using Apricot you need to be running Rubinius in Ruby 1.9
+mode. We make this easy in the Apricot repository with the `.ruby-version`
+file which RVM automatically reads to figure out which Ruby to switch to.
 
 ``` sh
 $ rvm install rbx-head --1.9
@@ -21,15 +21,15 @@ $ bundle
 
 ## The REPL
 Apricot provides a nice read-eval-print-loop with line editing, history,
-tab-completion, and some interesting commands like `!bytecode` (see `!help`).
-To enter the REPL just run:
+tab-completion, and some interesting commands like `!bytecode`. To enter the
+REPL just run:
 ``` sh
 $ bin/apricot
 ```
 
-Once in the repl you can ask for help by using `!help` and you can exit with `!exit`.
-Play around, read `kernel/core.apr` and try out our functions, make some of your own.
-Experiment. Tell us what you think!
+Once in the repl you can ask for help by using `!help` and you can exit with
+`!exit`.  Play around, read `kernel/core.apr` and try out our functions, and
+make some of your own. Experiment. Tell us what you think!
 ``` clojure
 apr> (+ 1 2 3)
 => 6
