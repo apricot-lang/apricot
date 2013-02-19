@@ -106,6 +106,12 @@
 (defn integer? [x]
   (instance? Integer x))
 
+(defn fixnum? [x]
+  (instance? Fixnum x))
+
+(defn bignum? [x]
+  (instance? Bignum x))
+
 (defn float? [x]
   (instance? Float x))
 
