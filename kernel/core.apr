@@ -379,7 +379,10 @@
          ~@body
          (recur)))))
 
-(defn str [& args]
-  (.reduce (.map args | :to_s) "" :+))
+(defn str
+  ([] "")
+  ([x] (.to_s x))
+  ([x & args]
+   (.reduce args (.to_s x) | #(.+ %1 (.to_s %2)))))
 
 (defn identity [x] x)
