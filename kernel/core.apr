@@ -175,6 +175,9 @@
 (defn empty? [coll]
   (.empty? coll))
 
+(defn reverse [coll]
+  (.reverse coll))
+
 (defn map
   ([f coll]
    (.map coll | f))
