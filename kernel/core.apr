@@ -190,6 +190,22 @@
   ([f val coll]
    (.reduce coll val | f)))
 
+(defn contains? [coll val]
+  (.include? coll val))
+
+; Hash map functions
+(defn get
+  ([map key]
+   (.fetch map key))
+  ([map key not-found]
+   (.fetch map key not-found)))
+
+(defn keys [map]
+  (.keys map))
+
+(defn vals [map]
+  (.values map))
+
 ; Basic logic predicates and functions
 
 (defn nil? [x]
