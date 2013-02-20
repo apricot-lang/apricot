@@ -301,6 +301,19 @@
 (defn bit-test [x n]
   (not= 0 (bit-and x (bit-shift-left 1 n))))
 
+; Functional programming functions
+(defn complement [f]
+  (fn
+    ([] (not (f)))
+    ([x] (not (f x)))
+    ([x y] (not (f x y)))
+    ([x y & zs] (not (apply f x y zs)))))
+
+(defn constantly [x]
+  (fn [& args] x))
+
+(defn identity [x] x)
+
 ; Useful macros
 
 (defmacro when [test & body]
@@ -461,5 +474,3 @@
   ([x] (.apricot_str x))
   ([x & args]
    (.reduce args (.apricot_str x) | #(.concat %1 (.apricot_str %2)))))
-
-(defn identity [x] x)
