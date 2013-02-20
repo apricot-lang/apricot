@@ -350,6 +350,24 @@
   ([x form & more]
    `(.. (. ~x ~form) ~@more)))
 
+(defmacro ->
+  ([x] x)
+  ([x form]
+   (if (list? form)
+     `(~(first form) ~x ~@(next form))
+     (list form x)))
+  ([x form & more]
+   `(-> (-> ~x ~form) ~@more)))
+
+(defmacro ->>
+  ([x] x)
+  ([x form]
+   (if (list? form)
+     `(~(first form) ~@(next form) ~x)
+     (list form x)))
+  ([x form & more]
+   `(->> (->> ~x ~form) ~@more)))
+
 (defmacro if-let [bindings then [else nil]]
   `(let [temp# ~(bindings 1)]
      (if temp#
