@@ -58,7 +58,9 @@
   ; reason, so we use this method. (MAIN is the special toplevel object).
   (.each files | #(. MAIN send :require %)))
 
-(def puts Kernel/puts)
+(defn puts [& args]
+  (Kernel/puts (apply str args)))
+
 (def macroexpand Apricot/macroexpand)
 (def macroexpand-1 Apricot/macroexpand_1)
 
