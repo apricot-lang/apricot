@@ -184,6 +184,12 @@
   ([f coll & colls]
    (.map (.zip coll & colls) | #(apply f %))))
 
+(defn reduce
+  ([f coll]
+   (.reduce coll | f))
+  ([f val coll]
+   (.reduce coll val | f)))
+
 ; Basic logic predicates and functions
 
 (defn nil? [x]
