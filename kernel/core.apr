@@ -396,8 +396,8 @@
 
 (defn str
   ([] "")
-  ([x] (.to_s x))
+  ([x] (.apricot_str x))
   ([x & args]
-   (.reduce args (.to_s x) | #(.+ %1 (.to_s %2)))))
+   (.reduce args (.apricot_str x) | #(.concat %1 (.apricot_str %2)))))
 
 (defn identity [x] x)

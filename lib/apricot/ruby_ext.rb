@@ -3,6 +3,10 @@ class Object
     inspect
   end
 
+  def apricot_str
+    to_s
+  end
+
   def apricot_call(*args)
     call(*args)
   end
@@ -27,6 +31,8 @@ class Array
   def apricot_call(idx)
     self[idx]
   end
+
+  alias_method :apricot_str, :apricot_inspect
 end
 
 class Hash
@@ -52,6 +58,8 @@ class Hash
   def apricot_call(key)
     self[key]
   end
+
+  alias_method :apricot_str, :apricot_inspect
 end
 
 class Set
@@ -73,6 +81,7 @@ class Set
   end
 
   alias_method :apricot_call, :[]
+  alias_method :apricot_str, :apricot_inspect
 end
 
 class Rational
@@ -83,12 +92,16 @@ class Rational
       to_s
     end
   end
+
+  alias_method :apricot_str, :apricot_inspect
 end
 
 class Regexp
   def apricot_inspect
     "#r#{inspect}"
   end
+
+  alias_method :apricot_str, :apricot_inspect
 end
 
 class Symbol
@@ -105,6 +118,8 @@ class Symbol
   def apricot_call(o)
     o[self]
   end
+
+  alias_method :apricot_str, :apricot_inspect
 end
 
 module Enumerable
