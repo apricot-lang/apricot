@@ -135,8 +135,23 @@
 (defn rest [coll]
   (.drop coll 1))
 
+(defn next [coll]
+  (let [r (rest coll)]
+    (if (.empty? r)
+      nil
+      r)))
+
 (defn second [coll]
-  (first (rest coll)))
+  (first (next coll)))
+
+(defn ffirst [coll]
+  (first (first coll)))
+
+(defn nfirst [coll]
+  (next (first coll)))
+
+(defn fnext [coll]
+  (first (next coll)))
 
 (defn last [coll]
   (.last coll))

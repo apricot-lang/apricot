@@ -114,3 +114,10 @@ module Enumerable
     list
   end
 end
+
+class NilClass
+  include Enumerable
+
+  def each
+  end
+end
