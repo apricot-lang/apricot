@@ -238,6 +238,20 @@
   ([x y & more]
    (.reduce more (.quo x y) :quo)))
 
+(defn quot [num div]
+  (.div num div))
+
+(defn rem [num div]
+  (.remainder num div))
+
+(defn int [x]
+  (.to_i x))
+
+(defn float [x]
+  (.to_f x))
+
+(def ratio Kernel/Rational)
+
 (defn inc [x] (+ x 1))
 (defn dec [x] (- x 1))
 
