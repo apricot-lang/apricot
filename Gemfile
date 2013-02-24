@@ -5,5 +5,5 @@ source "https://rubygems.org"
 
 group :development do
   gem "rake", "~> 10.0.3"
-  gem "rspec", "~> 2.12.0"
+  gem "rspec", "~> 2.13.0"
 end
