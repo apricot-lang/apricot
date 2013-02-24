@@ -3,19 +3,21 @@
 
 (require "socket")
 
-(defn log [prefix line]
-  (puts (str prefix line)))
+(defn send [io & parts]
+  (let [msg (apply str parts)]
+    (puts "<< " msg)
+    (.print io msg "\r\n")))
 
-(defn send [io & msgs]
-  (each [msg msgs]
-    (log "<< " msg)
-    (.puts io (str msg "\r\n"))))
+(defn run-bot [nick username realname channel server [port 6667]]
+  (let [irc (TCPSocket. server port)]
+    (send irc "NICK " nick)
+    (send irc "USER " username " * * :" realname)
+    (while-let [line (.gets irc)]
+      (puts ">> " line)
+      (when (.start_with? line "PING")
+        (send irc (.sub line "PING" "PONG")))
+      (when (.include? line "001")
+        (send irc "JOIN " channel)
+        (send irc "PRIVMSG " channel " :It works!")))))
 
-(let [irc (TCPSocket. "irc.tenthbit.net" 6667)]
-  (send irc "NICK apribot" "USER apr * * :Apribot")
-  (while-let [line (.gets irc)]
-    (log ">> " line)
-    (if (.start_with? line "PING")
-      (send irc (.sub line "PING" "PONG")))
-    (if (.include? line "001")
-      (send irc "JOIN #programming" "PRIVMSG #programming :yes, I'm real!"))))
+(run-bot "apribot" "apr" "Apribot" "#apricot" "irc.freenode.net")
