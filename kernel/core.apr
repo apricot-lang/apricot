@@ -269,6 +269,12 @@
 (defn rem [num div]
   (.remainder num div))
 
+(defn mod [num div]
+  (.modulo num div))
+
+(defn pow [num exp]
+  (.** num exp))
+
 (defn int [x]
   (.to_i x))
 
