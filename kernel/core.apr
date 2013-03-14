@@ -166,6 +166,14 @@
     []
     (.take coll (. (.count coll) - 1))))
 
+(defn nth
+  ([coll index]
+   (.at coll index))
+  ([coll index not-found]
+   (if (< index (count coll))
+     (.at coll index)
+     not-found)))
+
 (defn count [coll]
   (.count coll))
 
