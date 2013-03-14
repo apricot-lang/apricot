@@ -571,3 +571,9 @@
 
 (defmacro defmethod [target name & body]
   `(.send ~target :define_method ~(symbol name) | (fn ~name ~@body)))
+
+(defmacro defclass
+  ([name]
+   `(def ~name (Class.)))
+  ([name superclass]
+   `(def ~name (Class. ~superclass))))
