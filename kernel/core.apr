@@ -50,6 +50,9 @@
 (defn identifier [name]
   (.intern Apricot::Identifier name))
 
+(defn symbol [name]
+  (.to_sym name))
+
 (defn gensym [[prefix "g"]]
   (identifier (.gensym Apricot prefix)))
 
