@@ -561,3 +561,8 @@
   ([x] (.apricot_str x))
   ([x & args]
    (.reduce args (.apricot_str x) | #(.concat %1 (.apricot_str %2)))))
+
+; Structs
+
+(defmacro defstruct [name & fields]
+  `(def ~name (Struct. ~@(map symbol fields))))
