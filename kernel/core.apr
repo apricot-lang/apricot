@@ -566,3 +566,8 @@
 
 (defmacro defstruct [name & fields]
   `(def ~name (Struct. ~@(map symbol fields))))
+
+; Macros for defining Ruby classes and methods
+
+(defmacro defmethod [target name & body]
+  `(.send ~target :define_method ~(symbol name) | (fn ~name ~@body)))
