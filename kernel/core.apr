@@ -311,14 +311,14 @@
    (.reduce more (. x | y) | #(. %1 | %2))))
 
 (defn bit-xor
-  ([x y] (.x ^ y))
+  ([x y] (. x ^ y))
   ([x y & more]
    (.reduce more (. x ^ y) | #(. %1 ^ %2))))
 
 (defn bit-and-not
-  ([x y] (bit-and x (bit-not y))
+  ([x y] (bit-and x (bit-not y)))
   ([x y & more]
-   (.reduce more (bit-and x (bit-not y)) | #(bit-and %1 (bit-not %2))))))
+   (.reduce more (bit-and x (bit-not y)) | #(bit-and %1 (bit-not %2)))))
 
 (defn bit-shift-left [x n]
   (. x << n))
