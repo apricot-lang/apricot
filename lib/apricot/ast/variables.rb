@@ -24,6 +24,10 @@ module Apricot
       end
 
       def bytecode(g)
+        if @ns.is_a?(Namespace) && !@ns.vars.include?(@name)
+          g.compile_error "Unable to resolve name #{@name} in namespace #{@ns}"
+        end
+
         g.push_cpath_top
 
         ns_id = Apricot::Identifier.intern(@ns.name)

@@ -63,6 +63,12 @@
   ; reason, so we use this method. (MAIN is the special toplevel object).
   (.each files | #(. MAIN send :require %)))
 
+(defn str
+  ([] "")
+  ([x] (.apricot_str x))
+  ([x & args]
+   (.reduce args (.apricot_str x) | #(.concat %1 (.apricot_str %2)))))
+
 (defn puts [& args]
   (Kernel/puts (apply str args)))
 
@@ -148,6 +154,9 @@
       nil
       r)))
 
+(defn empty? [coll]
+  (.empty? coll))
+
 (defn second [coll]
   (first (next coll)))
 
@@ -183,9 +192,6 @@
 (defn drop [n coll]
   (.drop coll n))
 
-(defn empty? [coll]
-  (.empty? coll))
-
 (defn reverse [coll]
   (.reverse coll))
 
@@ -217,7 +223,7 @@
 (defn vals [map]
   (.values map))
 
-; Basic logic predicates and functions
+; Basic logic predicates, functions, and macros
 
 (defn nil? [x]
   (.nil? x))
@@ -230,6 +236,20 @@
 
 (defn not [x]
   (if x false true))
+
+(defmacro and
+  ([] true)
+  ([x] x)
+  ([x & more]
+   `(let [and# ~x]
+      (if and# (and ~@more) and#))))
+
+(defmacro or
+  ([] false)
+  ([x] x)
+  ([x & more]
+   `(let [or# ~x]
+      (if or# or# (or ~@more)))))
 
 ; Number predicates and functions
 
@@ -296,6 +316,70 @@
 
 (defn inc [x] (+ x 1))
 (defn dec [x] (- x 1))
+
+; Equality and inequality
+
+(defn identical? [x y]
+  (.equal? x y))
+
+(defn =
+  ([x] true)
+  ([x y] (. x == y))
+  ([x y & more]
+   (and
+     (. x == y)
+     (.all? more | #(. x == %)))))
+
+(defn not=
+  ([x] false)
+  ([x y] (. x != y))
+  ([x y & more]
+   (not (apply = x y more))))
+
+(defn compare [x y]
+  (. x <=> y))
+
+(defn >
+  ([x] true)
+  ([x y] (. x > y))
+  ([x y & more]
+   (and
+     (. x > y)
+     (.all? (.each_cons (cons y more) 2) | #(. %1 > %2)))))
+
+(defn <
+  ([x] true)
+  ([x y] (. x < y))
+  ([x y & more]
+   (and
+     (. x < y)
+     (.all? (.each_cons (cons y more) 2) | #(. %1 < %2)))))
+
+(defn >=
+  ([x] true)
+  ([x y] (. x >= y))
+  ([x y & more]
+   (and
+     (. x >= y)
+     (.all? (.each_cons (cons y more) 2) | #(. %1 >= %2)))))
+
+(defn <=
+  ([x] true)
+  ([x y] (. x <= y))
+  ([x y & more]
+   (and
+     (. x <= y)
+     (.all? (.each_cons (cons y more) 2) | #(. %1 <= %2)))))
+
+(defn max
+  ([x] x)
+  ([x & more]
+   (.max (cons x more))))
+
+(defn min
+  ([x] x)
+  ([x & more]
+   (.min (cons x more))))
 
 ; Bitwise operations
 
@@ -463,20 +547,6 @@
     `(let [~val ~x]
        ~(apply expand forms))))
 
-(defmacro and
-  ([] true)
-  ([x] x)
-  ([x & more]
-   `(let [and# ~x]
-      (if and# (and ~@more) and#))))
-
-(defmacro or
-  ([] false)
-  ([x] x)
-  ([x & more]
-   `(let [or# ~x]
-      (if or# or# (or ~@more)))))
-
 (defmacro doto [x & forms]
   (let [gx (gensym "doto")]
     `(let [~gx ~x]
@@ -486,70 +556,6 @@
                   `(~f ~gx)))
               forms)
        ~gx)))
-
-; Equality and inequality
-
-(defn identical? [x y]
-  (.equal? x y))
-
-(defn =
-  ([x] true)
-  ([x y] (. x == y))
-  ([x y & more]
-   (and
-     (. x == y)
-     (.all? more | #(. x == %)))))
-
-(defn not=
-  ([x] false)
-  ([x y] (. x != y))
-  ([x y & more]
-   (not (apply = x y more))))
-
-(defn compare [x y]
-  (. x <=> y))
-
-(defn >
-  ([x] true)
-  ([x y] (. x > y))
-  ([x y & more]
-   (and
-     (. x > y)
-     (.all? (.each_cons (cons y more) 2) | #(. %1 > %2)))))
-
-(defn <
-  ([x] true)
-  ([x y] (. x < y))
-  ([x y & more]
-   (and
-     (. x < y)
-     (.all? (.each_cons (cons y more) 2) | #(. %1 < %2)))))
-
-(defn >=
-  ([x] true)
-  ([x y] (. x >= y))
-  ([x y & more]
-   (and
-     (. x >= y)
-     (.all? (.each_cons (cons y more) 2) | #(. %1 >= %2)))))
-
-(defn <=
-  ([x] true)
-  ([x y] (. x <= y))
-  ([x y & more]
-   (and
-     (. x <= y)
-     (.all? (.each_cons (cons y more) 2) | #(. %1 <= %2)))))
-
-(defn max
-  ([x] x)
-  ([x & more]
-   (.max (cons x more))))
-
-(defn min
-  ([x] x)
-  ([x & more]
-   (.min (cons x more))))
 
 ; Miscellaneous (to be sorted)
 
@@ -563,12 +569,6 @@
        (when ~(first binding)
          ~@body
          (recur)))))
-
-(defn str
-  ([] "")
-  ([x] (.apricot_str x))
-  ([x & args]
-   (.reduce args (.apricot_str x) | #(.concat %1 (.apricot_str %2)))))
 
 ; Structs
 
