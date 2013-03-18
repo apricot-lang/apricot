@@ -14,14 +14,16 @@
 
 (def defn
   (fn [name args & body]
-    (list 'def name (concat (list 'fn name args) body))))
+    (list 'do
+          (list 'def name (concat (list 'fn name args) body))
+          (list 'quote name))))
 (.add (.macros *ns*) :defn)
 
 (defn defmacro [name args & body]
   (list 'do
         (concat (list 'defn name args) body)
         (list '.add (list '.macros '*ns*) (.name name))
-        name))
+        (list 'quote name)))
 (.add (.macros *ns*) :defmacro)
 
 (defn array [& args] args)
