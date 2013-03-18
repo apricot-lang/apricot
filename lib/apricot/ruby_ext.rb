@@ -118,8 +118,6 @@ class Symbol
   def apricot_call(o)
     o[self]
   end
-
-  alias_method :apricot_str, :apricot_inspect
 end
 
 module Enumerable
