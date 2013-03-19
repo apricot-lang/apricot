@@ -44,8 +44,8 @@ module Apricot
         pos(g)
 
         if constant?
-          g.push_cpath_top
-          const_names.each {|n| g.find_const n }
+          g.push_const const_names.first
+          const_names.drop(1).each {|n| g.find_const n }
         else
           reference(g).bytecode(g)
         end
