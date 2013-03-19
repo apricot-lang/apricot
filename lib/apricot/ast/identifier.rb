@@ -54,16 +54,20 @@ module Apricot
       # called by (def <identifier> <value>)
       def assign_bytecode(g, value)
         if constant?
-          g.push_cpath_top
-          const_names[0..-2].each {|n| g.find_const n }
+          if const_names.length == 1
+            g.push_scope
+          else
+            g.push_const const_names[0]
+            const_names[1..-2].each {|n| g.find_const n }
+          end
+
           g.push_literal const_names.last
           value.bytecode(g)
           g.send :const_set, 2
         else
           g.compile_error "Can't change the value of self" if name == :self
 
-          g.push_cpath_top
-          g.find_const :Apricot
+          g.push_const :Apricot
           g.send :current_namespace, 0
           g.push_literal name
           value.bytecode(g)
@@ -74,8 +78,7 @@ module Apricot
       def quote_bytecode(g)
         pos(g)
 
-        g.push_cpath_top
-        g.find_const :Apricot
+        g.push_const :Apricot
         g.find_const :Identifier
         g.push_literal name
         g.send :intern, 1

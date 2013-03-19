@@ -134,8 +134,7 @@ module Apricot::AST
       lbl = g.new_label
       g.gif lbl
       g.pop
-      g.push_cpath_top
-      g.find_const :Regexp
+      g.push_const :Regexp
       g.push_literal @pattern
       g.push @options
       g.send :new, 2
@@ -191,8 +190,7 @@ module Apricot::AST
       pos(g)
 
       # Create a new Hash
-      g.push_cpath_top
-      g.find_const :Hash
+      g.push_const :Hash
       g.push(@elements.length / 2)
       g.send :new_from_literal, 1
 
@@ -224,8 +222,7 @@ module Apricot::AST
     def bytecode(g, quoted = false)
       pos(g)
 
-      g.push_cpath_top
-      g.find_const :Set
+      g.push_const :Set
       g.send :new, 0 # TODO: Inline this new?
 
       @elements.each do |e|

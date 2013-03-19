@@ -39,10 +39,10 @@ module Apricot::AST
       # Handle (foo ...) and (Foo/bar ...) calls
       if callee.is_a?(Identifier) &&
           (callee.namespace_fn?(g) || callee.module_method?(g))
-        g.push_cpath_top
 
         ns_id = Apricot::Identifier.intern(callee.ns.name)
-        ns_id.const_names.each {|n| g.find_const(n) }
+        g.push_const ns_id.const_names.first
+        ns_id.const_names.drop(1).each {|n| g.find_const(n) }
 
         args.each {|arg| arg.bytecode(g) }
         g.send callee.unqualified_name, args.length
@@ -54,8 +54,7 @@ module Apricot::AST
     end
 
     def quote_bytecode(g)
-      g.push_cpath_top
-      g.find_const :Apricot
+      g.push_const :Apricot
       g.find_const :List
 
       if @elements.empty?

@@ -83,8 +83,7 @@ module Apricot
         g.is_nil
         g.git nil_block
 
-        g.push_cpath_top
-        g.find_const :Proc
+        g.push_const :Proc
 
         g.swap
         g.send :__from_block__, 1
@@ -479,8 +478,7 @@ module Apricot
 
       if nomatch_possible
         nomatch.set!
-        fn.push_cpath_top
-        fn.find_const :ArgumentError
+        fn.push_const :ArgumentError
         fn.push_literal "No matching overload"
         fn.string_dup
         fn.send :new, 1
@@ -576,8 +574,7 @@ module Apricot
     # optional arguments.
     fn.splat_index = overloads.last.arglist.num_total if overloads.last.arglist.rest_arg
 
-    g.push_cpath_top
-    g.find_const :Kernel
+    g.push_const :Kernel
     g.create_block fn
     g.send_with_block :lambda, 0
     g.set_local fn_scope.self_reference.slot if fn_name
