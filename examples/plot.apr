@@ -1,21 +1,28 @@
 ; Just a quick and dirty graph plotter.
 
 (defn plot [f x1 x2 xscale y1 y2 yscale]
-  (let [width (* (- x2 x1) xscale)
-        height (* (- y2 y1) yscale)
-        points (map (fn [x] [x (.round (* (f x) yscale))])
+  (let [width (.ceil (* (- x2 x1) xscale))
+        height (.ceil (* (- y2 y1) yscale))
+        points (map (fn [x] [(.round (* xscale (- x x1)))
+                             (.round (* yscale (- (f x) y1)))])
                     (.step x1 x2 (/ xscale)))
-        graph (Array. height | #(* " " width))]
+        graph (Array. (inc height) | #(* " " width))]
     (each [p points]
       (let [x (first p)
             y (second p)]
-        (when (< y height)
-          (#|.[]=| (graph (- height y 1)) (* xscale (- x x1)) "*"))))
+        (when (<= 0 y height)
+          (#|.[]=| (graph (- height y)) x "*"))))
     (each [line graph]
-      (puts line))))
+          (puts line))))
 
 (puts "Exponential:")
 (plot Math/exp 0 5 10 0 20 1)
 
 (puts "Logarithm base 10:")
-(plot Math/log10 1 15 5 0 2 10)
+(plot Math/log10 1 15 5 0 1.5 10)
+
+(puts "Sine:")
+(plot Math/sin 0 (* 4 Math::PI) 5 -1 1 5)
+
+(puts "Tangent:")
+(plot Math/tan 0 (* 2 Math::PI) 10 -5 5 2)
