@@ -23,6 +23,7 @@ $ bundle
 Apricot provides a nice read-eval-print-loop with line editing, history,
 tab-completion, and some interesting commands like `!bytecode`. To enter the
 REPL just run:
+
 ``` sh
 $ bin/apricot
 ```
@@ -30,23 +31,23 @@ $ bin/apricot
 Once in the repl you can ask for help by using `!help` and you can exit with
 `!exit`.  Play around, read `kernel/core.apr` and try out our functions, and
 make some of your own. Experiment. Tell us what you think!
+
 ``` clojure
 apr> (+ 1 2 3)
 => 6
 apr> (map (fn [x] (* x x)) (Range. 1 10))
 => [1 4 9 16 25 36 49 64 81 100]
 apr> (defn square [x] (* x x))
-=> #<Proc:0x398@(eval):6 (lambda)>
+=> nil
 apr> (map square (Range. 1 10))
 => [1 4 9 16 25 36 49 64 81 100]
-apr> (defn compose [f g] (fn [x] (f (g x))))
-=> #<Proc:0x3a8@(eval):8 (lambda)>
-apr> (map (compose str square) (Range. 1 10))
+apr> (map (comp str square) (Range. 1 10))
 => ["1" "4" "9" "16" "25" "36" "49" "64" "81" "100"]
 ```
 
 ## Hello World
 So you want to put your program in a file and not type it into the REPL? Sure:
+
 ``` sh
 $ cat hello.apr
 (puts "Hello, world!")
