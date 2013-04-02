@@ -1,0 +1,10 @@
+; Print the solution of a towers of hanoi puzzle with n disks using pegs a, b,
+; and c.
+(defn hanoi [n a b c]
+  (when-not (zero? n)
+    (hanoi (dec n) a c b)
+    (puts "Move disk " n " from peg " a " to peg " c)
+    (hanoi (dec n) b a c)))
+
+; 5-disk example:
+(hanoi 5 "A" "B" "C")
