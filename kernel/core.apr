@@ -588,3 +588,20 @@
    `(def ~name (Class.)))
   ([name superclass]
    `(def ~name (Class. ~superclass))))
+
+; Documentation
+
+(defn fn-name
+  "Return the name of the given function or macro."
+  [f] (.. f block compiled_code name))
+
+(defn doc-string
+  "Return the documentation string for the given function or macro."
+  [f] (.instance_variable_get f :@apricot_doc))
+
+(defn doc
+  "Print the documentation for the given function or macro."
+  [f]
+  (println "-------------------------")
+  (println (fn-name f))
+  (println "  " (doc-string f)))
