@@ -13,16 +13,16 @@
         (when (<= 0 y height)
           (#|.[]=| (graph (- height y)) x "*"))))
     (each [line graph]
-          (puts line))))
+          (println line))))
 
-(puts "Exponential:")
+(println "Exponential:")
 (plot Math/exp 0 5 10 0 20 1)
 
-(puts "Logarithm base 10:")
+(println "Logarithm base 10:")
 (plot Math/log10 1 15 5 0 1.5 10)
 
-(puts "Sine:")
+(println "Sine:")
 (plot Math/sin 0 (* 4 Math::PI) 5 -1 1 5)
 
-(puts "Tangent:")
+(println "Tangent:")
 (plot Math/tan 0 (* 2 Math::PI) 10 -5 5 2)

@@ -69,7 +69,10 @@
   ([x & args]
    (.reduce args (.apricot_str x) | #(.concat %1 (.apricot_str %2)))))
 
-(defn puts [& args]
+(defn print [& args]
+  (Kernel/print (apply str args)))
+
+(defn println [& args]
   (Kernel/puts (apply str args)))
 
 (def macroexpand Apricot/macroexpand)
