@@ -18,6 +18,9 @@
   (fn defn [name & body]
     (let [doc-string (if (.is_a? (.first body) String)
                        (.shift body))
+          metadata (if (.is_a? (.first body) Hash)
+                     (.shift body)
+                     {})
           arglists (if (.is_a? (.first body) Array)
                      (list (.first body))
                      (.to_list
@@ -29,9 +32,10 @@
             (list '.instance_variable_set
                   f
                   :@apricot_meta
-                  {:name (list 'quote name)
-                   :doc doc-string
-                   :arglists (list 'quote arglists)})
+                  (.merge {:name (list 'quote name)
+                           :doc doc-string
+                           :arglists (list 'quote arglists)}
+                          metadata))
             nil))))
 (.add (.macros *ns*) :defn)
 (.instance_variable_set
@@ -39,12 +43,15 @@
   :@apricot_meta
   {:name 'defn
    :doc "Define a new function."
-   :arglists '([name doc-string? [params ...] body]
-               [name doc-string? ([params ...] body) ...+])})
+   :arglists '([name doc-string? metadata? [params ...] body]
+               [name doc-string? metadata? ([params ...] body) ...+])})
 
-(defn defmacro [name & body]
+(defn defmacro
   "Like defn, but the resulting function name is declared as a macro and will
   be used as a macro by the compiler when it is called."
+  {:arglists '([name doc-string? metadata? [params ...] body]
+               [name doc-string? metadata? ([params ...] body) ...+])}
+  [name & body]
   (list 'do
         (concat (list 'defn name) body)
         (list '.add (list '.macros '*ns*) (.name name))
