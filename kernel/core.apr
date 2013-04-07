@@ -2,6 +2,8 @@
 
 (ns Apricot::Core)
 
+; Basics
+
 (def raise Kernel/raise)
 
 (def list
@@ -32,8 +34,17 @@
                    :arglists (list 'quote arglists)})
             nil))))
 (.add (.macros *ns*) :defn)
+(.instance_variable_set
+  defn
+  :@apricot_meta
+  {:name 'defn
+   :doc "Define a new function."
+   :arglists '([name doc-string? [params ...] body]
+               [name doc-string? ([params ...] body) ...+])})
 
 (defn defmacro [name & body]
+  "Like defn, but the resulting function name is declared as a macro and will
+  be used as a macro by the compiler when it is called."
   (list 'do
         (concat (list 'defn name) body)
         (list '.add (list '.macros '*ns*) (.name name))
