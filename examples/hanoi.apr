@@ -3,7 +3,7 @@
 (defn hanoi [n a b c]
   (when-not (zero? n)
     (hanoi (dec n) a c b)
-    (println "Move disk " n " from peg " a " to peg " c)
+    (puts "Move disk " n " from peg " a " to peg " c)
     (hanoi (dec n) b a c)))
 
 ; 5-disk example:

@@ -1,1 +1,1 @@
-(println "Hello, world!")
+(puts "Hello, world!")

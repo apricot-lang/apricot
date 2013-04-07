@@ -342,7 +342,6 @@ module Apricot
   # (fn name? ([args*] body*) ... ([args*] body*))
   SpecialForm.define(:fn) do |g, args|
     fn_name = args.shift.name if args.first.is_a? AST::Identifier
-    doc_string = args.shift if args.first.is_a? AST::StringLiteral
 
     overloads = []
     # The overload that a (recur ...) in a variadic overload must jump to if
@@ -579,15 +578,6 @@ module Apricot
     g.create_block fn
     g.send_with_block :lambda, 0
     g.set_local fn_scope.self_reference.slot if fn_name
-
-    # Attach the docstring to the fn if it has one.
-    if doc_string
-      g.dup_top
-      g.push_literal :@apricot_doc
-      doc_string.bytecode(g)
-      g.send :instance_variable_set, 2
-      g.pop
-    end
   end
 
   # (try body* (rescue name|[name condition*] body*)* (ensure body*)?)

@@ -5,7 +5,7 @@
 
 (defn send [io & parts]
   (let [msg (apply str parts)]
-    (println "<< " msg)
+    (puts "<< " msg)
     (.print io msg "\r\n")))
 
 (defn run-bot [nick username realname channel server [port 6667]]
@@ -13,7 +13,7 @@
     (send irc "NICK " nick)
     (send irc "USER " username " * * :" realname)
     (while-let [line (.gets irc)]
-      (println ">> " line)
+      (puts ">> " line)
       (when (.start_with? line "PING")
         (send irc (.sub line "PING" "PONG")))
       (when (.include? line "001")

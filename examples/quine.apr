@@ -1,1 +1,1 @@
-((fn [x] (println (list x (list (quote quote) x)))) (quote (fn [x] (println (list x (list (quote quote) x))))))
+((fn [x] (puts (list x (list (quote quote) x)))) (quote (fn [x] (puts (list x (list (quote quote) x))))))
