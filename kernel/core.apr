@@ -13,15 +13,29 @@
     (.to_list (.reduce (.map args | :to_a) [] :+))))
 
 (def defn
-  (fn defn [name args & body]
-    (list 'do
-          (list 'def name (concat (list 'fn name args) body))
-          nil)))
+  (fn defn [name & body]
+    (let [doc-string (if (.is_a? (.first body) String)
+                       (.shift body))
+          arglists (if (.is_a? (.first body) Array)
+                     (list (.first body))
+                     (.to_list
+                       (.map body | #(if (.is_a? % Apricot::List)
+                                       (.first %)))))
+          f (.intern Apricot::Identifier (.gensym Apricot))]
+      (list 'let [f (concat (list 'fn name) body)]
+            (list 'def name f)
+            (list '.instance_variable_set
+                  f
+                  :@apricot_meta
+                  {:name (list 'quote name)
+                   :doc doc-string
+                   :arglists (list 'quote arglists)})
+            nil))))
 (.add (.macros *ns*) :defn)
 
-(defn defmacro [name args & body]
+(defn defmacro [name & body]
   (list 'do
-        (concat (list 'defn name args) body)
+        (concat (list 'defn name) body)
         (list '.add (list '.macros '*ns*) (.name name))
         nil))
 (.add (.macros *ns*) :defmacro)
@@ -589,19 +603,20 @@
   ([name superclass]
    `(def ~name (Class. ~superclass))))
 
+; Metadata
+
+(defn meta
+  "Return the metadata of obj."
+  [obj]
+  (.instance_variable_get obj :@apricot_meta))
+
 ; Documentation
-
-(defn fn-name
-  "Return the name of the given function or macro."
-  [f] (.. f block compiled_code name))
-
-(defn doc-string
-  "Return the documentation string for the given function or macro."
-  [f] (.instance_variable_get f :@apricot_doc))
 
 (defn doc
   "Print the documentation for the given function or macro."
   [f]
-  (println "-------------------------")
-  (println (fn-name f))
-  (println "  " (doc-string f)))
+  (let [m (meta f)]
+    (println "-------------------------")
+    (println (m :name))
+    (println (m :arglists))
+    (println "  " (m :doc))))

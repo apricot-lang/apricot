@@ -331,6 +331,14 @@ module Apricot
       @num_optional = @optional_args.length
       @num_total = @num_required + @num_optional
     end
+
+    def to_array
+      args = @required_args.map {|id| Identifier.intern(id) }
+      args += @optional_args.map {|name, val| [Identifier.intern(name), val.to_value] }
+      args += [Identifier.intern(:|), Identifier.intern(@block_arg)] if @block_arg
+      args += [Identifier.intern(:&), Identifier.intern(@rest_arg)] if @rest_arg
+      args
+    end
   end
 
   Overload = Struct.new(:arglist, :body)
@@ -579,15 +587,6 @@ module Apricot
     g.create_block fn
     g.send_with_block :lambda, 0
     g.set_local fn_scope.self_reference.slot if fn_name
-
-    # Attach the docstring to the fn if it has one.
-    if doc_string
-      g.dup_top
-      g.push_literal :@apricot_doc
-      doc_string.bytecode(g)
-      g.send :instance_variable_set, 2
-      g.pop
-    end
   end
 
   # (try body* (rescue name|[name condition*] body*)* (ensure body*)?)
