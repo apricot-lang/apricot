@@ -38,7 +38,7 @@
                            :doc doc-string
                            :arglists (list 'quote arglists)}
                           metadata))
-            nil))))
+            f))))
 (.add (.macros *ns*) :defn)
 (.instance_variable_set
   defn
@@ -46,7 +46,8 @@
   {:name 'defn
    :doc "Define a new function."
    :arglists '([name doc-string? metadata? [params ...] body]
-               [name doc-string? metadata? ([params ...] body) ...+])})
+               [name doc-string? metadata? ([params ...] body) ...+])
+   :macro true})
 
 (defn defmacro
   "Like defn, but the resulting function name is declared as a macro and will
@@ -54,10 +55,13 @@
   {:arglists '([name doc-string? metadata? [params ...] body]
                [name doc-string? metadata? ([params ...] body) ...+])}
   [name & body]
-  (list 'do
-        (concat (list 'defn name) body)
-        (list '.add (list '.macros '*ns*) (.name name))
-        nil))
+  (let [f (.intern Apricot::Identifier (.gensym Apricot))]
+    (list 'let [f (concat (list 'defn name) body)]
+          (list '.add (list '.macros '*ns*) (.name name))
+          (list '.store
+                (list '.instance_variable_get f :@apricot_meta)
+                :macro true)
+          f)))
 (.add (.macros *ns*) :defmacro)
 
 (defn list
@@ -900,4 +904,6 @@
     (println "-------------------------")
     (println (m :name))
     (println (m :arglists))
+    (if (m :macro)
+      (println "Macro"))
     (println "  " (m :doc))))
