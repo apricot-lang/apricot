@@ -545,7 +545,7 @@
 ; Equality and inequality
 
 (defn identical?
-  "Tests if the two arguments are the same object."
+  "Test if the two arguments are the same object."
   [x y]
   (.equal? x y))
 
