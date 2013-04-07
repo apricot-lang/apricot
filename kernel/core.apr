@@ -134,8 +134,8 @@
   (.each files | #(. MAIN send :require %)))
 
 (defn str
-  "With no args, returns the empty string. With one arg x, returns x converted
-  to a string. With more than one arg, returns the concatenation of the str
+  "With no args, return the empty string. With one arg x, return x converted
+  to a string. With more than one arg, return the concatenation of the str
   values of the args."
   ([] "")
   ([x] (.apricot_str x))
@@ -374,7 +374,7 @@
    (.reduce coll val | f)))
 
 (defn contains?
-  "Return true if val is present in the given collection, otherwise returns
+  "Return true if val is present in the given collection, otherwise return
   false. Note that for hashes this checks for a key."
   [coll val]
   (.include? coll val))
