@@ -115,9 +115,9 @@
   (.to_sym name))
 
 (defn gensym
-  "Returns a new symbol with a unique name. If a prefix string is supplied,
-  the name is prefix__# where # is some unique number. If prefix is not
-  supplied, the prefix is 'g'."
+  "Return a new symbol with a unique name. If a prefix string is supplied, the
+  name is prefix__# where # is some unique number. If prefix is not supplied,
+  the prefix is 'g'."
   [[prefix "g"]]
   (identifier (.gensym Apricot prefix)))
 
