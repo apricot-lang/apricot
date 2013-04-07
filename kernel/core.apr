@@ -420,10 +420,10 @@
   (if x false true))
 
 (defmacro and
-  "Evaluates exprs one at a time, from left to right. If a form
-  returns logical false (nil or false), and returns that value and
-  doesn't evaluate any of the other expressions, otherwise it returns
-  the value of the last expr. (and) returns true."
+  "Evaluate exprs one at a time, from left to right. If a form returns logical
+  false (nil or false), return that value and don't evaluate any of the other
+  expressions, otherwise return the value of the last expr. (and) returns
+  true."
   ([] true)
   ([x] x)
   ([x & more]
@@ -431,10 +431,10 @@
       (if and# (and ~@more) and#))))
 
 (defmacro or
-  "Evaluates exprs one at a time, from left to right. If a form
-  returns a logical true value, or returns that value and doesn't
-  evaluate any of the other expressions, otherwise it returns the
-  value of the last expression. (or) returns nil."
+  "Evaluate exprs one at a time, from left to right. If a form returns a
+  logical true value, return that value and don't evaluate any of the other
+  expressions, otherwise return the value of the last expression. (or) returns
+  nil."
   ([] nil)
   ([x] x)
   ([x & more]
