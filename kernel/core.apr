@@ -6,13 +6,15 @@
 
 (def raise Kernel/raise)
 
+; Needed in defn, will redefine with documentation later.
 (def list
-  (fn list [& args]
-    (.to_list args)))
+  (fn list [& items]
+    (.to_list items)))
 
+; Needed in defn, will redefine with documentation later.
 (def concat
-  (fn concat [& args]
-    (.to_list (.reduce (.map args | :to_a) [] :+))))
+  (fn concat [& colls]
+    (.to_list (.reduce (.map colls | :to_a) [] :+))))
 
 (def defn
   (fn defn [name & body]
@@ -57,6 +59,14 @@
         (list '.add (list '.macros '*ns*) (.name name))
         nil))
 (.add (.macros *ns*) :defmacro)
+
+(defn list [& items]
+  "Create a new list containing the items."
+  (.to_list items))
+
+(defn concat [& colls]
+  "Concatenate the items in the supplied colls into a single list."
+  (.to_list (.reduce (.map colls | :to_a) [] :+)))
 
 (defn array [& args] args)
 
