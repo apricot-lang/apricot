@@ -139,12 +139,12 @@
    (.reduce args (.apricot_str x) | #(.concat %1 (.apricot_str %2)))))
 
 (defn print
-  "Prints the object(s) to standard output."
+  "Print the object(s) to standard output."
   [& args]
   (Kernel/print (apply str args)))
 
 (defn println
-  "Prints the object(s) followed by a newline at the end to standard output."
+  "Print the object(s) followed by a newline at the end to standard output."
   [& args]
   (Kernel/puts (apply str args)))
 
