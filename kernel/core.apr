@@ -485,15 +485,15 @@
    (.reduce more (.* x y) :*)))
 
 (defn -
-  "If no ys are supplied, returns the negation of x, else subtracts the ys
-  from x and returns the result."
+  "If no ys are supplied, return the negation of x, otherwise subtract the ys
+  from x and return the result."
   ([x] (. x -@)) ; Ruby's horribly named -@ method is the negation operator
   ([x y] (.- x y))
   ([x y & more]
    (.reduce more (.- x y) :-)))
 
 (defn /
-  "If no denominators are supplied, returns 1/numerator, else returns
+  "If no denominators are supplied, return 1/numerator, otherwise return
   numerator divided by all of the denominators."
   ([x] (.quo 1 x))
   ([x y] (.quo x y))
