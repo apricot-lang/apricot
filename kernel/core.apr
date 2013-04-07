@@ -60,12 +60,14 @@
         nil))
 (.add (.macros *ns*) :defmacro)
 
-(defn list [& items]
+(defn list
   "Create a new list containing the items."
+  [& items]
   (.to_list items))
 
-(defn concat [& colls]
+(defn concat
   "Concatenate the items in the supplied colls into a single list."
+  [& colls]
   (.to_list (.reduce (.map colls | :to_a) [] :+)))
 
 (defn array [& args] args)
