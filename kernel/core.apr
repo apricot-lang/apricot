@@ -5,15 +5,15 @@
 (def raise Kernel/raise)
 
 (def list
-  (fn [& args]
+  (fn list [& args]
     (.to_list args)))
 
 (def concat
-  (fn [& args]
+  (fn concat [& args]
     (.to_list (.reduce (.map args | :to_a) [] :+))))
 
 (def defn
-  (fn [name args & body]
+  (fn defn [name args & body]
     (list 'do
           (list 'def name (concat (list 'fn name args) body))
           nil)))
