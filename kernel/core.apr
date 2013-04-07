@@ -70,53 +70,82 @@
   [& colls]
   (.to_list (.reduce (.map colls | :to_a) [] :+)))
 
-(defn array [& args] args)
+(defn array
+  "Create a new array containing the items."
+  [& items] items)
 
-(defn set [& args]
-  (Set. args))
+(defn set
+  "Create a new set containing the items."
+  [& items]
+  (Set. items))
 
-(defn hash [& args]
-  (if (.even? (.length args))
+(defn hash
+  "Create a new hash map from the items. The items are interpreted as a list of
+  key/value pairs so there must be an even number of them."
+  [& items]
+  (if (.even? (.length items))
     (let [h {}]
-      (.each_slice args 2 | #(.store h %1 %2))
+      (.each_slice items 2 | #(.store h %1 %2))
       h)
     (raise ArgumentError "hash requires an even number of arguments")))
 
-(defn cons [head tail]
+(defn cons
+  "Return a new list where head is the first element and tail is the rest."
+  [head tail]
   (.cons (.to_list tail) head))
 
 (defn apply
-  ([f x]
-   (.apricot_call f & x))
-  ([f x & more]
-   (.apricot_call f & (cons x (.concat more (.pop more))))))
+  "Applies fn f to the argument list formed by prepending intervening
+  arguments to args."
+  ([f args]
+   (.apricot_call f & args))
+  ([f x & args]
+   (.apricot_call f & (cons x (.concat args (.pop args))))))
 
 ;; At this point everything is defined that syntax quote requires
 
-(defn identifier [name]
+(defn identifier
+  "Return an identifier with the given name."
+  [name]
   (.intern Apricot::Identifier name))
 
-(defn symbol [name]
+(defn symbol
+  "Return a symbol with the given name."
+  [name]
   (.to_sym name))
 
-(defn gensym [[prefix "g"]]
+(defn gensym
+  "Returns a new symbol with a unique name. If a prefix string is supplied,
+  the name is prefix__# where # is some unique number. If prefix is not
+  supplied, the prefix is 'g'."
+  [[prefix "g"]]
   (identifier (.gensym Apricot prefix)))
 
-(defn require [& files]
+(defn require
+  "Require the given Ruby files. Works just like using Ruby's 'require' on
+  each of the arguments."
+  [& files]
   ; (. Kernel require %) does not call the Rubygems custom require for some
   ; reason, so we use this method. (MAIN is the special toplevel object).
   (.each files | #(. MAIN send :require %)))
 
 (defn str
+  "With no args, returns the empty string. With one arg x, returns x converted
+  to a string. With more than one arg, returns the concatenation of the str
+  values of the args."
   ([] "")
   ([x] (.apricot_str x))
   ([x & args]
    (.reduce args (.apricot_str x) | #(.concat %1 (.apricot_str %2)))))
 
-(defn print [& args]
+(defn print
+  "Prints the object(s) to standard output."
+  [& args]
   (Kernel/print (apply str args)))
 
-(defn println [& args]
+(defn println
+  "Prints the object(s) followed by a newline at the end to standard output."
+  [& args]
   (Kernel/puts (apply str args)))
 
 (def macroexpand Apricot/macroexpand)
@@ -124,167 +153,273 @@
 
 ; Type predicates
 
-(defn instance? [c x]
+(defn instance?
+  "Test if x is an instance of class c. Return true or false."
+  [c x]
   (.is_a? x c))
 
-(defn module? [x]
+(defn module?
+  "Return true if x is an instance of Module."
+  [x]
   (instance? Module x))
 
-(defn class? [x]
+(defn class?
+  "Return true if x is an instance of Class."
+  [x]
   (instance? Class x))
 
-(defn array? [x]
+(defn array?
+  "Return true if x is an instance of Array."
+  [x]
   (instance? Array x))
 
-(defn list? [x]
+(defn list?
+  "Return true if x is an instance of Apricot::List."
+  [x]
   (instance? Apricot::List x))
 
-(defn hash? [x]
+(defn hash?
+  "Return true if x is an instance of Hash."
+  [x]
   (instance? Hash x))
 
-(defn set? [x]
+(defn set?
+  "Return true if x is an instance of Set."
+  [x]
   (instance? Set x))
 
-(defn string? [x]
+(defn string?
+  "Return true if x is an instance of String."
+  [x]
   (instance? String x))
 
-(defn regexp? [x]
+(defn regexp?
+  "Return true if x is an instance of Regexp."
+  [x]
   (instance? Regexp x))
 
-(defn identifier? [x]
+(defn identifier?
+  "Return true if x is an instance of Apricot::Identifier."
+  [x]
   (instance? Apricot::Identifier x))
 
-(defn symbol? [x]
+(defn symbol?
+  "Return true if x is an instance of Symbol."
+  [x]
   (instance? Symbol x))
 
-(defn number? [x]
+(defn number?
+  "Return true if x is an instance of Numeric."
+  [x]
   (instance? Numeric x))
 
-(defn ratio? [x]
+(defn ratio?
+  "Return true if x is an instance of Rational."
+  [x]
   (instance? Rational x))
 
-(defn integer? [x]
+(defn integer?
+  "Return true if x is an instance of Integer."
+  [x]
   (instance? Integer x))
 
-(defn fixnum? [x]
+(defn fixnum?
+  "Return true if x is an instance of Fixnum."
+  [x]
   (instance? Fixnum x))
 
-(defn bignum? [x]
+(defn bignum?
+  "Return true if x is an instance of Bignum."
+  [x]
   (instance? Bignum x))
 
-(defn float? [x]
+(defn float?
+  "Return true if x is an instance of Float."
+  [x]
   (instance? Float x))
 
-(defn complex? [x]
+(defn complex?
+  "Return true if x is an instance of Complex."
+  [x]
   (instance? Complex x))
 
-(defn range? [x]
+(defn range?
+  "Return true if x is an instance of Range."
+  [x]
   (instance? Range x))
 
-(defn comparable? [x]
+(defn comparable?
+  "Return true if x is an instance of a class that implements Comparable."
+  [x]
   (instance? Comparable x))
 
-(defn enumerable? [x]
+(defn enumerable?
+  "Return true if x is an instance of a class that implements Enumerable."
+  [x]
   (instance? Enumerable x))
 
 ; Collection functions
 
-(defn first [coll]
+(defn first
+  "Return the first item in the collection, or nil."
+  [coll]
   (.first coll))
 
-(defn rest [coll]
+(defn rest
+  "Return the items in the collection after the first. Possibly empty."
+  [coll]
   (.drop coll 1))
 
-(defn next [coll]
+(defn next
+  "Return the items after the first. If there are no more items, return nil."
+  [coll]
   (let [r (rest coll)]
     (if (.empty? r)
       nil
       r)))
 
-(defn empty? [coll]
+(defn empty?
+  "Return true if coll has no items."
+  [coll]
   (.empty? coll))
 
-(defn second [coll]
+(defn second
+  "Same as (first (next coll))."
+  [coll]
   (first (next coll)))
 
-(defn ffirst [coll]
+(defn ffirst
+  "Same as (first (first coll))."
+  [coll]
   (first (first coll)))
 
-(defn nfirst [coll]
+(defn nfirst
+  "Same as (next (first coll))."
+  [coll]
   (next (first coll)))
 
-(defn fnext [coll]
+(defn fnext
+  "Same as (first (next coll))."
+  [coll]
   (first (next coll)))
 
-(defn last [coll]
+(defn last
+  "Return the last item in coll."
+  [coll]
   (.last coll))
 
 (defn butlast [coll]
+  "Return all but the last item in coll."
   (if (empty? coll)
     []
     (.take coll (. (.count coll) - 1))))
 
 (defn nth
+  "Return the value at the given index in coll. If the index is out of bounds,
+  return not-found if it is supplied. Otherwise raise an exception."
   ([coll index]
    (.fetch coll index))
   ([coll index not-found]
    (.fetch coll index not-found)))
 
-(defn count [coll]
+(defn count
+  "Return the number of items in coll."
+  [coll]
   (.count coll))
 
-(defn take [n coll]
+(defn take
+  "Return the first n items in coll."
+  [n coll]
   (.take coll n))
 
-(defn drop [n coll]
+(defn drop
+  "Return all but the first n items in coll."
+  [n coll]
   (.drop coll n))
 
-(defn reverse [coll]
+(defn reverse
+  "Return the items in coll in reverse order."
+  [coll]
   (.reverse coll))
 
 (defn map
+  "Return an array consisting of the result of applying f to the set of first
+  items of each coll, followed by applying f to the set of second items in
+  each coll, until any one of the colls is exhausted. Any remaining items in
+  other colls are exhausted. Function f should accept number-of-colls
+  arguments."
   ([f coll]
    (.map coll | f))
   ([f coll & colls]
    (.map (.zip coll & colls) | #(apply f %))))
 
 (defn reduce
+  "f should be a function of 2 arguments. If val is not supplied, returns the
+  result of applying f to the first 2 items in coll, then applying f to that
+  result and the 3rd item, etc. If coll contains no items, f must accept no
+  arguments as well, and reduce returns the result of calling f with no
+  arguments. If coll has only 1 item, it is returned and f is not called. If
+  val is supplied, returns the result of applying f to val and the first item
+  in coll, then applying f to that result and the 2nd item, etc. If coll
+  contains no items, return val and f is not called."
   ([f coll]
-   (.reduce coll | f))
+   (if (empty? coll)
+     (f)
+     (.reduce coll | f)))
   ([f val coll]
    (.reduce coll val | f)))
 
-(defn contains? [coll val]
+(defn contains?
+  "Return true if val is present in the given collection, otherwise returns
+  false. Note that for hashes this checks for a key."
+  [coll val]
   (.include? coll val))
 
 ; Hash map functions
 (defn get
+  "Return the value mapped to key, not-found or nil if key not present."
   ([map key]
-   (.fetch map key))
+   (.fetch map key nil))
   ([map key not-found]
    (.fetch map key not-found)))
 
-(defn keys [map]
+(defn keys
+  "Return an array of the map's keys."
+  [map]
   (.keys map))
 
-(defn vals [map]
+(defn vals
+  "Return an array of the map's values."
+  [map]
   (.values map))
 
 ; Basic logic predicates, functions, and macros
 
-(defn nil? [x]
+(defn nil?
+  "Return true if x is nil, false otherwise."
+  [x]
   (.nil? x))
 
-(defn true? [x]
+(defn true?
+  "Return true if x is the value true, false otherwise."
+  [x]
   (.equal? x true))
 
-(defn false? [x]
+(defn false?
+  "Return true if x is the value false, false otherwise."
+  [x]
   (.equal? x false))
 
-(defn not [x]
+(defn not
+  "Return true if x is logical false, false otherwise."
+  [x]
   (if x false true))
 
 (defmacro and
+  "Evaluates exprs one at a time, from left to right. If a form
+  returns logical false (nil or false), and returns that value and
+  doesn't evaluate any of the other expressions, otherwise it returns
+  the value of the last expr. (and) returns true."
   ([] true)
   ([x] x)
   ([x & more]
@@ -292,7 +427,11 @@
       (if and# (and ~@more) and#))))
 
 (defmacro or
-  ([] false)
+  "Evaluates exprs one at a time, from left to right. If a form
+  returns a logical true value, or returns that value and doesn't
+  evaluate any of the other expressions, otherwise it returns the
+  value of the last expression. (or) returns nil."
+  ([] nil)
   ([x] x)
   ([x & more]
    `(let [or# ~x]
@@ -300,22 +439,33 @@
 
 ; Number predicates and functions
 
-(defn zero? [x]
+(defn zero?
+  "Return true if num is zero, false otherwise."
+  [x]
   (.zero? x))
 
-(defn pos? [x]
+(defn pos?
+  "Return true if num is greater than zero, false otherwise."
+  [x]
   (. x > 0))
 
-(defn neg? [x]
+(defn neg?
+  "Return true if num is less than zero, false otherwise."
+  [x]
   (. x < 0))
 
-(defn even? [x]
+(defn even?
+  "Return true if num is even, false otherwise."
+  [x]
   (.even? x))
 
-(defn odd? [x]
+(defn odd?
+  "Return true if num is odd, false otherwise."
+  [x]
   (.odd? x))
 
 (defn +
+  "Return the sum of nums. (+) returns 0."
   ([] 0)
   ([x] x)
   ([x y] (.+ x y))
@@ -323,6 +473,7 @@
    (.reduce more (.+ x y) :+)))
 
 (defn *
+  "Return the product of nums. (*) returns 1."
   ([] 1)
   ([x] x)
   ([x y] (.* x y))
@@ -330,46 +481,73 @@
    (.reduce more (.* x y) :*)))
 
 (defn -
+  "If no ys are supplied, returns the negation of x, else subtracts the ys
+  from x and returns the result."
   ([x] (. x -@)) ; Ruby's horribly named -@ method is the negation operator
   ([x y] (.- x y))
   ([x y & more]
    (.reduce more (.- x y) :-)))
 
 (defn /
+  "If no denominators are supplied, returns 1/numerator, else returns
+  numerator divided by all of the denominators."
   ([x] (.quo 1 x))
   ([x y] (.quo x y))
   ([x y & more]
    (.reduce more (.quo x y) :quo)))
 
-(defn quot [num div]
+(defn quot
+  "Return quotient of dividing numerator by denominator."
+  [num div]
   (.div num div))
 
-(defn rem [num div]
+(defn rem
+  "Return remainder of dividing numerator by denominator."
+  [num div]
   (.remainder num div))
 
-(defn mod [num div]
+(defn mod
+  "Return the modulus of num and div. Truncates toward negative infinity."
+  [num div]
   (.modulo num div))
 
-(defn pow [num exp]
+(defn pow
+  "Return num raised to the exponent exp."
+  [num exp]
   (.** num exp))
 
-(defn int [x]
+(defn int
+  "Coerce to integer."
+  [x]
   (.to_i x))
 
-(defn float [x]
+(defn float
+  "Coerce to floating point."
+  [x]
   (.to_f x))
 
 (def ratio Kernel/Rational)
 
-(defn inc [x] (+ x 1))
-(defn dec [x] (- x 1))
+(defn inc
+  "Return a number one greater than x."
+  [x]
+  (+ x 1))
+
+(defn dec
+  "Return a number one less than x."
+  [x]
+  (- x 1))
 
 ; Equality and inequality
 
-(defn identical? [x y]
+(defn identical?
+  "Tests if the two arguments are the same object."
+  [x y]
   (.equal? x y))
 
 (defn =
+  "Return true if all of the arguments are equal, otherwise false. (=) returns
+  true."
   ([x] true)
   ([x y] (. x == y))
   ([x y & more]
@@ -378,15 +556,21 @@
      (.all? more | #(. x == %)))))
 
 (defn not=
+  "Return true if any of the arguments are not equal, otherwise false. (not=
+  returns false. Same as (not (= x y ...))."
   ([x] false)
   ([x y] (. x != y))
   ([x y & more]
    (not (apply = x y more))))
 
-(defn compare [x y]
+(defn compare
+  "Return a negative number, zero, or a positive number when x is logically
+  'less than', 'equal to', or 'greater than' y, respectively."
+  [x y]
   (. x <=> y))
 
 (defn >
+  "Return true if nums are in monotonically decreasing order, otherwise false."
   ([x] true)
   ([x y] (. x > y))
   ([x y & more]
@@ -395,6 +579,7 @@
      (.all? (.each_cons (cons y more) 2) | #(. %1 > %2)))))
 
 (defn <
+  "Return true if nums are in monotonically increasing order, otherwise false."
   ([x] true)
   ([x y] (. x < y))
   ([x y & more]
@@ -403,6 +588,8 @@
      (.all? (.each_cons (cons y more) 2) | #(. %1 < %2)))))
 
 (defn >=
+  "Return true if nums are in monotonically non-increasing order, otherwise
+  false."
   ([x] true)
   ([x y] (. x >= y))
   ([x y & more]
@@ -411,6 +598,8 @@
      (.all? (.each_cons (cons y more) 2) | #(. %1 >= %2)))))
 
 (defn <=
+  "Return true if nums are in monotonically non-decreasing order, otherwise
+  false."
   ([x] true)
   ([x y] (. x <= y))
   ([x y & more]
@@ -419,74 +608,105 @@
      (.all? (.each_cons (cons y more) 2) | #(. %1 <= %2)))))
 
 (defn max
+  "Return the greatest of the arguments."
   ([x] x)
   ([x & more]
    (.max (cons x more))))
 
 (defn min
+  "Return the least of the arguments."
   ([x] x)
   ([x & more]
    (.min (cons x more))))
 
 ; Bitwise operations
 
-(defn bit-not [x]
+(defn bit-not
+  "Return the bitwise complement of x (ie. flip all the bits)."
+  [x]
   (. x #|~|)) ; Use arbitrary identifier syntax since ~ is a special char
 
 (defn bit-and
+  "Return the bitwise and of the arguments."
   ([x y] (. x & y))
   ([x y & more]
    (.reduce more (. x & y) | #(. %1 & %2))))
 
 (defn bit-or
+  "Return the bitwise or of the arguments."
   ([x y] (. x | y))
   ([x y & more]
    (.reduce more (. x | y) | #(. %1 | %2))))
 
 (defn bit-xor
+  "Return the bitwise exclusive or of the arguments."
   ([x y] (. x ^ y))
   ([x y & more]
    (.reduce more (. x ^ y) | #(. %1 ^ %2))))
 
 (defn bit-and-not
+  "Return the bitwise and of the first argument and the bitwise complement of
+  all arguments after the first."
   ([x y] (bit-and x (bit-not y)))
   ([x y & more]
    (.reduce more (bit-and x (bit-not y)) | #(bit-and %1 (bit-not %2)))))
 
-(defn bit-shift-left [x n]
+(defn bit-shift-left
+  "Return the bitwise shift left of x by n bits."
+  [x n]
   (. x << n))
 
-(defn bit-shift-right [x n]
+(defn bit-shift-right
+  "Return the bitwise shift right of x by n bits."
+  [x n]
   (. x >> n))
 
-(defn bit-clear [x n]
+(defn bit-clear
+  "Return x with the bit at index n set to 0."
+  [x n]
   (bit-and-not x (bit-shift-left 1 n)))
 
-(defn bit-set [x n]
+(defn bit-set
+  "Return x with the bit at index n set to 1."
+  [x n]
   (bit-or x (bit-shift-left 1 n)))
 
-(defn bit-flip [x n]
+(defn bit-flip
+  "Return x with the bit at index n flipped from its previous value."
+  [x n]
   (bit-xor x (bit-shift-left 1 n)))
 
-(defn bit-test [x n]
+(defn bit-test
+  "Return true if the bit at index n is 1, otherwise false."
+  [x n]
   (not= 0 (bit-and x (bit-shift-left 1 n))))
 
 ; Functional programming functions
-(defn complement [f]
+(defn complement
+  "Take a fn f and return a fn that takes the same arguments as f, has the
+  same effects, if any, and returns the opposite truth value."
+  [f]
   (fn
     ([] (not (f)))
     ([x] (not (f x)))
     ([x y] (not (f x y)))
     ([x y & zs] (not (apply f x y zs)))))
 
-(defn constantly [x]
+(defn constantly
+  "Return a function that takes any number of arguments and returns x."
+  [x]
   (fn [& args] x))
 
-(defn identity [x] x)
+(defn identity
+  "Return the argument."
+  [x] x)
 
 ; TODO: Stole this from Clojure. It probably isn't as efficient as it could be
 ; in Apricot.
 (defn comp
+  "Take a set of functions and return a fn that is the composition of those
+  fns. The returned fn takes a variable number of args, applies the rightmost
+  of fns to the args, the next fn (right-to-left) to the result, etc."
   ([] identity)
   ([f] f)
   ([f g]
@@ -512,6 +732,9 @@
             ret))))))
 
 (defn partial
+  "Take a function f and fewer than the normal arguments to f, and return a fn
+  that takes a variable number of additional args. When called, the returned
+  function calls f with args + additional args."
   ([f] f)
   ([f arg1]
    (fn [& args] (apply f arg1 args)))
@@ -524,10 +747,14 @@
 
 ; Useful macros
 
-(defmacro when [test & body]
+(defmacro when
+  "Evaluate test. If logical true, evaluate body in an implicit do."
+  [test & body]
   `(if ~test (do ~@body)))
 
-(defmacro when-not [test & body]
+(defmacro when-not
+  "Evaluate test. If logical false, evaluate body in an implicit do."
+  [test & body]
   `(if ~test nil (do ~@body)))
 
 (defmacro ..
@@ -537,6 +764,9 @@
    `(.. (. ~x ~form) ~@more)))
 
 (defmacro ->
+  "Thread the expr through the forms. Insert x as the second item in the first
+  form, making a list of it if it is not a list already. If there are more
+  forms, insert the first form as the second item in second form, etc."
   ([x] x)
   ([x form]
    (if (list? form)
@@ -546,6 +776,9 @@
    `(-> (-> ~x ~form) ~@more)))
 
 (defmacro ->>
+  "Thread the expr through the forms. Insert x as the last item in the first
+  form, making a list of it if it is not a list already. If there are more
+  forms, insert the first form as the last item in second form, etc."
   ([x] x)
   ([x form]
    (if (list? form)
@@ -554,14 +787,24 @@
   ([x form & more]
    `(->> (->> ~x ~form) ~@more)))
 
-(defmacro if-let [bindings then [else nil]]
+(defmacro if-let
+  "bindings => var test
+
+  If test is true, evaluates then with var bound to the value of test,
+  otherwise yields else."
+  [bindings then [else nil]]
   `(let [temp# ~(bindings 1)]
      (if temp#
        (let ~bindings
          ~then)
        ~else)))
 
-(defmacro cond [& clauses]
+(defmacro cond
+  "Take a set of test/expr pairs. Evaluate each test one at a time. If a test
+  returns logical true, evaluate and return the value of the corresponding
+  expr and don't evaluate any of the other tests or exprs. (cond) returns
+  nil."
+  [& clauses]
   (when-not (even? (count clauses))
     (raise ArgumentError "cond requires an even number of forms"))
   (when-not (empty? clauses)
@@ -569,18 +812,20 @@
        ~(second clauses)
        (cond ~@(drop 2 clauses)))))
 
-; (case form when* else?)
-;   when = [expr+] expr
-;   else = expr
-;
-; Works like Ruby's case/when syntax (uses the === method).
-;
-; Example:
-; (case x
-;   [Array] "x is an array"
-;   [String Symbol] "x is a string or symbol"
-;   "x is unknown")
-(defmacro case [x & forms]
+(defmacro case
+  "when => [expr ...+] expr
+  else => expr
+
+  Works like Ruby's case/when syntax (uses the === method).
+
+  Example:
+  (case x
+    [Array] \"x is an array\"
+    [String Symbol] \"x is a string or symbol\"
+    [1 2] \"x is equal to 1 or 2\"
+    \"x is unknown\")"
+  {:arglists '([x when ... else?])}
+  [x & forms]
   (let [else (if (odd? (count forms))
                (.pop forms))
         val (gensym "case")
@@ -594,7 +839,13 @@
     `(let [~val ~x]
        ~(apply expand forms))))
 
-(defmacro doto [x & forms]
+(defmacro doto
+  "Evaluate x then call all of the methods and functions with the value of x
+  supplied at the front of the given arguments. The forms are evaluated in
+  order. Return x.
+
+  (doto (Hash.) (.store :a 1) (.store :b 2)) ;=> {:a 1, :b 2}"
+  [x & forms]
   (let [gx (gensym "doto")]
     `(let [~gx ~x]
        ~@(map (fn [f]
