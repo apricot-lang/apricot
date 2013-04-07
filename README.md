@@ -29,8 +29,9 @@ $ bin/apricot
 ```
 
 Once in the repl you can ask for help by using `!help` and you can exit with
-`!exit`.  Play around, read `kernel/core.apr` and try out our functions, and
-make some of your own. Experiment. Tell us what you think!
+`!exit`. See the documentation of any function with `(doc <name>)`. Play
+around, read `kernel/core.apr` and try out our functions, and make some of
+your own. Experiment. Tell us what you think!
 
 ``` clojure
 apr> (+ 1 2 3)
@@ -43,6 +44,14 @@ apr> (map square (Range. 1 10))
 => [1 4 9 16 25 36 49 64 81 100]
 apr> (map (comp str square) (Range. 1 10))
 => ["1" "4" "9" "16" "25" "36" "49" "64" "81" "100"]
+apr> (doc comp)
+-------------------------
+comp
+([] [f] [f g] [f g h] [f1 f2 f3 & fs])
+  Take a set of functions and return a fn that is the composition of those
+  fns. The returned fn takes a variable number of args, applies the rightmost
+  of fns to the args, the next fn (right-to-left) to the result, etc.
+=> nil
 ```
 
 ## Hello World
