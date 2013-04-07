@@ -46,8 +46,7 @@
   {:name 'defn
    :doc "Define a new function."
    :arglists '([name doc-string? metadata? [params ...] body]
-               [name doc-string? metadata? ([params ...] body) ...+])
-   :macro true})
+               [name doc-string? metadata? ([params ...] body) ...+])})
 
 (defn defmacro
   "Like defn, but the resulting function name is declared as a macro and will
@@ -58,7 +57,6 @@
   (list 'do
         (concat (list 'defn name) body)
         (list '.add (list '.macros '*ns*) (.name name))
-        (list '.store)
         nil))
 (.add (.macros *ns*) :defmacro)
 
@@ -117,9 +115,9 @@
   (.to_sym name))
 
 (defn gensym
-  "Return a new symbol with a unique name. If a prefix string is supplied, the
-  name is prefix__# where # is some unique number. If prefix is not supplied,
-  the prefix is 'g'."
+  "Returns a new symbol with a unique name. If a prefix string is supplied,
+  the name is prefix__# where # is some unique number. If prefix is not
+  supplied, the prefix is 'g'."
   [[prefix "g"]]
   (identifier (.gensym Apricot prefix)))
 
