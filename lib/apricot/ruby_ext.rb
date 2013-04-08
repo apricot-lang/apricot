@@ -1,4 +1,6 @@
 class Object
+  attr_accessor :apricot_meta
+
   def apricot_inspect
     inspect
   end

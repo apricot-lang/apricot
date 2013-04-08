@@ -31,18 +31,16 @@
           f (.intern Apricot::Identifier (.gensym Apricot))]
       (list 'let [f (concat (list 'fn name) body)]
             (list 'def name f)
-            (list '.instance_variable_set
+            (list '.apricot_meta=
                   f
-                  :@apricot_meta
-                  (.merge {:name (list 'quote name)
-                           :doc doc-string
-                           :arglists (list 'quote arglists)}
-                          metadata))
+                  (.merge! {:name (list 'quote name)
+                            :doc doc-string
+                            :arglists (list 'quote arglists)}
+                           metadata))
             f))))
 (.add (.macros *ns*) :defn)
-(.instance_variable_set
+(.apricot_meta=
   defn
-  :@apricot_meta
   {:name 'defn
    :doc "Define a new function."
    :arglists '([name doc-string? metadata? [params ...] body]
@@ -58,9 +56,7 @@
   (let [f (.intern Apricot::Identifier (.gensym Apricot))]
     (list 'let [f (concat (list 'defn name) body)]
           (list '.add (list '.macros '*ns*) (.name name))
-          (list '.store
-                (list '.instance_variable_get f :@apricot_meta)
-                :macro true)
+          (list '.store (list '.apricot_meta f) :macro true)
           f)))
 (.add (.macros *ns*) :defmacro)
 
@@ -893,7 +889,7 @@
 (defn meta
   "Return the metadata of obj."
   [obj]
-  (.instance_variable_get obj :@apricot_meta))
+  (.apricot_meta obj))
 
 ; Documentation
 
