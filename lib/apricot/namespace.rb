@@ -16,17 +16,15 @@ module Apricot
       ns
     end
 
-    attr_reader :vars, :fns, :macros
+    attr_reader :vars, :fns
 
     def initialize
       @vars = {}
       @fns = Set[]
-      @macros = Set[]
     end
 
     def set_var(name, val)
       @vars[name] = val
-      @macros.delete name
 
       val = val.to_proc if val.is_a? Method
 

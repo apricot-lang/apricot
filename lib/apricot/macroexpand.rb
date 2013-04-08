@@ -20,22 +20,28 @@ module Apricot
 
       dot = Identifier.intern(:'.')
       method = Identifier.intern(name_s[1..-1])
-      List[dot, args.first, method, *args.tail]
+      return List[dot, args.first, method, *args.tail]
+    end
 
     # Handle the (Class. args*) shorthand new form
-    elsif name.length > 1 && name_s != '..' && name_s.end_with?('.')
+    if name.length > 1 && name_s != '..' && name_s.end_with?('.')
       dot = Identifier.intern(:'.')
       klass = Identifier.intern(name_s[0..-2])
       new = Identifier.intern(:new)
-      List[dot, klass, new, *args]
+      return List[dot, klass, new, *args]
+    end
 
     # Handle defined macros
-    elsif callee.ns.is_a?(Namespace) && callee.ns.macros.include?(callee.unqualified_name)
-      callee.ns.get_var(callee.unqualified_name).call(*args)
+    if callee.ns.is_a?(Namespace) && callee.ns.vars.include?(callee.unqualified_name)
+      potential_macro = callee.ns.get_var(callee.unqualified_name)
+      meta = potential_macro.apricot_meta
+
+      if meta && meta[:macro]
+        return potential_macro.call(*args)
+      end
+    end
 
     # Default case
-    else
-      form
-    end
+    form
   end
 end

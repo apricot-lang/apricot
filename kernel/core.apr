@@ -38,7 +38,6 @@
                             :arglists (list 'quote arglists)}
                            metadata))
             f))))
-(.add (.macros *ns*) :defn)
 (.apricot_meta=
   defn
   {:name 'defn
@@ -56,10 +55,8 @@
   [name & body]
   (let [f (.intern Apricot::Identifier (.gensym Apricot))]
     (list 'let [f (concat (list 'defn name) body)]
-          (list '.add (list '.macros '*ns*) (.name name))
           (list '.store (list '.apricot_meta f) :macro true)
           f)))
-(.add (.macros *ns*) :defmacro)
 
 (defn list
   "Create a new list containing the items."
