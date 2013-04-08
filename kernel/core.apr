@@ -51,7 +51,8 @@
   "Like defn, but the resulting function name is declared as a macro and will
   be used as a macro by the compiler when it is called."
   {:arglists '([name doc-string? metadata? [params ...] body]
-               [name doc-string? metadata? ([params ...] body) ...+])}
+               [name doc-string? metadata? ([params ...] body) ...+])
+   :macro true}
   [name & body]
   (let [f (.intern Apricot::Identifier (.gensym Apricot))]
     (list 'let [f (concat (list 'defn name) body)]
