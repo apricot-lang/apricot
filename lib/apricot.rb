@@ -29,10 +29,7 @@ module Apricot
   Core.get_var(:ns).apricot_meta = {macro: true}
 
   # TODO: add and use a proper code loader
-  file = __FILE__
-  file = File.readlink(file) while File.symlink? file
-  file = File.expand_path('../../kernel/core.apr', file)
-  Apricot::Compiler.compile(file)
+  Apricot::Compiler.compile(File.expand_path('../../kernel/core.apr', __FILE__))
 
 #  ::User = Namespace.new
   Apricot.current_namespace = Core
