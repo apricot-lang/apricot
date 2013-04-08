@@ -1,15 +1,6 @@
 require 'set'
 
-# TODO: Move gensym to a more appropriate file
-module Apricot
-  @gensym = 0
-
-  def self.gensym(prefix = 'g')
-    :"#{prefix}__#{@gensym += 1}"
-  end
-end
-
-%w[parser compiler ast macroexpand generator stages printers special_forms
+%w[misc parser compiler ast macroexpand generator stages printers special_forms
 errors list identifier ruby_ext namespace].each {|r| require "apricot/#{r}" }
 
 # Start "booting" apricot. Set up core namespace and load the core library.
