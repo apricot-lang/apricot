@@ -41,6 +41,10 @@ module Apricot
         end
       end
 
+      def meta
+        @ns.is_a?(Namespace) && @ns.vars[@name] && @ns.vars[@name].apricot_meta
+      end
+
       def fn?
         @ns.is_a?(Namespace) && @ns.fns.include?(@name)
       end

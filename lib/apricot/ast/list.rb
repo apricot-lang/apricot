@@ -37,20 +37,31 @@ module Apricot::AST
       end
 
       # Handle (foo ...) and (Foo/bar ...) calls
-      if callee.is_a?(Identifier) &&
-          (callee.namespace_fn?(g) || callee.module_method?(g))
+      if callee.is_a?(Identifier)
+        meta = callee.meta(g)
 
-        ns_id = Apricot::Identifier.intern(callee.ns.name)
-        g.push_const ns_id.const_names.first
-        ns_id.const_names.drop(1).each {|n| g.find_const(n) }
+        # Handle inlinable function calls
+        if meta && meta[:inline]
+          # Apply the inliner macro to the arguments and compile the result.
+          inliner = meta[:inline]
+          form = Node.from_value(inliner.call(*args.map(&:to_value)), line)
+          form.bytecode(g)
+          return
+        elsif callee.namespace_fn?(g) || callee.module_method?(g)
+          ns_id = Apricot::Identifier.intern(callee.ns.name)
+          g.push_const ns_id.const_names.first
+          ns_id.const_names.drop(1).each {|n| g.find_const(n) }
 
-        args.each {|arg| arg.bytecode(g) }
-        g.send callee.unqualified_name, args.length
-      else
-        callee.bytecode(g)
-        args.each {|arg| arg.bytecode(g) }
-        g.send :apricot_call, args.length
+          args.each {|arg| arg.bytecode(g) }
+          g.send callee.unqualified_name, args.length
+          return
+        end
       end
+
+      # Handle everything else
+      callee.bytecode(g)
+      args.each {|arg| arg.bytecode(g) }
+      g.send :apricot_call, args.length
     end
 
     def quote_bytecode(g)

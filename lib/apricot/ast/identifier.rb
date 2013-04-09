@@ -84,6 +84,11 @@ module Apricot
         g.send :intern, 1
       end
 
+      def meta(g)
+        ref = reference(g)
+        ref.is_a?(NamespaceReference) && ref.meta
+      end
+
       def namespace_fn?(g)
         ref = reference(g)
         ref.is_a?(NamespaceReference) && ref.fn?
