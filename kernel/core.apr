@@ -439,31 +439,48 @@
 
 (defn zero?
   "Return true if num is zero, false otherwise."
+  {:inline (fn [x] `(.zero? ~x))}
   [x]
   (.zero? x))
 
 (defn pos?
   "Return true if num is greater than zero, false otherwise."
+  {:inline (fn [x] `(. ~x > 0))}
   [x]
   (. x > 0))
 
 (defn neg?
   "Return true if num is less than zero, false otherwise."
+  {:inline (fn [x] `(. ~x < 0))}
   [x]
   (. x < 0))
 
 (defn even?
   "Return true if num is even, false otherwise."
+  {:inline (fn [x] `(.even? ~x))}
   [x]
   (.even? x))
 
 (defn odd?
   "Return true if num is odd, false otherwise."
+  {:inline (fn [x] `(.odd? ~x))}
   [x]
   (.odd? x))
 
+(defn nary-inline
+  {:private true}
+  [op]
+  (fn
+    ([x y] `(. ~x ~op ~y))
+    ([x y & more]
+     (.reduce more
+              `(. ~x ~op ~y)
+              | (fn [a b] `(. ~a ~op ~b))))))
+
 (defn +
   "Return the sum of nums. (+) returns 0."
+  {:inline (nary-inline '+)
+   :inline-arities #(. % > 1)}
   ([] 0)
   ([x] x)
   ([x y] (.+ x y))
@@ -472,6 +489,8 @@
 
 (defn *
   "Return the product of nums. (*) returns 1."
+  {:inline (nary-inline '*)
+   :inline-arities #(. % > 1)}
   ([] 1)
   ([x] x)
   ([x y] (.* x y))
@@ -481,6 +500,8 @@
 (defn -
   "If no ys are supplied, return the negation of x, otherwise subtract the ys
   from x and return the result."
+  {:inline (nary-inline '-)
+   :inline-arities #(. % > 1)}
   ([x] (. x -@)) ; Ruby's horribly named -@ method is the negation operator
   ([x y] (.- x y))
   ([x y & more]
@@ -489,6 +510,8 @@
 (defn /
   "If no denominators are supplied, return 1/numerator, otherwise return
   numerator divided by all of the denominators."
+  {:inline (nary-inline '/)
+   :inline-arities #(. % > 1)}
   ([x] (.quo 1 x))
   ([x y] (.quo x y))
   ([x y & more]
@@ -528,13 +551,15 @@
 
 (defn inc
   "Return a number one greater than x."
+  {:inline (fn [x] `(. ~x + 1))}
   [x]
-  (+ x 1))
+  (. x + 1))
 
 (defn dec
   "Return a number one less than x."
+  {:inline (fn [x] `(. ~x - 1))}
   [x]
-  (- x 1))
+  (. x - 1))
 
 ; Equality and inequality
 
