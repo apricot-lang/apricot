@@ -946,3 +946,20 @@
     (if (m :macro)
       (println "Macro"))
     (println "  " (m :doc))))
+
+; REPL Utilities
+
+(defn decode
+  "Print the Rubinius bytecode for the given Proc or Method."
+  [f]
+  (case f
+    [Proc]   (Kernel/puts (.. f block compiled_code decode))
+    [Method] (Kernel/puts (.. f executable decode))
+    (raise (str "Don't know how to decode " (.inspect f)))))
+
+(defmacro time
+  "Evaluates the forms in body and returns the time it took."
+  [& body]
+  `(do
+     (require "benchmark")
+     (.realtime Benchmark | #(do ~@body))))
