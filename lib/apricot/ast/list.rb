@@ -45,8 +45,15 @@ module Apricot::AST
                                      meta[:'inline-arities'].apricot_call(args.length))
           # Apply the inliner macro to the arguments and compile the result.
           inliner = meta[:inline]
-          form = Node.from_value(inliner.apricot_call(*args.map(&:to_value)), line)
-          form.bytecode(g)
+          args.map!(&:to_value)
+
+          begin
+            inlined_form = inliner.apricot_call(*args)
+          rescue => e
+            g.compile_error "Inliner macro for '#{callee.name}' raised an exception:\n  #{e}"
+          end
+
+          Node.from_value(inlined_form, line).bytecode(g)
           return
         elsif callee.namespace_fn?(g) || callee.module_method?(g)
           ns_id = Apricot::Identifier.intern(callee.ns.name)
