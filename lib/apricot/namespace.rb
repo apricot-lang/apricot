@@ -35,6 +35,8 @@ module Apricot
         @fns.delete name
         singleton_class.send(:undef_method, name)
       end
+
+      val
     end
 
     def get_var(name)
