@@ -41,10 +41,11 @@ module Apricot::AST
         meta = callee.meta(g)
 
         # Handle inlinable function calls
-        if meta && meta[:inline]
+        if meta && meta[:inline] && (!meta[:'inline-arities'] ||
+                                     meta[:'inline-arities'].apricot_call(args.length))
           # Apply the inliner macro to the arguments and compile the result.
           inliner = meta[:inline]
-          form = Node.from_value(inliner.call(*args.map(&:to_value)), line)
+          form = Node.from_value(inliner.apricot_call(*args.map(&:to_value)), line)
           form.bytecode(g)
           return
         elsif callee.namespace_fn?(g) || callee.module_method?(g)
