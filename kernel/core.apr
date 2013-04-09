@@ -479,8 +479,10 @@
 
 (defn +
   "Return the sum of nums. (+) returns 0."
-  {:inline (nary-inline '+)
-   :inline-arities #(. % > 1)}
+  {:inline (fn
+             ([] 0)
+             ([x] x)
+             ([x & more] (apply (nary-inline '+) x more)))}
   ([] 0)
   ([x] x)
   ([x y] (.+ x y))
@@ -489,8 +491,10 @@
 
 (defn *
   "Return the product of nums. (*) returns 1."
-  {:inline (nary-inline '*)
-   :inline-arities #(. % > 1)}
+  {:inline (fn
+             ([] 1)
+             ([x] x)
+             ([x & more] (apply (nary-inline '*) x more)))}
   ([] 1)
   ([x] x)
   ([x y] (.* x y))
@@ -500,8 +504,10 @@
 (defn -
   "If no ys are supplied, return the negation of x, otherwise subtract the ys
   from x and return the result."
-  {:inline (nary-inline '-)
-   :inline-arities #(. % > 1)}
+  {:inline (fn
+             ([x] `(. ~x -@))
+             ([x & more] (apply (nary-inline '-) x more)))
+   :inline-arities #(. % > 0)}
   ([x] (. x -@)) ; Ruby's horribly named -@ method is the negation operator
   ([x y] (.- x y))
   ([x y & more]
@@ -510,8 +516,10 @@
 (defn /
   "If no denominators are supplied, return 1/numerator, otherwise return
   numerator divided by all of the denominators."
-  {:inline (nary-inline 'quo)
-   :inline-arities #(. % > 1)}
+  {:inline (fn
+             ([x] `(. 1 quo ~x))
+             ([x & more] (apply (nary-inline 'quo) x more)))
+   :inline-arities #(. % > 0)}
   ([x] (.quo 1 x))
   ([x y] (.quo x y))
   ([x y & more]
