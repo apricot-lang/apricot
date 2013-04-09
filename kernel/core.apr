@@ -510,7 +510,7 @@
 (defn /
   "If no denominators are supplied, return 1/numerator, otherwise return
   numerator divided by all of the denominators."
-  {:inline (nary-inline '/)
+  {:inline (nary-inline 'quo)
    :inline-arities #(. % > 1)}
   ([x] (.quo 1 x))
   ([x y] (.quo x y))
