@@ -60,13 +60,11 @@
 
 (defn list
   "Create a new list containing the items."
-  [& items]
-  (.to_list items))
+  [& items] (.to_list items))
 
 (defn concat
   "Concatenate the items in the supplied colls into a single list."
-  [& colls]
-  (.to_list (.reduce (.map colls | :to_a) [] :+)))
+  [& colls] (.to_list (.reduce (.map colls | :to_a) [] :+)))
 
 (defn array
   "Create a new array containing the items."
@@ -74,8 +72,7 @@
 
 (defn set
   "Create a new set containing the items."
-  [& items]
-  (Set. items))
+  [& items] (Set. items))
 
 (defn hash
   "Create a new hash map from the items. The items are interpreted as a list of
@@ -89,8 +86,7 @@
 
 (defn cons
   "Return a new list where head is the first element and tail is the rest."
-  [head tail]
-  (.cons (.to_list tail) head))
+  [head tail] (.cons (.to_list tail) head))
 
 (defn apply
   "Applies fn f to the argument list formed by prepending intervening
@@ -104,13 +100,11 @@
 
 (defn identifier
   "Return an identifier with the given name."
-  [name]
-  (.intern Apricot::Identifier name))
+  [name] (.intern Apricot::Identifier name))
 
 (defn symbol
   "Return a symbol with the given name."
-  [name]
-  (.to_sym name))
+  [name] (.to_sym name))
 
 (defn gensym
   "Return a new symbol with a unique name. If a prefix string is supplied, the
@@ -138,13 +132,11 @@
 
 (defn print
   "Print the object(s) to standard output."
-  [& args]
-  (Kernel/print (apply str args)))
+  [& args] (Kernel/print (apply str args)))
 
 (defn println
   "Print the object(s) followed by a newline at the end to standard output."
-  [& args]
-  (Kernel/puts (apply str args)))
+  [& args] (Kernel/puts (apply str args)))
 
 (def macroexpand Apricot/macroexpand)
 (def macroexpand-1 Apricot/macroexpand_1)
@@ -153,108 +145,127 @@
 
 (defn instance?
   "Test if x is an instance of class c. Return true or false."
-  [c x]
-  (.is_a? x c))
+  [c x] (.is_a? x c))
 
 (defn module?
   "Return true if x is an instance of Module."
-  [x]
-  (instance? Module x))
+  [x] (instance? Module x))
 
 (defn class?
   "Return true if x is an instance of Class."
-  [x]
-  (instance? Class x))
+  [x] (instance? Class x))
 
 (defn array?
   "Return true if x is an instance of Array."
-  [x]
-  (instance? Array x))
+  [x] (instance? Array x))
 
 (defn list?
   "Return true if x is an instance of Apricot::List."
-  [x]
-  (instance? Apricot::List x))
+  [x] (instance? Apricot::List x))
 
 (defn hash?
   "Return true if x is an instance of Hash."
-  [x]
-  (instance? Hash x))
+  [x] (instance? Hash x))
 
 (defn set?
   "Return true if x is an instance of Set."
-  [x]
-  (instance? Set x))
+  [x] (instance? Set x))
 
 (defn string?
   "Return true if x is an instance of String."
-  [x]
-  (instance? String x))
+  [x] (instance? String x))
 
 (defn regexp?
   "Return true if x is an instance of Regexp."
-  [x]
-  (instance? Regexp x))
+  [x] (instance? Regexp x))
 
 (defn identifier?
   "Return true if x is an instance of Apricot::Identifier."
-  [x]
-  (instance? Apricot::Identifier x))
+  [x] (instance? Apricot::Identifier x))
 
 (defn symbol?
   "Return true if x is an instance of Symbol."
-  [x]
-  (instance? Symbol x))
+  [x] (instance? Symbol x))
 
 (defn number?
   "Return true if x is an instance of Numeric."
-  [x]
-  (instance? Numeric x))
+  [x] (instance? Numeric x))
 
 (defn ratio?
   "Return true if x is an instance of Rational."
-  [x]
-  (instance? Rational x))
+  [x] (instance? Rational x))
 
 (defn integer?
   "Return true if x is an instance of Integer."
-  [x]
-  (instance? Integer x))
+  [x] (instance? Integer x))
 
 (defn fixnum?
   "Return true if x is an instance of Fixnum."
-  [x]
-  (instance? Fixnum x))
+  [x] (instance? Fixnum x))
 
 (defn bignum?
   "Return true if x is an instance of Bignum."
-  [x]
-  (instance? Bignum x))
+  [x] (instance? Bignum x))
 
 (defn float?
   "Return true if x is an instance of Float."
-  [x]
-  (instance? Float x))
+  [x] (instance? Float x))
 
 (defn complex?
   "Return true if x is an instance of Complex."
-  [x]
-  (instance? Complex x))
+  [x] (instance? Complex x))
 
 (defn range?
   "Return true if x is an instance of Range."
-  [x]
-  (instance? Range x))
+  [x] (instance? Range x))
 
 (defn comparable?
   "Return true if x is an instance of a class that implements Comparable."
-  [x]
-  (instance? Comparable x))
+  [x] (instance? Comparable x))
 
 (defn enumerable?
   "Return true if x is an instance of a class that implements Enumerable."
-  [x]
-  (instance? Enumerable x))
+  [x] (instance? Enumerable x))
+
+; Basic logic predicates, functions, and macros
+
+(defn nil?
+  "Return true if x is nil, false otherwise."
+  [x] (.nil? x))
+
+(defn true?
+  "Return true if x is the value true, false otherwise."
+  [x] (.equal? x true))
+
+(defn false?
+  "Return true if x is the value false, false otherwise."
+  [x] (.equal? x false))
+
+(defn not
+  "Return true if x is logical false, false otherwise."
+  [x] (if x false true))
+
+(defmacro and
+  "Evaluate exprs one at a time, from left to right. If a form returns logical
+  false (nil or false), return that value and don't evaluate any of the other
+  expressions, otherwise return the value of the last expr. (and) returns
+  true."
+  ([] true)
+  ([x] x)
+  ([x & more]
+   `(let [and# ~x]
+      (if and# (and ~@more) and#))))
+
+(defmacro or
+  "Evaluate exprs one at a time, from left to right. If a form returns a
+  logical true value, return that value and don't evaluate any of the other
+  expressions, otherwise return the value of the last expression. (or) returns
+  nil."
+  ([] nil)
+  ([x] x)
+  ([x & more]
+   `(let [or# ~x]
+      (if or# or# (or ~@more)))))
 
 ; Collection functions
 
@@ -283,28 +294,23 @@
 
 (defn second
   "Same as (first (next coll))."
-  [coll]
-  (first (next coll)))
+  [coll] (first (next coll)))
 
 (defn ffirst
   "Same as (first (first coll))."
-  [coll]
-  (first (first coll)))
+  [coll] (first (first coll)))
 
 (defn nfirst
   "Same as (next (first coll))."
-  [coll]
-  (next (first coll)))
+  [coll] (next (first coll)))
 
 (defn fnext
   "Same as (first (next coll))."
-  [coll]
-  (first (next coll)))
+  [coll] (first (next coll)))
 
 (defn last
   "Return the last item in coll."
-  [coll]
-  (.last coll))
+  [coll] (.last coll))
 
 (defn butlast [coll]
   "Return all but the last item in coll."
@@ -322,23 +328,19 @@
 
 (defn count
   "Return the number of items in coll."
-  [coll]
-  (.count coll))
+  [coll] (.count coll))
 
 (defn take
   "Return the first n items in coll."
-  [n coll]
-  (.take coll n))
+  [n coll] (.take coll n))
 
 (defn drop
   "Return all but the first n items in coll."
-  [n coll]
-  (.drop coll n))
+  [n coll] (.drop coll n))
 
 (defn reverse
   "Return the items in coll in reverse order."
-  [coll]
-  (.reverse coll))
+  [coll] (.reverse coll))
 
 (defn map
   "Return an array consisting of the result of applying f to the set of first
@@ -383,89 +385,38 @@
 
 (defn keys
   "Return an array of the map's keys."
-  [map]
-  (.keys map))
+  [map] (.keys map))
 
 (defn vals
   "Return an array of the map's values."
-  [map]
-  (.values map))
-
-; Basic logic predicates, functions, and macros
-
-(defn nil?
-  "Return true if x is nil, false otherwise."
-  [x]
-  (.nil? x))
-
-(defn true?
-  "Return true if x is the value true, false otherwise."
-  [x]
-  (.equal? x true))
-
-(defn false?
-  "Return true if x is the value false, false otherwise."
-  [x]
-  (.equal? x false))
-
-(defn not
-  "Return true if x is logical false, false otherwise."
-  [x]
-  (if x false true))
-
-(defmacro and
-  "Evaluate exprs one at a time, from left to right. If a form returns logical
-  false (nil or false), return that value and don't evaluate any of the other
-  expressions, otherwise return the value of the last expr. (and) returns
-  true."
-  ([] true)
-  ([x] x)
-  ([x & more]
-   `(let [and# ~x]
-      (if and# (and ~@more) and#))))
-
-(defmacro or
-  "Evaluate exprs one at a time, from left to right. If a form returns a
-  logical true value, return that value and don't evaluate any of the other
-  expressions, otherwise return the value of the last expression. (or) returns
-  nil."
-  ([] nil)
-  ([x] x)
-  ([x & more]
-   `(let [or# ~x]
-      (if or# or# (or ~@more)))))
+  [map] (.values map))
 
 ; Number predicates and functions
 
 (defn zero?
   "Return true if num is zero, false otherwise."
   {:inline (fn [x] `(.zero? ~x))}
-  [x]
-  (.zero? x))
+  [x] (.zero? x))
 
 (defn pos?
   "Return true if num is greater than zero, false otherwise."
   {:inline (fn [x] `(. ~x > 0))}
-  [x]
-  (. x > 0))
+  [x] (. x > 0))
 
 (defn neg?
   "Return true if num is less than zero, false otherwise."
   {:inline (fn [x] `(. ~x < 0))}
-  [x]
-  (. x < 0))
+  [x] (. x < 0))
 
 (defn even?
   "Return true if num is even, false otherwise."
   {:inline (fn [x] `(.even? ~x))}
-  [x]
-  (.even? x))
+  [x] (.even? x))
 
 (defn odd?
   "Return true if num is odd, false otherwise."
   {:inline (fn [x] `(.odd? ~x))}
-  [x]
-  (.odd? x))
+  [x] (.odd? x))
 
 (defn nary-inline
   {:private true}
@@ -527,54 +478,45 @@
 
 (defn quot
   "Return quotient of dividing numerator by denominator."
-  [num div]
-  (.truncate (.fdiv num div)))
+  [num div] (.truncate (.fdiv num div)))
 
 (defn rem
   "Return remainder of dividing numerator by denominator."
-  [num div]
-  (.remainder num div))
+  [num div] (.remainder num div))
 
 (defn mod
   "Return the modulus of num and div. Truncates toward negative infinity."
-  [num div]
-  (.modulo num div))
+  [num div] (.modulo num div))
 
 (defn pow
   "Return num raised to the exponent exp."
-  [num exp]
-  (.** num exp))
+  [num exp] (.** num exp))
 
 (defn int
   "Coerce to integer."
-  [x]
-  (.to_i x))
+  [x] (.to_i x))
 
 (defn float
   "Coerce to floating point."
-  [x]
-  (.to_f x))
+  [x] (.to_f x))
 
 (def ratio Kernel/Rational)
 
 (defn inc
   "Return a number one greater than x."
   {:inline (fn [x] `(. ~x + 1))}
-  [x]
-  (. x + 1))
+  [x] (. x + 1))
 
 (defn dec
   "Return a number one less than x."
   {:inline (fn [x] `(. ~x - 1))}
-  [x]
-  (. x - 1))
+  [x] (. x - 1))
 
 ; Equality and inequality
 
 (defn identical?
   "Test if the two arguments are the same object."
-  [x y]
-  (.equal? x y))
+  [x y] (.equal? x y))
 
 (defn =
   "Return true if all of the arguments are equal, otherwise false. (=) returns
@@ -597,8 +539,7 @@
 (defn compare
   "Return a negative number, zero, or a positive number when x is logically
   'less than', 'equal to', or 'greater than' y, respectively."
-  [x y]
-  (. x <=> y))
+  [x y] (. x <=> y))
 
 (defn >
   "Return true if nums are in monotonically decreasing order, otherwise false."
@@ -654,8 +595,7 @@
 
 (defn bit-not
   "Return the bitwise complement of x (ie. flip all the bits)."
-  [x]
-  (. x #|~|)) ; Use arbitrary identifier syntax since ~ is a special char
+  [x] (. x #|~|)) ; Use arbitrary identifier syntax since ~ is a special char
 
 (defn bit-and
   "Return the bitwise and of the arguments."
@@ -684,33 +624,27 @@
 
 (defn bit-shift-left
   "Return the bitwise shift left of x by n bits."
-  [x n]
-  (. x << n))
+  [x n] (. x << n))
 
 (defn bit-shift-right
   "Return the bitwise shift right of x by n bits."
-  [x n]
-  (. x >> n))
+  [x n] (. x >> n))
 
 (defn bit-clear
   "Return x with the bit at index n set to 0."
-  [x n]
-  (bit-and-not x (bit-shift-left 1 n)))
+  [x n] (bit-and-not x (bit-shift-left 1 n)))
 
 (defn bit-set
   "Return x with the bit at index n set to 1."
-  [x n]
-  (bit-or x (bit-shift-left 1 n)))
+  [x n] (bit-or x (bit-shift-left 1 n)))
 
 (defn bit-flip
   "Return x with the bit at index n flipped from its previous value."
-  [x n]
-  (bit-xor x (bit-shift-left 1 n)))
+  [x n] (bit-xor x (bit-shift-left 1 n)))
 
 (defn bit-test
   "Return true if the bit at index n is 1, otherwise false."
-  [x n]
-  (not= 0 (bit-and x (bit-shift-left 1 n))))
+  [x n] (not= 0 (bit-and x (bit-shift-left 1 n))))
 
 ; Functional programming functions
 (defn complement
@@ -725,8 +659,7 @@
 
 (defn constantly
   "Return a function that takes any number of arguments and returns x."
-  [x]
-  (fn [& args] x))
+  [x] (fn [& args] x))
 
 (defn identity
   "Return the argument."
@@ -931,8 +864,7 @@
 
 (defn meta
   "Return the metadata of obj."
-  [obj]
-  (.apricot_meta obj))
+  [obj] (.apricot_meta obj))
 
 ; Documentation
 
