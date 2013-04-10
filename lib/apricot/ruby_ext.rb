@@ -173,6 +173,10 @@ class NilClass
   def each
   end
 
+  def empty?
+    true
+  end
+
   # Seq Methods
   # Many functions that return seqs occasionally return nil, so it's
   # convenient if nil can respond to some of the same methods as seqs.

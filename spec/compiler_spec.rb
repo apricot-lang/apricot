@@ -208,7 +208,7 @@ describe 'Apricot' do
         ([x] x)
         ([x y | f] (f x y))
         ([x y & more | f]
-         (recur (f x y) (first more) (rest more))))
+         (recur (f x y) (first more) (next more))))
     CODE
 
     reduce_args.call(1).should == 1

@@ -21,6 +21,10 @@ module Apricot
       self
     end
 
+    def empty?
+      false
+    end
+
     def to_s
       str = '('
       each {|x| str << x.apricot_inspect << ' ' }
