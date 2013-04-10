@@ -86,7 +86,7 @@
 
 (defn cons
   "Return a new list where head is the first element and tail is the rest."
-  [head tail] (.cons (.to_list tail) head))
+  [head tail] (Apricot::Cons. head tail))
 
 (defn apply
   "Applies fn f to the argument list formed by prepending intervening
@@ -269,28 +269,30 @@
 
 ; Collection functions
 
+(defn seq
+  "Returns a seq on the collection. If the collection is empty, returns nil.
+  (seq nil) returns nil."
+  [coll] (.seq coll))
+
 (defn first
-  "Return the first item in the collection, or nil."
-  [coll]
-  (.first coll))
+  "Return the first item in the collection. Call seq on the argument. If coll
+  is nil, return nil."
+  [coll] (.first (seq coll)))
 
 (defn rest
-  "Return the items in the collection after the first. Possibly empty."
-  [coll]
-  (.drop coll 1))
+  "Return a possibly empty seq of the items after the first. Call seq on the
+  argument."
+  [coll] (.rest (seq coll)))
 
 (defn next
-  "Return the items after the first. If there are no more items, return nil."
-  [coll]
-  (let [r (rest coll)]
-    (if (.empty? r)
-      nil
-      r)))
+  "Return a seq of the items after the first. Call seq on the argument. If
+  there are no more items, return nil."
+  [coll] (.next (seq coll)))
 
 (defn empty?
-  "Return true if coll has no items."
-  [coll]
-  (.empty? coll))
+  "Return true if coll has no items - same as (not (seq coll)). Please use the
+  idiom (seq x) rather than (not (empty? x))"
+  [coll] (not (seq coll)))
 
 (defn second
   "Same as (first (next coll))."

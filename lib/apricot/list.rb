@@ -1,7 +1,7 @@
 module Apricot
   # A linked list implementation representing (a b c) syntax in Apricot
   class List
-    include Enumerable
+    include Seq
 
     def self.[](*args)
       list = EmptyList
@@ -66,6 +66,14 @@ module Apricot
 
     def to_list
       self
+    end
+
+    def seq
+      if empty?
+        nil
+      else
+        self
+      end
     end
 
     def inspect
