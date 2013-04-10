@@ -768,12 +768,12 @@
 (defmacro if-let
   "bindings => var test
 
-  If test is true, evaluates then with var bound to the value of test,
-  otherwise yields else."
+  If test is true, evaluate then with var bound to the value of test,
+  otherwise yield else."
   [bindings then [else nil]]
   `(let [temp# ~(bindings 1)]
      (if temp#
-       (let ~bindings
+       (let [~(bindings 0) temp#]
          ~then)
        ~else)))
 
