@@ -44,6 +44,8 @@ module Apricot
 
     def run
       Readline.completion_append_character = " "
+      Readline.basic_word_break_characters = " \t\n\"'`~@;{[("
+      Readline.basic_quote_characters = "\""
 
       Readline.completion_proc = proc do |s|
         if s.start_with? '!'
