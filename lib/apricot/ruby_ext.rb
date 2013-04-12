@@ -36,7 +36,7 @@ class Array
 
   alias_method :apricot_str, :apricot_inspect
 
-  def seq
+  def to_seq
     if length == 0
       nil
     else
@@ -181,7 +181,7 @@ class NilClass
   # Many functions that return seqs occasionally return nil, so it's
   # convenient if nil can respond to some of the same methods as seqs.
 
-  def seq
+  def to_seq
     nil
   end
 

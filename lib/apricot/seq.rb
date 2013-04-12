@@ -17,7 +17,7 @@ module Apricot
       self
     end
 
-    def seq
+    def to_seq
       self
     end
 

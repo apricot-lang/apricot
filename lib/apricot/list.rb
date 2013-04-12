@@ -68,7 +68,7 @@ module Apricot
       self
     end
 
-    def seq
+    def to_seq
       if empty?
         nil
       else

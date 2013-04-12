@@ -4,7 +4,7 @@ module Apricot
 
     def initialize(head, tail)
       @head = head
-      @tail = tail.seq
+      @tail = tail.to_seq
     end
 
     def first

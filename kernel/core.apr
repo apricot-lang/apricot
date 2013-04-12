@@ -272,7 +272,7 @@
 (defn seq
   "Returns a seq on the collection. If the collection is empty, returns nil.
   (seq nil) returns nil."
-  [coll] (.seq coll))
+  [coll] (.to_seq coll))
 
 (defn first
   "Return the first item in the collection. Call seq on the argument. If coll
