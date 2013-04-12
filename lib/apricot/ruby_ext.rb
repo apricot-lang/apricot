@@ -99,6 +99,10 @@ class Hash
   end
 
   alias_method :apricot_str, :apricot_inspect
+
+  def to_seq
+    each_pair.to_a.to_seq
+  end
 end
 
 class Set
