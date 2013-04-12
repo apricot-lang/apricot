@@ -39,7 +39,7 @@ apr> (+ 1 2 3)
 apr> (map (fn [x] (* x x)) (Range. 1 10))
 => [1 4 9 16 25 36 49 64 81 100]
 apr> (defn square [x] (* x x))
-=> nil
+=> #<Proc:0x330@(eval):3 (lambda)>
 apr> (map square (Range. 1 10))
 => [1 4 9 16 25 36 49 64 81 100]
 apr> (map (comp str square) (Range. 1 10))
