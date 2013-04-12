@@ -208,6 +208,8 @@ module Apricot
         potential_completions =
           const.is_a?(Apricot::Namespace) ? const.vars.keys : const.methods
 
+        # Select the matching vars or methods and format them properly as
+        # completions.
         potential_completions.select do |c|
           c.to_s.start_with? id
         end.sort.map do |c|
@@ -228,8 +230,8 @@ module Apricot
         # it. (e.g. in Math::PI::<tab> we can't do anything)
         return [] unless const && const.is_a?(Module)
 
-        # If the constant
-
+        # Select the matching constants and format them properly as
+        # completions.
         const.constants.select do |c|
           c.to_s.start_with? curr_name
         end.sort.map do |name|
