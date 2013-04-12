@@ -234,10 +234,10 @@ module Apricot
       end
 
       skip_whitespace
-      if unquote == :unquote
-        incomplete_error "Unexpected end of program after ~, expected a form" unless @char
-      else
-        incomplete_error "Unexpected end of program after ~@, expected a form" unless @char
+
+      unless @char
+        syntax = unquote == :unquote ? '~' : '~@'
+        incomplete_error "Unexpected end of program after #{syntax}, expected a form"
       end
 
       form = parse_form
