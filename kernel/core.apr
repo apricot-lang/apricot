@@ -835,6 +835,10 @@
 
 ; Miscellaneous (to be sorted)
 
+(defn eval
+  "Evaluate the form data structure (not text!) and return the result."
+  [form] (Apricot::Compiler/eval_form form))
+
 (defmacro each [binding & body]
   `(.each ~(last binding)
           | (fn [~(first binding)] ~@body)))
