@@ -8,32 +8,32 @@ module Apricot
     MAX_HISTORY_LINES = 1000
 
     COMMANDS = {
-      "!backtrace" => [
-        "Print the backtrace of the most recent exception",
-        proc do
+      "!backtrace" => {
+        doc: "Print the backtrace of the most recent exception",
+        code: proc do
           puts (@exception ? @exception.awesome_backtrace : "No backtrace")
         end
-      ],
+      },
 
-      "!bytecode" => [
-        "Print the bytecode generated from the previous line",
-        proc do
+      "!bytecode" => {
+        doc: "Print the bytecode generated from the previous line",
+        code: proc do
           puts (@compiled_code ? @compiled_code.decode : "No previous line")
         end
-      ],
+      },
 
-      "!exit" => ["Exit the REPL", proc { exit }],
+      "!exit" => {doc: "Exit the REPL", code: proc { exit }},
 
-      "!help" => [
-        "Print this message",
-        proc do
+      "!help" => {
+        doc: "Print this message",
+        code: proc do
           width = 14
 
           puts "(doc foo)".ljust(width) +
             "Print the documentation for a function or macro"
-          COMMANDS.sort.each {|name, a| puts name.ljust(width) + a[0] }
+          COMMANDS.sort.each {|name, c| puts name.ljust(width) + c[:doc] }
         end
-      ]
+      }
     }
 
     COMMAND_COMPLETIONS = COMMANDS.keys.sort
@@ -74,7 +74,7 @@ module Apricot
         if stripped.empty?
           next
         elsif stripped.start_with?('!')
-          if COMMANDS.include?(stripped) && block = COMMANDS[stripped][1]
+          if COMMANDS.include?(stripped) && block = COMMANDS[stripped][:code]
             instance_eval(&block)
           else
             puts "Unknown command: #{stripped}"
