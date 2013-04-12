@@ -27,7 +27,11 @@ module Apricot
       "!help" => [
         "Print this message",
         proc do
-          COMMANDS.sort.each {|name, a| puts name.ljust(14) + a[0] }
+          width = 14
+
+          puts "(doc foo)".ljust(width) +
+            "Print the documentation for a function or macro"
+          COMMANDS.sort.each {|name, a| puts name.ljust(width) + a[0] }
         end
       ]
     }
