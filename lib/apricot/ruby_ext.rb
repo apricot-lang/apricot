@@ -125,6 +125,10 @@ class Set
 
   alias_method :apricot_call, :[]
   alias_method :apricot_str, :apricot_inspect
+
+  def to_seq
+    to_a.to_seq
+  end
 end
 
 class Rational
