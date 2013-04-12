@@ -47,8 +47,13 @@ module Apricot
 
       Readline.completion_proc = proc do |s|
         if s.start_with? '!'
+          # User is typing a REPL command
           COMMAND_COMPLETIONS.select {|c| c.start_with? s }
+        elsif ('A'..'Z').include? s[0]
+          # User is typing a constant
+          constant_completion(s)
         else
+          # User is typing a regular name
           comps = SPECIAL_COMPLETIONS +
             Apricot.current_namespace.vars.keys.map(&:to_s)
           comps.select {|c| c.start_with? s }.sort
@@ -72,8 +77,8 @@ module Apricot
         end
 
         begin
-          @compiled_code = Apricot::Compiler.compile_string(code, "(eval)",
-                                                            @line, @bytecode)
+          @compiled_code =
+            Apricot::Compiler.compile_string(code, "(eval)", @line, @bytecode)
           value = Rubinius.run_script @compiled_code
           puts "=> #{value.apricot_inspect}"
           e = nil
@@ -165,6 +170,75 @@ module Apricot
       Readline::HISTORY.pop
       @line -= 1
       retry
+    end
+
+    # Find constant Foo::Bar::Baz from ["Foo", "Bar", "Baz"] array. Helper for
+    # tab-completion of constants.
+    def find_constant(const_names)
+      const_names.reduce(Object) do |mod, name|
+        mod.const_get(name)
+      end
+    rescue NameError
+      # Return nil if the constant doesn't exist.
+      nil
+    end
+
+    # Tab-completion for constants and namespaced identifiers
+    def constant_completion(s)
+      # Split Foo/bar into Foo and bar. If there is no / then id will be nil.
+      constant_str, id = s.split('/', 2)
+
+      # If we have a Foo/bar case, complete the 'bar' part if possible.
+      if id
+        # Split with -1 returns an extra empty string if constant_str ends in
+        # '::'. Then it will fail to find the constant for Foo::/ and we won't
+        # try completing Foo::/ to Foo/whatever.
+        const_names = constant_str.split('::', -1)
+
+        const = find_constant(const_names)
+
+        # If we can't find the constant the user is typing, don't return any
+        # completions. If it isn't a Module or Namespace (subclass of Module),
+        # we can't complete methods or vars below it. (e.g. in Math::PI/<tab>
+        # we can't do any completions)
+        return [] unless const && const.is_a?(Module)
+
+        # Complete the vars of the namespace or the methods of the module.
+        potential_completions =
+          const.is_a?(Apricot::Namespace) ? const.vars.keys : const.methods
+
+        potential_completions.select do |c|
+          c.to_s.start_with? id
+        end.sort.map do |c|
+          "#{constant_str}/#{c}"
+        end
+
+      # Otherwise there is no / and we complete constant names.
+      else
+        # Split with -1 returns an extra empty string if constant_str ends in
+        # '::'. This allows us to differentiate Foo:: and Foo cases.
+        const_names = constant_str.split('::', -1)
+        curr_name = const_names.pop # The user is currently typing the last name.
+
+        const = find_constant(const_names)
+
+        # If we can't find the constant the user is typing, don't return any
+        # completions. If it isn't a Module, we can't complete constants below
+        # it. (e.g. in Math::PI::<tab> we can't do anything)
+        return [] unless const && const.is_a?(Module)
+
+        # If the constant
+
+        const.constants.select do |c|
+          c.to_s.start_with? curr_name
+        end.sort.map do |name|
+          if const_names.size == 0
+            name.to_s
+          else
+            "#{const_names.join('::')}::#{name}"
+          end
+        end
+      end
     end
   end
 end
