@@ -28,18 +28,27 @@ module Apricot
       prepare_compiled_code compiler.run
     end
 
+    def self.compile_form(node, file = "(none)", line = 1, debug = false)
+      compile_node(AST::Node.from_value(node, line), file, line, debug)
+    end
+
     def self.prepare_compiled_code(cc)
       cc.scope = Rubinius::ConstantScope.new(Object)
       cc
     end
 
-    def self.eval(code, file = "(none)", line = 1, debug = false)
-      if code.is_a? AST::Node
-        cc = compile_node(code, file, line, debug)
-      else
-        cc = compile_string(code, file, line, debug)
-      end
+    def self.eval(code, file = "(eval)", line = 1, debug = false)
+      cc = compile_string(code, file, line, debug)
+      Rubinius.run_script cc
+    end
 
+    def self.eval_form(form, file = "(eval)", line = 1, debug = false)
+      cc = compile_form(form, file, line, debug)
+      Rubinius.run_script cc
+    end
+
+    def self.eval_node(node, file = "(eval)", line = 1, debug = false)
+      cc = compile_node(node, file, line, debug)
       Rubinius.run_script cc
     end
   end

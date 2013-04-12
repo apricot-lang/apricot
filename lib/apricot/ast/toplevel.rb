@@ -29,7 +29,7 @@ module Apricot
             # We evaluate top level forms as we generate the bytecode for them
             # so macros defined in a file can be used immediately after the
             # definition.
-            Apricot::Compiler.eval(e, @file) if @evaluate
+            Apricot::Compiler.eval_node(e, @file) if @evaluate
           end
         end
 
