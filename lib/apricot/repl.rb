@@ -81,6 +81,7 @@ module Apricot
             Apricot::Compiler.compile_string(code, "(eval)", @line, @bytecode)
           value = Rubinius.run_script @compiled_code
           puts "=> #{value.apricot_inspect}"
+          Apricot.current_namespace.set_var(:_, value)
           e = nil
         rescue Apricot::SyntaxError => e
           if e.incomplete?
