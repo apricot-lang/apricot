@@ -167,6 +167,51 @@ class Symbol
   end
 end
 
+class Range
+  def to_seq
+    if first > last || (first == last && exclude_end?)
+      nil
+    else
+      Seq.new(first, last, exclude_end?)
+    end
+  end
+
+  class Seq
+    include Apricot::Seq
+
+    def initialize(first, last, exclude)
+      @first = first
+      @last = last
+      @exclude = exclude
+    end
+
+    def first
+      @first
+    end
+
+    def next
+      next_val = @first.succ
+
+      if next_val > @last || (next_val == @last && @exclude)
+        nil
+      else
+        Seq.new(next_val, @last, @exclude)
+      end
+    end
+
+    def each
+      val = @first
+
+      until val > @last || (val == @last && @exclude)
+        yield val
+        val = val.succ
+      end
+
+      self
+    end
+  end
+end
+
 module Enumerable
   def to_list
     list = Apricot::List::EmptyList
