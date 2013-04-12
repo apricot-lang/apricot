@@ -192,7 +192,7 @@ class Range
     def next
       next_val = @first.succ
 
-      if next_val > @last || (next_val == @last && @exclude)
+      if @first == @last || (next_val == @last && @exclude)
         nil
       else
         Seq.new(next_val, @last, @exclude)
@@ -200,10 +200,12 @@ class Range
     end
 
     def each
+      prev = nil
       val = @first
 
-      until val > @last || (val == @last && @exclude)
+      until prev == @last || (val == @last && @exclude)
         yield val
+        prev = val
         val = val.succ
       end
 
