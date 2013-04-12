@@ -95,7 +95,8 @@ module Apricot
               more_code = Readline.readline(' ' * @prompt.length, false)
               if more_code
                 code << "\n" << more_code
-                Readline::HISTORY << Readline::HISTORY.pop + "\n" + more_code
+                Readline::HISTORY << Readline::HISTORY.pop + "\n" +
+                  ' ' * @prompt.length +  more_code
                 retry
               else
                 print "\r" # print the exception at the start of the line
