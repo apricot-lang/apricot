@@ -163,7 +163,7 @@ class Symbol
   end
 
   def apricot_call(o)
-    o[self]
+    o[self] unless o.nil?
   end
 end
 
