@@ -1,8 +1,8 @@
 require 'set'
 
 %w[
-misc parser compiler ast macroexpand generator stages printers special_forms
-errors seq cons list identifier ruby_ext namespace
+version misc parser compiler ast macroexpand generator stages printers
+special_forms errors seq cons list identifier ruby_ext namespace
 ].each {|r| require "apricot/#{r}" }
 
 # Start "booting" apricot. Set up core namespace and load the core library.
