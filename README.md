@@ -1,14 +1,13 @@
 # Apricot [![Build Status](https://secure.travis-ci.org/programble/apricot.png?branch=master)](http://travis-ci.org/programble/apricot) [![Dependency Status](https://gemnasium.com/programble/apricot.png?travis)](https://gemnasium.com/programble/apricot)
 
-A Clojure-like Lisp on Rubinius.
+A Clojure-like Lisp on [Rubinius](http://rubini.us/).
 
 Try to contain your excitement, please.
 
 
 ## Install
-First of all, you're going to need [Rubinius](http://rubini.us/). I recommend
-installing the latest Rubinius with Ruby 1.9-mode default from
-[RVM](https://rvm.io/).
+First of all, you're going to need Rubinius. I recommend installing the latest
+Rubinius with Ruby 1.9-mode default from [RVM](https://rvm.io/).
 
 ``` sh
 $ rvm install rbx-head --1.9
@@ -72,13 +71,13 @@ $ gem install bundler
 $ bundle
 ```
 
-You're all set now. Run the tests with `rake` and run the bleeding edge REPL
-with `ruby -Ilib bin/apricot`. Similarily, use `irb -Ilib -rapricot` for an
-IRB session with Apricot loaded.
+You're all set. Run the tests with `rake` and run the bleeding edge REPL with
+`ruby -Ilib bin/apricot`. Similarily, use `irb -Ilib -rapricot` for an IRB
+session with Apricot loaded.
 
 
 ## Contact / Bug Reports
-If you have any questions don't hesistate to visit us in `#apricot` on
+If you have any questions don't hesitate to visit us in `#apricot` on
 [freenode](http://freenode.net/) or drop one of us an email. And we'd really
 appreciate it if you opened bug reports on the GitHub [issue
 tracker](https://github.com/programble/apricot/issues)!
@@ -86,9 +85,9 @@ tracker](https://github.com/programble/apricot/issues)!
 
 ## License
 
-Copyright (c) 2012-2013, Curtis McEnroe <programble@gmail.com>
+Copyright (c) 2012-2013, Curtis McEnroe \<programble@gmail.com>
 
-Copyright (c) 2012-2013, Scott Olson <scott@scott-olson.org>
+Copyright (c) 2012-2013, Scott Olson \<scott@scott-olson.org>
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
