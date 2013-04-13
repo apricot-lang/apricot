@@ -5,33 +5,29 @@ A Clojure-like Lisp on Rubinius.
 Try to contain your excitement, please.
 
 
-## Setup
-To get Apricot up and running, make sure you have Rubinius and Bundler
-installed.  The easiest way to get Rubinius is with [RVM](https://rvm.io/).
-Whenever you are using Apricot you need to be running Rubinius in Ruby 1.9
-mode. We make this easy in the Apricot repository with the `.ruby-version`
-file which RVM automatically reads to figure out which Ruby to switch to.
+## Install
+First of all, you're going to need [Rubinius](http://rubini.us/). I recommend
+installing the latest Rubinius with Ruby 1.9-mode default from
+[RVM](https://rvm.io/).
 
 ``` sh
 $ rvm install rbx-head --1.9
-$ rvm use rbx-head
-$ gem install bundler
-$ bundle
+$ rvm use rbx
+$ gem install apricot
 ```
+
+To use Apricot you must be running Rubinius in Ruby 1.9 mode.
+
 
 ## The REPL
-Apricot provides a nice read-eval-print-loop with line editing, history,
+Apricot provides an awesome read-eval-print-loop with line editing, history,
 tab-completion, and some interesting commands like `!bytecode`. To enter the
-REPL just run:
+REPL just run `apricot`.
 
-``` sh
-$ bin/apricot
-```
-
-Once in the repl you can ask for help by using `!help` and you can exit with
-`!exit`. See the documentation of any function with `(doc <name>)`. Play
-around, read `kernel/core.apr` and try out our functions, and make some of
-your own. Experiment. Tell us what you think!
+Once in the repl you can get help with `!help` or use `(doc <name>)` to see
+the documentation of any function or macro. Play around, read
+`kernel/core.apr` and try out our functions, and make some of your own.
+Experiment. Tell us what you think!
 
 ``` clojure
 apr> (+ 1 2 3)
@@ -54,21 +50,38 @@ comp
 => nil
 ```
 
+
 ## Hello World
 So you want to put your program in a file and not type it into the REPL? Sure:
 
 ``` sh
 $ cat hello.apr
-(puts "Hello, world!")
-$ bin/apricot hello.apr
+(println "Hello, world!")
+$ apricot hello.apr
 Hello, world!
 ```
 
+
+## Development
+If you want to hack on Apricot, first install Rubinius as explained above.
+When you `cd` to the Apricot git repo, RVM should automatically switch to
+Rubinius thanks to the `.ruby-version` file. Now install and run Bundler:
+
+``` sh
+$ gem install bundler
+$ bundle
+```
+
+You're all set now. Run the tests with `rake` and run the bleeding edge REPL
+with `ruby -Ilib bin/apricot`. Similarily, use `irb -Ilib -rapricot` for an
+IRB session with Apricot loaded.
+
+
 ## Contact / Bug Reports
-Come visit us on [freenode](http://freenode.net/) in the #apricot channel, or
-drop one of us an email. Please send your bug reports to the GitHub
-[issue tracker](https://github.com/programble/apricot/issues). They will be
-greatly appreciated!
+If you have any questions don't hesistate to visit us in `#apricot` on
+[freenode](http://freenode.net/) or drop one of us an email. And we'd really
+appreciate it if you opened bug reports on the GitHub [issue
+tracker](https://github.com/programble/apricot/issues)!
 
 
 ## License
