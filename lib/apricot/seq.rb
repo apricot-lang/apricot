@@ -1,4 +1,11 @@
 module Apricot
+  # Every seq should include this module and define 'first' and 'next'
+  # methods. A seq may redefine 'rest' and 'each' if there is a more efficient
+  # way to implement them.
+  #
+  # 'first' should return the first item in the seq.
+  # 'next' should return a seq of the rest of the items in the seq, or nil
+  #   if there are no more items.
   module Seq
     include Enumerable
 
