@@ -107,9 +107,9 @@
   [name] (.to_sym name))
 
 (defn gensym
-  "Return a new symbol with a unique name. If a prefix string is supplied, the
-  name is prefix__# where # is some unique number. If prefix is not supplied,
-  the prefix is 'g'."
+  "Return a new identifier with a unique name. If a prefix string is supplied,
+  the name is prefix__# where # is some unique number. If prefix is not
+  supplied, the prefix is 'g'."
   [[prefix "g"]]
   (identifier (.gensym Apricot prefix)))
 
@@ -900,7 +900,7 @@
     (raise (str "Don't know how to decode " (.inspect f)))))
 
 (defmacro time
-  "Evaluates the forms in body and returns the time it took."
+  "Evaluate the forms in body and return the time it took."
   [& body]
   `(do
      (require "benchmark")
