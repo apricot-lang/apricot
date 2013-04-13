@@ -155,6 +155,10 @@
   "Return true if x is an instance of Class."
   [x] (instance? Class x))
 
+(defn seq?
+  "Return true if x is an instance of an Apricot::Seq class."
+  [x] (instance? Apricot::Seq x))
+
 (defn array?
   "Return true if x is an instance of Array."
   [x] (instance? Array x))
