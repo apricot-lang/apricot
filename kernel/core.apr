@@ -224,11 +224,11 @@
   [x] (instance? Range x))
 
 (defn comparable?
-  "Return true if x is an instance of a class that implements Comparable."
+  "Return true if x is an instance of a Comparable class."
   [x] (instance? Comparable x))
 
 (defn enumerable?
-  "Return true if x is an instance of a class that implements Enumerable."
+  "Return true if x is an instance of an Enumerable class."
   [x] (instance? Enumerable x))
 
 ; Basic logic predicates, functions, and macros
