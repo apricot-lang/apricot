@@ -19,7 +19,7 @@ module Apricot
     List[Identifier.intern(:"in-ns"),
       List[Identifier.intern(:quote), constant]]
   end)
-  Core.get_var(:ns).apricot_meta = {macro: true}
+  Core.get_var(:ns).apricot_meta = {:macro => true}
 
   # TODO: add and use a proper code loader
   Apricot::Compiler.compile(File.expand_path('../../kernel/core.apr', __FILE__))
