@@ -31,7 +31,7 @@ module Apricot
         when Array    then ArrayLiteral.new(line, val.map {|x| from_value x, line})
         when Set      then SetLiteral.new(line, val.map {|x| from_value x, line})
         when Apricot::Identifier then Identifier.new(line, val.name)
-        when Apricot::List       then List.new(line, val.map {|x| from_value x, line})
+        when Apricot::Seq        then List.new(line, val.map {|x| from_value x, line})
         when Hash
           elems = []
           val.each_pair {|k,v| elems << from_value(k, line) << from_value(v, line) }
