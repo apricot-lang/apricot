@@ -1,6 +1,4 @@
-#!/usr/bin/env rbx
-# vim: ft=ruby:
-
+#!/usr/bin/env ruby
 require 'apricot'
 
 evals = []
