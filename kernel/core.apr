@@ -751,7 +751,7 @@
   forms, insert the first form as the second item in second form, etc."
   ([x] x)
   ([x form]
-   (if (list? form)
+   (if (seq? form)
      `(~(first form) ~x ~@(next form))
      (list form x)))
   ([x form & more]
@@ -763,7 +763,7 @@
   forms, insert the first form as the last item in second form, etc."
   ([x] x)
   ([x form]
-   (if (list? form)
+   (if (seq? form)
      `(~(first form) ~@(next form) ~x)
      (list form x)))
   ([x form & more]
@@ -831,7 +831,7 @@
   (let [gx (gensym "doto")]
     `(let [~gx ~x]
        ~@(map (fn [f]
-                (if (list? f)
+                (if (seq? f)
                   `(~(first f) ~gx ~@(rest f))
                   `(~f ~gx)))
               forms)
