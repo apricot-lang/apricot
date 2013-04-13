@@ -1,16 +1,6 @@
 #!/usr/bin/env rbx
 # vim: ft=ruby:
 
-unless defined?(Rubinius)
-  $stderr.puts "Error: Apricot must be run on Rubinius."
-  exit 1
-end
-
-unless Rubinius.ruby19?
-  $stderr.puts "Warning: Apricot must be run in Ruby 1.9 mode, executing rbx -X19..."
-  exec("/usr/bin/env", "rbx", "-X19", file, *ARGV)
-end
-
 require 'apricot'
 
 evals = []

@@ -2,12 +2,14 @@ PATH
   remote: .
   specs:
     apricot (0.0.1)
+      redcard (~> 1.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
     diff-lcs (1.2.3)
     rake (10.0.4)
+    redcard (1.1.0)
     rspec (2.13.0)
       rspec-core (~> 2.13.0)
       rspec-expectations (~> 2.13.0)

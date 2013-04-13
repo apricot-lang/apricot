@@ -1,3 +1,6 @@
+require 'redcard'
+RedCard.verify "1.9", :rubinius => "2.0"
+
 require 'set'
 
 %w[
