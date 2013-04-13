@@ -883,11 +883,11 @@
   [f]
   (let [m (meta f)]
     (println "-------------------------")
-    (println (m :name))
-    (println (m :arglists))
-    (if (m :macro)
+    (println (:name m))
+    (println (:arglists m))
+    (if (:macro m)
       (println "Macro"))
-    (println "  " (m :doc))))
+    (println "  " (:doc m))))
 
 ; REPL Utilities
 
