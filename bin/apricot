@@ -11,8 +11,6 @@ unless Rubinius.ruby19?
   exec("/usr/bin/env", "rbx", "-X19", file, *ARGV)
 end
 
-$LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
-
 require 'apricot'
 
 evals = []
