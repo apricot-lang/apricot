@@ -924,5 +924,5 @@
          (require "benchmark/ips")
          (.ips Benchmark | (fn [~bm] ~@reports))
          (rescue [_ LoadError]
-           (raise "ips requires the benchmark-ips gem")))
+           (raise "benchmark-ips requires the benchmark-ips gem")))
        nil)))
