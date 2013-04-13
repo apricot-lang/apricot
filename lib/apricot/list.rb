@@ -68,12 +68,16 @@ module Apricot
       self
     end
 
+    def first
+      empty? ? nil : @head
+    end
+
+    def next
+      @tail.empty? ? nil : @tail
+    end
+
     def to_seq
-      if empty?
-        nil
-      else
-        self
-      end
+      empty? ? nil : self
     end
 
     def inspect
