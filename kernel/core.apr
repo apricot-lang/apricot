@@ -904,4 +904,4 @@
   [& body]
   `(do
      (require "benchmark")
-     (.realtime Benchmark | #(do ~@body))))
+     (.realtime Benchmark | (fn [] ~@body))))
