@@ -15,8 +15,7 @@ module Apricot::AST
         return
       end
 
-      callee = @elements.first
-      args = @elements.drop(1)
+      callee, *args = @elements
 
       # Handle special forms such as def, let, fn, quote, etc
       if callee.is_a?(Identifier) && special = Apricot::SpecialForm[callee.name]
@@ -57,8 +56,10 @@ module Apricot::AST
           return
         elsif callee.namespace_fn?(g) || callee.module_method?(g)
           ns_id = Apricot::Identifier.intern(callee.ns.name)
-          g.push_const ns_id.const_names.first
-          ns_id.const_names.drop(1).each {|n| g.find_const(n) }
+          first_name, *rest_names = ns_id.const_names
+
+          g.push_const first_name
+          rest_names.each {|n| g.find_const(n) }
 
           args.each {|arg| arg.bytecode(g) }
           g.send callee.unqualified_name, args.length
