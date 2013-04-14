@@ -69,6 +69,12 @@ module Apricot
       load_history
       terminal_state = `stty -g`.chomp
 
+      # Clear the current line before starting the REPL. This means the user
+      # can begin typing before the prompt appears and it will gracefully
+      # appear in front of their code when the REPL is ready, without any ugly
+      # text duplication issues. This snippet was stolen from Pry.
+      puts "\e[0A\e[0G"
+
       while code = readline_with_history
         stripped = code.strip
 
