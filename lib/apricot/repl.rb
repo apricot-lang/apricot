@@ -71,23 +71,34 @@ module Apricot
 
       while code = readline_with_history
         stripped = code.strip
-        if stripped.empty?
-          next
-        elsif stripped.start_with?('!')
+
+        # Ignore blank lines.
+        next if stripped.empty?
+
+        # Handle REPL commands.
+        if stripped.start_with?('!')
           if COMMANDS.include?(stripped) && block = COMMANDS[stripped][:code]
             instance_eval(&block)
           else
             puts "Unknown command: #{stripped}"
           end
+
           next
         end
 
+        # Otherwise treat the input as code to evaluate.
         begin
           @compiled_code =
-            Apricot::Compiler.compile_string(code, "(eval)", @line, @bytecode)
-          value = Rubinius.run_script @compiled_code
+            Apricot::Compiler.compile_string(code, "(eval)", @line)
+
+          puts @compiled_code.decode if @bytecode
+
+          value = Rubinius.run_script(@compiled_code)
           puts "=> #{value.apricot_inspect}"
+
+          # Save the return value of the previous evaluation in _.
           Apricot.current_namespace.set_var(:_, value)
+
           e = nil
         rescue Apricot::SyntaxError => e
           if e.incomplete?
@@ -105,7 +116,7 @@ module Apricot
               # This is raised by Ctrl-C. Stop trying to read more code and
               # just give up. Remove the current input from history.
               current_code = Readline::HISTORY.pop
-              @line -= current_code.count "\n"
+              @line -= current_code.count("\n")
               e = nil # ignore the syntax error since the code was Ctrl-C'd
             end
           end
