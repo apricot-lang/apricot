@@ -3,7 +3,12 @@ module Apricot
     class Identifier < Node
       def initialize(line, name)
         super(line)
-        @id = Apricot::Identifier.intern(name)
+
+        if name.is_a? Apricot::Identifier
+          @id = name
+        else
+          @id = Apricot::Identifier.intern(name)
+        end
       end
 
       def reference(g)

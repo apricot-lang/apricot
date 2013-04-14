@@ -24,7 +24,7 @@ module Apricot
 
         case val
         when Apricot::Identifier
-          Identifier.new(line, val.name)
+          Identifier.new(line, val)
 
         when Apricot::Seq
           List.new(line, val.map {|x| from_value(x, line) })
