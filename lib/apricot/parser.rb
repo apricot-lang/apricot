@@ -471,21 +471,22 @@ module Apricot
       end
 
       # Handle % identifiers in #() syntax
-      if (state = @fn_state.last) && identifier[0] == '%'
-        identifier = case identifier[1..-1]
-        when '' # % is equivalent to %1
-          state.args[0] ||= Apricot.gensym('p1')
-        when '&'
-          state.rest ||= Apricot.gensym('rest')
-        when /^[1-9]\d*$/
-          n = identifier[1..-1].to_i
-          state.args[n - 1] ||= Apricot.gensym("p#{n}")
+      identifier =
+        if (state = @fn_state.last) && identifier[0] == '%'
+          case identifier[1..-1]
+          when '' # % is equivalent to %1
+            state.args[0] ||= Apricot.gensym('p1')
+          when '&'
+            state.rest ||= Apricot.gensym('rest')
+          when /^[1-9]\d*$/
+            n = identifier[1..-1].to_i
+            state.args[n - 1] ||= Apricot.gensym("p#{n}")
+          else
+            syntax_error "arg literal must be %, %& or %integer"
+          end
         else
-          syntax_error "arg literal must be %, %& or %integer"
+          identifier.to_sym
         end
-      else
-        identifier = identifier.to_sym
-      end
 
       case identifier
       when :true, :false, :nil
