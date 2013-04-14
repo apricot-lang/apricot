@@ -2,9 +2,9 @@
 
 (doto (Cinch::Bot.)
   (.configure | #(doto %
-                   (.server= "irc.tenthbit.net")
+                   (.server= "irc.freenode.net")
                    (.nick= "apribot")
-                   (.channels= ["#programming"])))
+                   (.channels= ["#apricot"])))
 
   (.on :message #r/^apribot[:,]?\s+(.+)/
        | (fn [m msg] (.reply m msg true)))
