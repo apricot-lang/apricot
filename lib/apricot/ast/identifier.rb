@@ -12,13 +12,14 @@ module Apricot
       end
 
       def reference(g)
-        @reference ||= if name == :self
-                         SelfReference.new
-                       elsif qualified?
-                         NamespaceReference.new(unqualified_name, ns)
-                       else
-                         g.scope.find_var(name)
-                       end
+        @reference ||=
+          if name == :self
+            SelfReference.new
+          elsif qualified?
+            NamespaceReference.new(unqualified_name, ns)
+          else
+            g.scope.find_var(name)
+          end
       end
 
       def name
