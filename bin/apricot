@@ -2,17 +2,12 @@
 require 'apricot'
 
 evals = []
-bytecode = false
 
 options = Rubinius::Options.new "Usage: #{$0} [options] [program]", 20
 options.doc "OPTIONS:"
 
 options.on "-e", "CODE", "evaluate CODE and print the result" do |code|
   evals << [:eval, code]
-end
-
-options.on "-B", "--bytecode", "print bytecode after compiling" do
-  bytecode = true
 end
 
 options.on "-h", "--help", "display this help" do
@@ -27,7 +22,7 @@ end
 if evals.empty?
   if $stdin.tty?
     require 'apricot/repl'
-    Apricot::REPL.new('apr> ', bytecode).run
+    Apricot::REPL.new('apr> ').run
   else
     evals << [:stdin]
   end
@@ -36,11 +31,11 @@ end
 evals.each do |type, *args|
   case type
   when :eval
-    Apricot::Compiler.eval(args.first, "(eval)", 1, bytecode)
+    Apricot::Compiler.eval(args.first, "(eval)", 1)
   when :stdin
-    Apricot::Compiler.eval(STDIN.read, "(stdin)", 1, bytecode)
+    Apricot::Compiler.eval(STDIN.read, "(stdin)", 1)
   when :file
     # The code is executed as it compiles.
-    Apricot::Compiler.compile(args.first, nil, bytecode)
+    Apricot::Compiler.compile(args.first)
   end
 end
