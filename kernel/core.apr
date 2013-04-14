@@ -839,6 +839,12 @@
 
 ; Miscellaneous (to be sorted)
 
+(defn read
+  "Read the next object from io, which must be an instance of IO. The default
+  io is stdin."
+  [[io STDIN]]
+  (.to_value (.parse_one (Apricot::Parser. io))))
+
 (defn eval
   "Evaluate the form data structure (not text!) and return the result."
   [form] (Apricot::Compiler/eval_form form))
