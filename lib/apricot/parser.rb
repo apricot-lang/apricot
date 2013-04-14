@@ -301,23 +301,26 @@ module Apricot
     end
 
     def parse_string_char
-      char = if @char == "\\"
-               next_char
-               if CHAR_ESCAPES.has_key?(@char)
-                 CHAR_ESCAPES[consume_char]
-               elsif @char =~ OCTAL
-                 char_escape_helper(8, OCTAL, 3)
-               elsif @char == 'x'
-                 next_char
-                 syntax_error "Invalid hex character escape" unless @char =~ HEX
-                 char_escape_helper(16, HEX, 2)
-               else
-                 consume_char
-               end
-             else
-               consume_char
-             end
+      char =
+        if @char == "\\"
+          next_char
+          if CHAR_ESCAPES.has_key?(@char)
+            CHAR_ESCAPES[consume_char]
+          elsif @char =~ OCTAL
+            char_escape_helper(8, OCTAL, 3)
+          elsif @char == 'x'
+            next_char
+            syntax_error "Invalid hex character escape" unless @char =~ HEX
+            char_escape_helper(16, HEX, 2)
+          else
+            consume_char
+          end
+        else
+          consume_char
+        end
+
       incomplete_error "Unexpected end of file while parsing character escape" unless char
+
       char
     end
 
