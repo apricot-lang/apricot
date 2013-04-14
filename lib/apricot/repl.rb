@@ -39,9 +39,8 @@ module Apricot
     COMMAND_COMPLETIONS = COMMANDS.keys.sort
     SPECIAL_COMPLETIONS = SpecialForm::Specials.keys.map(&:to_s)
 
-    def initialize(prompt = 'apr> ', bytecode = false, history_file = nil)
+    def initialize(prompt = 'apr> ', history_file = nil)
       @prompt = prompt
-      @bytecode = bytecode
       @history_file = File.expand_path(history_file || HISTORY_FILE)
       @line = 1
     end
@@ -96,8 +95,6 @@ module Apricot
         begin
           @compiled_code =
             Apricot::Compiler.compile_string(code, "(eval)", @line)
-
-          puts @compiled_code.decode if @bytecode
 
           value = Rubinius.run_script(@compiled_code)
           puts "=> #{value.apricot_inspect}"
