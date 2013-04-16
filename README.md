@@ -1,4 +1,4 @@
-# Apricot [![Build Status](https://secure.travis-ci.org/programble/apricot.png?branch=master)](http://travis-ci.org/programble/apricot) [![Dependency Status](https://gemnasium.com/programble/apricot.png?travis)](https://gemnasium.com/programble/apricot)
+# Apricot [![Gem Version](https://badge.fury.io/rb/apricot.png)](http://badge.fury.io/rb/apricot) [![Build Status](https://secure.travis-ci.org/programble/apricot.png?branch=master)](http://travis-ci.org/programble/apricot) [![Dependency Status](https://gemnasium.com/programble/apricot.png?travis)](https://gemnasium.com/programble/apricot)
 
 A Clojure-like Lisp on [Rubinius](http://rubini.us/).
 
