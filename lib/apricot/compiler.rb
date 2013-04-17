@@ -2,20 +2,44 @@ module Apricot
   module Compiler
     module_function
 
-    def generate(node)
-      gen = Apricot::Generator.new
-      node.bytecode(gen)
-      gen.close
-      gen.encode
-      cc = gen.package(Rubinius::CompiledCode)
+    def generate(nodes, file = "(none)", line = 1, evaluate = false)
+      g = Apricot::Generator.new
+      g.name = :__top_level__
+      g.file = file.to_sym
+
+      g.scopes << AST::TopLevelScope.new
+
+      g.set_line(line)
+
+      if nodes.empty?
+        g.push_nil
+      else
+        nodes.each_with_index do |e, i|
+          g.pop unless i == 0
+          e.bytecode(g)
+
+          # We evaluate top level forms as we generate the bytecode for them
+          # so macros can be used immediately after their definitions.
+          eval_node(e, file) if evaluate
+        end
+      end
+
+      g.ret
+
+      scope = g.scopes.pop
+      g.local_count = scope.local_count
+      g.local_names = scope.local_names
+
+      g.close
+      g.encode
+      cc = g.package(Rubinius::CompiledCode)
       cc.scope = Rubinius::ConstantScope.new(Object)
       cc
     end
 
     def compile(file)
       nodes = Apricot::Parser.parse_file(file)
-      ast = AST::TopLevel.new(nodes, file, 1, true)
-      generate(ast)
+      generate(nodes, file, 1, true)
     end
 
     def eval(code, file = "(eval)", line = 1)
@@ -31,8 +55,7 @@ module Apricot
     end
 
     def compile_node(node, file = "(none)", line = 1)
-      ast = AST::TopLevel.new([node], file, line, false)
-      generate(ast)
+      generate([node], file, line)
     end
 
     def compile_form(form, file = "(none)", line = 1)

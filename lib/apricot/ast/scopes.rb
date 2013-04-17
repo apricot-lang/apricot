@@ -27,6 +27,23 @@ module Apricot
       end
     end
 
+    class TopLevelScope
+      include StorageScope
+
+      # A nested scope is looking up a variable. There are no local variables
+      # at the top level, so look up the variable on the current namespace.
+      def find_var(name, depth = nil)
+        # Ignore depth, it has no bearing on namespace lookups.
+        NamespaceReference.new(name)
+      end
+
+      # A (recur) is looking for a recursion target. Since this is the top
+      # level, which has no parent, the lookup has failed.
+      def find_recur_target
+        nil
+      end
+    end
+
     class Scope
       attr_reader :parent, :variables
       # The loop label stores the code location where a (recur) form should
