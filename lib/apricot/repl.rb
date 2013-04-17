@@ -71,8 +71,8 @@ module Apricot
       # Clear the current line before starting the REPL. This means the user
       # can begin typing before the prompt appears and it will gracefully
       # appear in front of their code when the REPL is ready, without any ugly
-      # text duplication issues. This snippet was stolen from Pry.
-      puts "\e[0A\e[0G"
+      # text duplication issues.
+      clear_line
 
       while code = readline_with_history
         stripped = code.strip
@@ -116,6 +116,7 @@ module Apricot
             rescue Interrupt
               # This is raised by Ctrl-C. Stop trying to read more code and
               # just give up. Remove the current input from history.
+              puts "^C"
               current_code = Readline::HISTORY.pop
               @line -= current_code.count("\n")
               next
@@ -158,6 +159,12 @@ module Apricot
       system('stty', terminal_state) if terminal_state # Restore the terminal
     end
 
+    # Clear the current line in the terminal. This snippet was stolen from
+    # Pry.
+    def clear_line
+      puts "\e[0A\e[0G"
+    end
+
     def load_history
       if File.exist?(@history_file)
         hist = YAML.load_file @history_file
@@ -197,10 +204,8 @@ module Apricot
 
       line
     rescue Interrupt
-      # This is raised by Ctrl-C. Remove the line from history then try to
-      # read another line.
+      # This is raised by Ctrl-C. Try to read another line.
       puts "^C"
-      Readline::HISTORY.pop
       @line -= 1
       retry
     end
