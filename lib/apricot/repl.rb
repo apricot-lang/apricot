@@ -93,14 +93,18 @@ module Apricot
 
         # Otherwise treat the input as code to evaluate.
         begin
-          @compiled_code =
-            Apricot::Compiler.compile_string(code, "(eval)", @line)
+          nodes = Apricot::Parser.parse_string(code)
 
-          value = Rubinius.run_script(@compiled_code)
-          puts "=> #{value.apricot_inspect}"
+          nodes.each do |node|
+            @compiled_code =
+              Apricot::Compiler.compile_node(node, "(eval)", @line)
 
-          # Save the return value of the previous evaluation in _.
-          Apricot.current_namespace.set_var(:_, value)
+            value = Rubinius.run_script(@compiled_code)
+            puts "=> #{value.apricot_inspect}"
+
+            # Save the result of the previous evaluation in _.
+            Apricot.current_namespace.set_var(:_, value)
+          end
 
           e = nil
         rescue Apricot::SyntaxError => e
