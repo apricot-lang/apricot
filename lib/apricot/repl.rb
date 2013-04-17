@@ -93,7 +93,29 @@ module Apricot
 
         # Otherwise treat the input as code to evaluate.
         begin
-          nodes = Apricot::Parser.parse_string(code)
+          begin
+            nodes = Apricot::Parser.parse_string(code)
+          rescue Apricot::SyntaxError => e
+            if e.incomplete?
+              begin
+                more_code = Readline.readline(' ' * @prompt.length, false)
+                if more_code
+                  code << "\n" << more_code
+                  Readline::HISTORY << Readline::HISTORY.pop + "\n" +
+                    ' ' * @prompt.length +  more_code
+                  retry
+                else
+                  print "\r" # print the exception at the start of the line
+                end
+              rescue Interrupt
+                # This is raised by Ctrl-C. Stop trying to read more code and
+                # just give up. Remove the current input from history.
+                current_code = Readline::HISTORY.pop
+                @line -= current_code.count("\n")
+                e = nil # ignore the syntax error since the code was Ctrl-C'd
+              end
+            end
+          end
 
           nodes.each do |node|
             @compiled_code =
@@ -107,26 +129,6 @@ module Apricot
           end
 
           e = nil
-        rescue Apricot::SyntaxError => e
-          if e.incomplete?
-            begin
-              more_code = Readline.readline(' ' * @prompt.length, false)
-              if more_code
-                code << "\n" << more_code
-                Readline::HISTORY << Readline::HISTORY.pop + "\n" +
-                  ' ' * @prompt.length +  more_code
-                retry
-              else
-                print "\r" # print the exception at the start of the line
-              end
-            rescue Interrupt
-              # This is raised by Ctrl-C. Stop trying to read more code and
-              # just give up. Remove the current input from history.
-              current_code = Readline::HISTORY.pop
-              @line -= current_code.count("\n")
-              e = nil # ignore the syntax error since the code was Ctrl-C'd
-            end
-          end
         rescue Interrupt => e
           # Raised by Ctrl-C. Print a newline so the error message is on the
           # next line.
