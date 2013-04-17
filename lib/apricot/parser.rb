@@ -22,6 +22,9 @@ module Apricot
 
       @fn_state = []
       @syntax_quote_gensyms = []
+
+      # Read the first character
+      next_char
     end
 
     def self.parse_file(filename)
@@ -35,7 +38,6 @@ module Apricot
     # Return a list of the AST nodes in the program.
     def parse
       nodes = []
-      next_char
 
       skip_whitespace
       while @char
@@ -48,9 +50,14 @@ module Apricot
 
     # @return AST::Node an AST node representing the form read
     def parse_one
-      next_char
       skip_whitespace
-      parse_form
+      form = parse_form
+
+      # Unget the last character because the parser always reads one character
+      # ahead.
+      @io.ungetc(@char) if @char
+
+      form
     end
 
     private
