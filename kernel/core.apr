@@ -859,6 +859,10 @@
   [[io STDIN]]
   (.to_value (.parse_one (Apricot::Parser. io))))
 
+(defn read-string
+  "Read one object from the string s."
+  [s] (read (StringIO. s)))
+
 (defn eval
   "Evaluate the form data structure (not text!) and return the result."
   [form] (Apricot::Compiler/eval_form form))
