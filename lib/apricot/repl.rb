@@ -1,5 +1,6 @@
 require 'readline'
 require 'yaml'
+Apricot.require "repl"
 
 module Apricot
   class REPL

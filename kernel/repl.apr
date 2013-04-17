@@ -1,0 +1,37 @@
+; REPL Utilities
+
+(defn decode
+  "Print the Rubinius bytecode for the given Proc or Method."
+  [f]
+  (case f
+    [Proc]   (Kernel/puts (.. f block compiled_code decode))
+    [Method] (Kernel/puts (.. f executable decode))
+    (raise (str "Don't know how to decode " (.inspect f)))))
+
+(defmacro time
+  "Evaluate the forms in body and return the time it took."
+  [& body]
+  `(do
+     (require-ruby "benchmark")
+     (.realtime Benchmark | (fn [] ~@body))))
+
+(defmacro benchmark-ips
+  "clause => [label form ...]
+
+  Measure how many times per second each of the clause's bodies can be
+  executed. Output is organized using the given label strings.
+
+  This requires the benchmark-ips gem:
+    gem install benchmark-ips"
+  [& clauses]
+  (let [bm (gensym)
+        make-report (fn [clause]
+                      `(.report ~bm ~(first clause) | (fn [] ~@(rest clause))))
+        reports (map make-report clauses)]
+    `(do
+       (try
+         (require-ruby "benchmark/ips")
+         (.ips Benchmark | (fn [~bm] ~@reports))
+         (rescue [_ LoadError]
+           (raise "benchmark-ips requires the benchmark-ips gem")))
+       nil)))
