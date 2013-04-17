@@ -94,26 +94,31 @@ module Apricot
         # Otherwise treat the input as code to evaluate.
         begin
           begin
-            nodes = Apricot::Parser.parse_string(code)
+            nodes = Apricot::Parser.parse_string(code, "(eval)", @line)
           rescue Apricot::SyntaxError => e
-            if e.incomplete?
-              begin
-                more_code = Readline.readline(' ' * @prompt.length, false)
-                if more_code
-                  code << "\n" << more_code
-                  Readline::HISTORY << Readline::HISTORY.pop + "\n" +
-                    ' ' * @prompt.length +  more_code
-                  retry
-                else
-                  print "\r" # print the exception at the start of the line
-                end
-              rescue Interrupt
-                # This is raised by Ctrl-C. Stop trying to read more code and
-                # just give up. Remove the current input from history.
-                current_code = Readline::HISTORY.pop
-                @line -= current_code.count("\n")
-                e = nil # ignore the syntax error since the code was Ctrl-C'd
+            # Reraise unless this is an incomplete error (meaning we can read
+            # more on the next line).
+            raise unless e.incomplete?
+
+            begin
+              indent = ' ' * @prompt.length
+              more_code = Readline.readline(indent, false)
+
+              if more_code
+                code << "\n" << indent << more_code
+                Readline::HISTORY.pop
+                Readline::HISTORY << code
+                retry
+              else
+                print "\r" # print the exception at the start of the line
+                raise
               end
+            rescue Interrupt
+              # This is raised by Ctrl-C. Stop trying to read more code and
+              # just give up. Remove the current input from history.
+              current_code = Readline::HISTORY.pop
+              @line -= current_code.count("\n")
+              next
             end
           end
 
