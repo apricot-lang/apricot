@@ -2,7 +2,7 @@ module Apricot
   module Compiler
     module_function
 
-    def generate(node, file = "(none)", line = 1)
+    def generate(node)
       gen = Apricot::Generator.new
       node.bytecode(gen)
       gen.close
@@ -15,7 +15,7 @@ module Apricot
     def compile(file)
       nodes = Apricot::Parser.parse_file(file)
       ast = AST::TopLevel.new(nodes, file, 1, true)
-      generate(ast, file)
+      generate(ast)
     end
 
     def eval(code, file = "(eval)", line = 1)
@@ -32,7 +32,7 @@ module Apricot
 
     def compile_node(node, file = "(none)", line = 1)
       ast = AST::TopLevel.new([node], file, line, false)
-      generate(ast, file, line)
+      generate(ast)
     end
 
     def compile_form(form, file = "(none)", line = 1)
