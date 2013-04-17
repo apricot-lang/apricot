@@ -5,5 +5,5 @@ require 'set'
 
 %w[
 version misc parser compiler ast macroexpand generator special_forms errors
-seq cons list identifier ruby_ext namespace boot
+seq cons list identifier ruby_ext namespace code_loader boot
 ].each {|r| require "apricot/#{r}" }
