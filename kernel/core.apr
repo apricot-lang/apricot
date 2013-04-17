@@ -113,13 +113,27 @@
   [[prefix "g"]]
   (identifier (.gensym Apricot prefix)))
 
-(defn require
-  "Require the given Ruby files. Works just like using Ruby's 'require' on
-  each of the arguments."
-  [& files]
+(defn require-ruby
+  "Require the given Ruby files, skipping any which are already loaded. Just
+  like calling Ruby's require method on each argument."
+  [& names]
   ; (. Kernel require %) does not call the Rubygems custom require for some
   ; reason, so we use this method. (MAIN is the special toplevel object).
-  (.each files | #(. MAIN send :require %)))
+  (.each names | #(. MAIN send :require %))
+  nil)
+
+(defn load
+  "Load the given Apricot files, unconditionally. To skip loading files which
+  are already loaded, see 'require'."
+  [& names]
+  (.each names | #(Apricot/load %))
+  nil)
+
+(defn require
+  "Load the given Apricot files, skipping any which are already loaded."
+  [& names]
+  (.each names | #(Apricot/require %))
+  nil)
 
 (defn str
   "With no args, return the empty string. With one arg x, return x converted
@@ -909,7 +923,7 @@
   "Evaluate the forms in body and return the time it took."
   [& body]
   `(do
-     (require "benchmark")
+     (require-ruby "benchmark")
      (.realtime Benchmark | (fn [] ~@body))))
 
 (defmacro benchmark-ips
@@ -927,7 +941,7 @@
         reports (map make-report clauses)]
     `(do
        (try
-         (require "benchmark/ips")
+         (require-ruby "benchmark/ips")
          (.ips Benchmark | (fn [~bm] ~@reports))
          (rescue [_ LoadError]
            (raise "benchmark-ips requires the benchmark-ips gem")))

@@ -1,4 +1,7 @@
 module Apricot
+  LIB_PATH = File.expand_path("../../../kernel", __FILE__)
+  $LOAD_PATH << LIB_PATH
+
   Core = Namespace.new
 
   Core.set_var(:"*ns*", Core)
@@ -13,9 +16,7 @@ module Apricot
   end)
   Core.get_var(:ns).apricot_meta = {:macro => true}
 
-  # TODO: add and use a proper code loader
-  core_apr_file = File.expand_path('../../../kernel/core.apr', __FILE__)
-  Apricot::Compiler.compile(core_apr_file)
+  Apricot.require "core"
 
 #  ::User = Namespace.new
   Apricot.current_namespace = Core
