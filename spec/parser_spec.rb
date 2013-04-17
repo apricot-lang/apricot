@@ -1,8 +1,8 @@
 describe Apricot::Parser do
   def parse(s)
-    @ast = described_class.parse_string(s, "(spec)")
-    @first = @ast.elements.first
-    @ast.elements
+    @nodes = described_class.parse_string(s, "(spec)")
+    @first = @nodes.first
+    @nodes
   end
 
   def parse_one(s, klass)
@@ -75,14 +75,14 @@ describe Apricot::Parser do
 
   it 'parses true, false, nil, and self' do
     parse('true false nil self').length.should == 4
-    @ast[0].should be_a(AST::Literal)
-    @ast[0].value.should == :true
-    @ast[1].should be_a(AST::Literal)
-    @ast[1].value.should == :false
-    @ast[2].should be_a(AST::Literal)
-    @ast[2].value.should == :nil
-    @ast[3].should be_a(AST::Identifier)
-    @ast[3].name.should == :self
+    @nodes[0].should be_a(AST::Literal)
+    @nodes[0].value.should == :true
+    @nodes[1].should be_a(AST::Literal)
+    @nodes[1].value.should == :false
+    @nodes[2].should be_a(AST::Literal)
+    @nodes[2].value.should == :nil
+    @nodes[3].should be_a(AST::Identifier)
+    @nodes[3].name.should == :self
   end
 
   it 'parses fixnums' do
@@ -256,8 +256,8 @@ describe Apricot::Parser do
 
   it 'parses multiple forms' do
     parse('foo bar').length.should == 2
-    @ast[0].should be_a(AST::Identifier)
-    @ast[1].should be_a(AST::Identifier)
+    @nodes[0].should be_a(AST::Identifier)
+    @nodes[1].should be_a(AST::Identifier)
   end
 
   it 'parses quoted forms' do

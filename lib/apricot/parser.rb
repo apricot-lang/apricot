@@ -25,25 +25,25 @@ module Apricot
     end
 
     def self.parse_file(filename)
-      File.open(filename) {|f| new(f, filename).parse(true) }
+      File.open(filename) {|f| new(f, filename).parse }
     end
 
     def self.parse_string(source, filename = "(none)", line = 1)
       new(StringIO.new(source, "r"), filename, line).parse
     end
 
-    # @return [Array<AST::Node>] a list of the forms in the program
-    def parse(evaluate = false)
-      program = []
+    # Return a list of the AST nodes in the program.
+    def parse
+      nodes = []
       next_char
 
       skip_whitespace
       while @char
-        program << parse_form
+        nodes << parse_form
         skip_whitespace
       end
 
-      Apricot::AST::TopLevel.new(program, @filename, 1, evaluate)
+      nodes
     end
 
     # @return AST::Node an AST node representing the form read
