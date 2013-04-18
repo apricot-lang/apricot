@@ -47,9 +47,17 @@ module Apricot
     end
 
     def run
+      # *1, *2, and *3 shall hold the results of the previous three
+      # evaluations.
+      Apricot.current_namespace.set_var(:'*1', nil)
+      Apricot.current_namespace.set_var(:'*2', nil)
+      Apricot.current_namespace.set_var(:'*3', nil)
+
+      # Set up some Readline options.
       Readline.completion_append_character = " "
       Readline.basic_word_break_characters = " \t\n\"'`~@;{[("
 
+      # Set up tab completion.
       Readline.completion_proc = proc do |s|
         if s.start_with? '!'
           # User is typing a REPL command
@@ -130,8 +138,13 @@ module Apricot
             value = Rubinius.run_script(@compiled_code)
             puts "=> #{value.apricot_inspect}"
 
-            # Save the result of the previous evaluation in _.
-            Apricot.current_namespace.set_var(:_, value)
+            # Save the result of the evaluation in *1 and shift down the older
+            # previous values.
+            old   = Apricot.current_namespace.get_var(:'*1')
+            older = Apricot.current_namespace.get_var(:'*2')
+            Apricot.current_namespace.set_var(:'*1', value)
+            Apricot.current_namespace.set_var(:'*2', old)
+            Apricot.current_namespace.set_var(:'*3', older)
           end
 
           e = nil
