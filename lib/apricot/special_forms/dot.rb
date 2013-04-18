@@ -41,7 +41,7 @@ module Apricot
     args.each do |arg|
       next unless arg.is_a?(AST::Identifier)
       g.compile_error "Incorrect use of & in send expression" if arg.name == :&
-        g.compile_error "Incorrect use of | in send expression" if arg.name == :|
+      g.compile_error "Incorrect use of | in send expression" if arg.name == :|
     end
 
     receiver.bytecode(g)
