@@ -930,3 +930,18 @@
   (each [var (.keys (.vars ns))]
     (.add_alias *ns* var ns))
   nil)
+
+(defmacro ns
+  "Sets *ns* to the namespace named by name (unevaluated), creating it if
+  needed. Optionally takes a uses clause like (:use Foo Bar Baz) to important
+  vars from other namespaces."
+  [ns-sym [uses nil]]
+  `(do
+     (in-ns '~ns-sym)
+     ~(if (not= ns-sym 'Apricot::Core)
+        '(Apricot::Core/refer Apricot::Core))
+     ~@(if uses
+        (if (= :use (first uses))
+          (map (fn [ns] `(Apricot::Core/refer ~ns))
+               (rest uses))
+          (raise "Invalid clause in ns macro")))))
