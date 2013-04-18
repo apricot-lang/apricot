@@ -182,10 +182,10 @@ class Range
   class Seq
     include Apricot::Seq
 
-    def initialize(first, last, exclude)
+    def initialize(first, last, exclusive)
       @first = first
       @last = last
-      @exclude = exclude
+      @exclusive = exclusive
     end
 
     def first
@@ -195,10 +195,10 @@ class Range
     def next
       next_val = @first.succ
 
-      if @first == @last || (next_val == @last && @exclude)
+      if @first == @last || (next_val == @last && @exclusive)
         nil
       else
-        Seq.new(next_val, @last, @exclude)
+        Seq.new(next_val, @last, @exclusive)
       end
     end
 
@@ -206,7 +206,7 @@ class Range
       prev = nil
       val = @first
 
-      until prev == @last || (val == @last && @exclude)
+      until prev == @last || (val == @last && @exclusive)
         yield val
         prev = val
         val = val.succ
