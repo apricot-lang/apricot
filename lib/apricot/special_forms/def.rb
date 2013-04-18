@@ -6,13 +6,9 @@ module Apricot
 
     target, value = *args
 
-    value ||= AST::Literal.new(0, :nil)
+    g.compile_error "First argument to def must be an identifier" unless target.is_a? AST::Identifer
 
-    case target
-    when AST::Identifier
-      target.assign_bytecode(g, value)
-    else
-      g.compile_error "First argument to def must be an identifier"
-    end
+    value ||= AST::Literal.new(0, :nil)
+    target.assign_bytecode(g, value)
   end
 end
