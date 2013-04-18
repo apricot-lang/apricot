@@ -920,3 +920,13 @@
     (if (:macro m)
       (println "Macro"))
     (println "  " (:doc m))))
+
+; Namespaces
+
+(defn refer
+  "For each public interned var in the namespace named by the symbol, adds a
+  mapping from the name of the var to the var to the current namespace."
+  [ns]
+  (each [var (.keys (.vars ns))]
+    (.add_alias *ns* var ns))
+  nil)
