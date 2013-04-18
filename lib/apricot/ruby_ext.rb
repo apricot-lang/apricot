@@ -119,11 +119,10 @@ class Set
     str << '}'
   end
 
-  def [](elem)
-    elem if self.include? elem
+  def apricot_call(elem, default = nil)
+    include?(elem) ? elem : default
   end
 
-  alias_method :apricot_call, :[]
   alias_method :apricot_str, :apricot_inspect
 
   def to_seq
