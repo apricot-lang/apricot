@@ -161,8 +161,12 @@ class Symbol
     end
   end
 
-  def apricot_call(o)
-    o[self] unless o.nil?
+  def apricot_call(obj, default = nil)
+    if obj.is_a?(Hash) || obj.is_a?(Set)
+      obj.apricot_call(self, default)
+    else
+      nil
+    end
   end
 end
 
