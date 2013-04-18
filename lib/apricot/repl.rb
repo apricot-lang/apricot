@@ -38,7 +38,7 @@ module Apricot
     }
 
     COMMAND_COMPLETIONS = COMMANDS.keys.sort
-    SPECIAL_COMPLETIONS = SpecialForm::Specials.keys.map(&:to_s)
+    SPECIAL_COMPLETIONS = SpecialForm::SPECIAL_FORMS.keys.map(&:to_s)
 
     def initialize(prompt = 'apr> ', history_file = nil)
       @prompt = prompt
