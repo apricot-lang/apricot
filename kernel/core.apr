@@ -71,8 +71,16 @@
   [& items] items)
 
 (defn set
-  "Create a new set containing the items."
-  [& items] (Set. items))
+  "Return a set of the distinct elements of coll."
+  [coll] (Set. coll))
+
+(defn hash-set
+  "Return a new hash set with supplied keys."
+  [& keys] (Set. keys))
+
+(defn sorted-set
+  "Return a new sorted set with supplied keys."
+  [& keys] (SortedSet. keys))
 
 (defn hash
   "Create a new hash map from the items. The items are interpreted as a list of
