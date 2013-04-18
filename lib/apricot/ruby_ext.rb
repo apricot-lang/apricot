@@ -94,8 +94,8 @@ class Hash
     str << '}'
   end
 
-  def apricot_call(key)
-    self[key]
+  def apricot_call(key, default = nil)
+    fetch(key, default)
   end
 
   alias_method :apricot_str, :apricot_inspect
