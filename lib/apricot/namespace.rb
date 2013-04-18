@@ -16,11 +16,12 @@ module Apricot
       ns
     end
 
-    attr_reader :vars, :fns
+    attr_reader :vars, :fns, :aliases
 
     def initialize
       @vars = {}
       @fns = Set[]
+      @aliases = {}
     end
 
     def set_var(name, val)
@@ -42,8 +43,27 @@ module Apricot
     def get_var(name)
       # raise may be a function defined on the namespace so we need to
       # explicitly call the Ruby raise method.
-      Kernel.raise NameError, "Undefined variable '#{name}' on #{self}" unless @vars.include? name
-      @vars[name]
+      Kernel.raise NameError,
+        "Undefined variable '#{name}' on #{self}" unless has_var? name
+
+      if var = @vars[name]
+        var
+      elsif ns = @aliases[name]
+        ns.get_var(name)
+      else
+        nil
+      end
+    end
+
+    def add_alias(name, ns)
+      Kernel.raise NameError,
+        "Can't add alias for already defined variable '#{name}'" if has_var? name
+
+      @aliases[name] = ns
+    end
+
+    def has_var?(name)
+      @vars.has_key?(name) || @aliases.has_key?(name)
     end
   end
 
