@@ -56,9 +56,6 @@ module Apricot
     end
 
     def add_alias(name, ns)
-      Kernel.raise NameError,
-        "Can't add alias for already defined variable '#{name}'" if has_var? name
-
       @aliases[name] = ns
     end
 
