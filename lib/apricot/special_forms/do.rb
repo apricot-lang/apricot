@@ -4,11 +4,10 @@ module Apricot
     if args.empty?
       g.push_nil
     else
-      args[0..-2].each do |a|
+      args.each_with_index do |a, i|
+        g.pop unless i == 0
         a.bytecode(g)
-        g.pop
       end
-      args.last.bytecode(g)
     end
   end
 end
