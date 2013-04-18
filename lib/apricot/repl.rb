@@ -49,9 +49,9 @@ module Apricot
     def run
       # *1, *2, and *3 shall hold the results of the previous three
       # evaluations.
-      Apricot.current_namespace.set_var(:'*1', nil)
-      Apricot.current_namespace.set_var(:'*2', nil)
-      Apricot.current_namespace.set_var(:'*3', nil)
+      Apricot::Core.set_var(:'*1', nil)
+      Apricot::Core.set_var(:'*2', nil)
+      Apricot::Core.set_var(:'*3', nil)
 
       # Set up some Readline options.
       Readline.completion_append_character = " "
@@ -140,11 +140,11 @@ module Apricot
 
             # Save the result of the evaluation in *1 and shift down the older
             # previous values.
-            old   = Apricot.current_namespace.get_var(:'*1')
-            older = Apricot.current_namespace.get_var(:'*2')
-            Apricot.current_namespace.set_var(:'*1', value)
-            Apricot.current_namespace.set_var(:'*2', old)
-            Apricot.current_namespace.set_var(:'*3', older)
+            old   = Apricot::Core.get_var(:'*1')
+            older = Apricot::Core.get_var(:'*2')
+            Apricot::Core.set_var(:'*1', value)
+            Apricot::Core.set_var(:'*2', old)
+            Apricot::Core.set_var(:'*3', older)
           end
 
           e = nil
