@@ -148,43 +148,21 @@ module Apricot
         g.push_unique_literal form
 
       when Regexp
-        # A regexp literal should only be converted to a Regexp the first time
-        # it is encountered. We push a literal nil here, and then overwrite
-        # the literal value with the created Regexp if it is nil, i.e. the
-        # first time only. Subsequent encounters will use the previously
-        # created Regexp. This idea was copied from
-        # Rubinius::AST::RegexLiteral.
-        idx = g.add_literal(nil)
-        g.push_literal_at idx
-        g.dup
-        g.is_nil
-
-        lbl = g.new_label
-        g.gif lbl
-        g.pop
-        g.push_const :Regexp
-        g.push_literal form.source
-        g.push form.options
-        g.send :new, 2
-        g.set_literal idx
-        lbl.set!
+        once(g) do
+          g.push_const :Regexp
+          g.push_literal form.source
+          g.push form.options
+          g.send :new, 2
+        end
 
       when Rational
         # Same idea as used above for Regexp.
-        idx = g.add_literal(nil)
-        g.push_literal_at idx
-        g.dup
-        g.is_nil
-
-        lbl = g.new_label
-        g.gif lbl
-        g.pop
-        g.push_self
-        g.push form.numerator
-        g.push form.denominator
-        g.send :Rational, 2, true
-        g.set_literal idx
-        lbl.set!
+        once(g) do
+          g.push_self
+          g.push form.numerator
+          g.push form.denominator
+          g.send :Rational, 2, true
+        end
 
       when Set
         raise NotImplementedError, "set bytecode"
@@ -195,6 +173,30 @@ module Apricot
       else
         g.compile_error "Can't generate bytecode for #{form} (#{form.class})"
       end
+    end
+
+    # Some literals, such as regexps and rationals, should only be created the
+    # first time they are encountered. We push a literal nil here, and then
+    # overwrite the literal value with the created object if it is nil, i.e.
+    # the first time only. Subsequent encounters will use the previously
+    # created object. This idea was copied from Rubinius::AST::RegexLiteral.
+    #
+    # The passed block should take a generator and generate the bytecode to
+    # create the object the first time.
+    def once(g)
+      idx = g.add_literal(nil)
+      g.push_literal_at idx
+      g.dup
+      g.is_nil
+
+      lbl = g.new_label
+      g.gif lbl
+      g.pop
+
+      yield g
+
+      g.set_literal idx
+      lbl.set!
     end
 
     def pos(g, form)
