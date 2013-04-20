@@ -62,6 +62,10 @@ module Apricot::AST
       pos(g)
       g.push_literal @value
     end
+
+    def to_value
+      @value
+    end
   end
 
   class StringLiteral < Literal
