@@ -1,6 +1,6 @@
 module Apricot
   class Identifier
-    attr_reader :name, :ns, :unqualified_name
+    attr_reader :name, :unqualified_name
 
     @table = {}
 
@@ -28,7 +28,6 @@ module Apricot
 
         @unqualified_name = $2.to_sym
       else
-        @ns = Apricot.current_namespace
         @unqualified_name = name
       end
     end
@@ -43,6 +42,10 @@ module Apricot
 
     def constant?
       @constant
+    end
+
+    def ns
+      @ns || Apricot.current_namespace
     end
 
     def const_names
@@ -71,7 +74,7 @@ module Apricot
         # be parsed as keywords or numbers
         str = @name.to_s.gsub(/(\\.)|\|/) { $1 || '\|' }
         "#|#{str}|"
-      when /\A#{Apricot::Parser::IDENTIFIER}+\z/
+      when /\A#{Apricot::Reader::IDENTIFIER}+\z/
         @name.to_s
       else
         str = @name.to_s.inspect[1..-2]

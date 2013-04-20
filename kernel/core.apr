@@ -28,7 +28,7 @@
                      (.to_list
                        (.map body | #(if (.is_a? % Apricot::List)
                                        (.first %)))))
-          f (.intern Apricot::Identifier (.gensym Apricot))]
+          f (Apricot/gensym)]
       (list 'let [f (concat (list 'fn name) body)]
             (list 'def name f)
             (list '.apricot_meta=
@@ -53,7 +53,7 @@
                [name doc-string? metadata? ([params ...] body) ...+])
    :macro true}
   [name & body]
-  (let [f (.intern Apricot::Identifier (.gensym Apricot))]
+  (let [f (Apricot/gensym)]
     (list 'let [f (concat (list 'defn name) body)]
           (list '.store (list '.apricot_meta f) :macro true)
           f)))
@@ -867,7 +867,7 @@
   "Read the next object from io, which must be an instance of IO. The default
   io is stdin."
   [[io STDIN]]
-  (.to_value (.parse_one (Apricot::Parser. io))))
+  (.read_one (Apricot::Reader. io)))
 
 (defn read-string
   "Read one object from the string s."

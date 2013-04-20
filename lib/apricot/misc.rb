@@ -6,6 +6,7 @@ module Apricot
   @gensym = 0
 
   def self.gensym(prefix = 'g')
-    :"#{prefix}__#{@gensym += 1}"
+    @gensym += 1
+    Identifier.intern("#{prefix}__#{@gensym}")
   end
 end

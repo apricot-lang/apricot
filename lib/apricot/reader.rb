@@ -1,59 +1,72 @@
 require 'stringio'
 
 module Apricot
-  class Parser
+  class Reader
     IDENTIFIER   = /[^'`~()\[\]{}";,\s]/
     OCTAL        = /[0-7]/
     HEX          = /[0-9a-fA-F]/
     DIGITS       = ('0'..'9').to_a + ('a'..'z').to_a
-    CHAR_ESCAPES = {"a" => "\a", "b" => "\b", "t" => "\t", "n" => "\n",
-                    "v" => "\v", "f" => "\f", "r" => "\r", "e" => "\e"}
-    REGEXP_OPTIONS = {'i' => Regexp::IGNORECASE, 'x' => Regexp::EXTENDED,
-                      'm' => Regexp::MULTILINE}
+
+    CHAR_ESCAPES = {
+      "a" => "\a", "b" => "\b", "t" => "\t", "n" => "\n",
+      "v" => "\v", "f" => "\f", "r" => "\r", "e" => "\e"
+    }
+
+    REGEXP_OPTIONS = {
+      'i' => Regexp::IGNORECASE,
+      'x' => Regexp::EXTENDED,
+      'm' => Regexp::MULTILINE
+    }
+
+    QUOTE = Identifier.intern(:quote)
+    UNQUOTE = Identifier.intern(:unquote)
+    UNQUOTE_SPLICING = Identifier.intern(:'unquote-splicing')
+    CONCAT = Identifier.intern(:concat)
+    APPLY = Identifier.intern(:apply)
+    LIST = Identifier.intern(:list)
+    FN = Identifier.intern(:fn)
 
     FnState = Struct.new(:args, :rest)
 
     # @param [IO] io an input stream object to read forms from
-    def initialize(io, filename = "(none)", line = 1)
+    def initialize(io, filename = '(none)', line = 1)
       @filename = filename
       @io = io
       @location = 0
       @line = line
 
       @fn_state = []
-      @syntax_quote_gensyms = []
 
       # Read the first character
       next_char
     end
 
-    def self.parse_file(filename)
-      File.open(filename) {|f| new(f, filename).parse }
+    def self.read_file(filename)
+      File.open(filename) {|f| new(f, filename).read }
     end
 
-    def self.parse_string(source, filename = "(none)", line = 1)
-      new(StringIO.new(source, "r"), filename, line).parse
+    def self.read_string(source, filename = '(none)', line = 1)
+      new(StringIO.new(source), filename, line).read
     end
 
-    # Return a list of the AST nodes in the program.
-    def parse
-      nodes = []
+    # Return a list of the forms that were read.
+    def read
+      forms = []
 
       skip_whitespace
       while @char
-        nodes << parse_form
+        forms << read_form
         skip_whitespace
       end
 
-      nodes
+      forms
     end
 
-    # @return AST::Node an AST node representing the form read
-    def parse_one
+    def read_one
       skip_whitespace
-      form = parse_form
+      form = read_form
 
-      # Unget the last character because the parser always reads one character
+      # Unget the last character because the reader always reads one character
       # ahead.
       @io.ungetc(@char) if @char
 
@@ -61,10 +74,9 @@ module Apricot
     end
 
     private
-    # Parse Lisp forms until the given character is encountered
-    # @param [String] terminator the character to stop parsing at
-    # @return [Array<AST::Node>] a list of the Lisp forms parsed
-    def parse_forms_until(terminator)
+
+    # Read forms until the given character is encountered
+    def read_forms_until(terminator)
       skip_whitespace
       forms = []
 
@@ -74,7 +86,7 @@ module Apricot
           return forms
         end
 
-        forms << parse_form
+        forms << read_form
         skip_whitespace
       end
 
@@ -82,39 +94,38 @@ module Apricot
       incomplete_error "Unexpected end of program, expected #{terminator}"
     end
 
-    # Parse a single Lisp form
-    # @return [AST::Node] an AST node representing the form
-    def parse_form
+    # Read a single Lisp form
+    def read_form
       case @char
-      when '#' then parse_dispatch
-      when "'" then parse_quote
-      when "`" then parse_syntax_quote
-      when "~" then parse_unquote
-      when '(' then parse_list
-      when '[' then parse_array
-      when '{' then parse_hash
-      when '"' then parse_string
-      when ':' then parse_symbol
-      when /\d/ then parse_number
+      when '#' then read_dispatch
+      when "'" then read_quote
+      when "`" then read_syntax_quote
+      when "~" then read_unquote
+      when '(' then read_list
+      when '[' then read_array
+      when '{' then read_hash
+      when '"' then read_string
+      when ':' then read_symbol
+      when /\d/ then read_number
       when IDENTIFIER
         if @char =~ /[+-]/ && peek_char =~ /\d/
-          parse_number
+          read_number
         else
-          parse_identifier
+          read_identifier
         end
       else syntax_error "Unexpected character: #{@char}"
       end
     end
 
-    def parse_dispatch
+    def read_dispatch
       next_char # skip #
       case @char
-      when '|' then parse_pipe_identifier
-      when '{' then parse_set
-      when '(' then parse_fn
-      when 'r' then parse_regex
-      when 'q' then parse_quotation(false)
-      when 'Q' then parse_quotation(true)
+      when '|' then read_pipe_identifier
+      when '{' then read_set
+      when '(' then read_fn
+      when 'r' then read_regex
+      when 'q' then read_quotation(false)
+      when 'Q' then read_quotation(true)
       else syntax_error "Unknown reader macro: ##{@char}"
       end
     end
@@ -133,163 +144,135 @@ module Apricot
           next_char; next_char # skip #_
           skip_whitespace
           incomplete_error "Unexpected end of program after #_, expected a form" unless @char
-          parse_form # discard next form
+          read_form # discard next form
         else
           next_char
         end
       end
     end
 
-    def parse_quote
+    def read_quote
       next_char # skip the '
       skip_whitespace
       incomplete_error "Unexpected end of program after quote ('), expected a form" unless @char
 
-      form = parse_form
-      quote = AST::Identifier.new(@line, :quote)
-      AST::List.new(@line, [quote, form])
+      with_location List[QUOTE, read_form]
     end
 
-    def parse_syntax_quote
+    def read_syntax_quote
       next_char # skip the `
       skip_whitespace
       incomplete_error "Unexpected end of program after syntax quote (`), expected a form" unless @char
 
-      @syntax_quote_gensyms << {}
-      form = syntax_quote(parse_form)
-      @syntax_quote_gensyms.pop
-
-      form
+      with_location syntax_quote(read_form, {})
     end
 
-    def syntax_quote(form)
-      quote = AST::Identifier.new(@line, :quote)
-
+    def syntax_quote(form, gensyms)
       case form
-      when AST::List
-        if is_unquote?(form)
-          form[1]
-        elsif is_unquote_splicing?(form)
+      when List
+        if is_unquote? form
+          form.rest.first
+        elsif is_unquote_splicing? form
           syntax_error "splicing unquote (~@) not in list"
         else
-          concat = AST::Identifier.new(@line, :concat)
-          AST::List.new(@line, [concat] + syntax_quote_list(form.elements))
+          cons(CONCAT, syntax_quote_list(form, gensyms))
         end
-      when AST::ArrayLiteral
-        syntax_quote_coll(:array, form.elements)
-      when AST::SetLiteral
-        syntax_quote_coll(:set, form.elements)
-      when AST::HashLiteral
-        syntax_quote_coll(:hash, form.elements)
-      when AST::Identifier
+      when Array
+        syntax_quote_coll(:array, form, gensyms)
+      when Set
+        syntax_quote_coll(:set, form, gensyms)
+      when Hash
+        syntax_quote_coll(:hash, form, gensyms)
+      when Identifier
         name = form.name
+
         if name.to_s.end_with?('#')
-          @syntax_quote_gensyms.last[name] ||= Apricot.gensym(name)
-          id = AST::Identifier.new(@line, @syntax_quote_gensyms.last[name])
-          AST::List.new(@line, [quote, id])
+          gensyms[name] ||= Apricot.gensym(name)
+          List[QUOTE, gensyms[name]]
         else
-          AST::List.new(@line, [quote, form])
+          List[QUOTE, form]
         end
-      when AST::BasicLiteral
-        form
       else
-        AST::List.new(@line, [quote, form])
+        form
       end
     end
 
-    def syntax_quote_coll(creator_name, elements)
-      apply = AST::Identifier.new(@line, :apply)
-      concat = AST::Identifier.new(@line, :concat)
-      creator = AST::Identifier.new(@line, creator_name)
-      list = AST::List.new(@line, [concat] + syntax_quote_list(elements))
-      AST::List.new(@line, [apply, creator, list])
+    def syntax_quote_coll(creator_name, elements, gensyms)
+      creator = Identifier.intern(creator_name)
+      list = cons(CONCAT, syntax_quote_list(elements, gensyms))
+      List[APPLY, creator, list]
     end
 
-    def syntax_quote_list(elements)
-      list = AST::Identifier.new(@line, :list)
-
+    def syntax_quote_list(elements, gensyms)
       elements.map do |form|
-        if is_unquote?(form)
-          AST::List.new(@line, [list, form[1]])
-        elsif is_unquote_splicing?(form)
-          form[1]
+        if is_unquote? form
+          List[LIST, form.rest.first]
+        elsif is_unquote_splicing? form
+          form.rest.first
         else
-          AST::List.new(@line, [list, syntax_quote(form)])
+          List[LIST, syntax_quote(form, gensyms)]
         end
-      end
+      end.to_list
     end
 
-    def is_unquote?(form)
-      form.is_a?(AST::List)          &&
-      form[0].is_a?(AST::Identifier) &&
-      form[0].name == :unquote
-    end
-
-    def is_unquote_splicing?(form)
-      form.is_a?(AST::List)          &&
-      form[0].is_a?(AST::Identifier) &&
-      form[0].name == :'unquote-splicing'
-    end
-
-    def parse_unquote
-      unquote = :unquote
+    def read_unquote
+      unquote_type = UNQUOTE
       next_char # skip the ~
 
       if @char == '@'
         next_char # skip the ~@
-        unquote = :'unquote-splicing'
+        unquote_type = UNQUOTE_SPLICING
       end
 
       skip_whitespace
 
       unless @char
-        syntax = unquote == :unquote ? '~' : '~@'
+        syntax = (unquote == UNQUOTE ? '~' : '~@')
         incomplete_error "Unexpected end of program after #{syntax}, expected a form"
       end
 
-      form = parse_form
-      unquote = AST::Identifier.new(@line, unquote)
-      AST::List.new(@line, [unquote, form])
+      with_location List[unquote_type, read_form]
     end
 
-    def parse_fn
+    def read_fn
+      line = @line
+
       @fn_state << FnState.new([], nil)
-      body = parse_list
+      body = read_list
       state = @fn_state.pop
 
-      state.args << :'&' << state.rest if state.rest
+      state.args << Identifier.intern(:'&') << state.rest if state.rest
+
       args = state.args.map.with_index do |x, i|
-        AST::Identifier.new(body.line, x || Apricot.gensym("p#{i + 1}"))
+        x || Apricot.gensym("p#{i + 1}")
       end
 
-      AST::List.new(body.line, [AST::Identifier.new(body.line, :fn),
-                                AST::ArrayLiteral.new(body.line, args),
-                                body])
+      with_location List[FN, args, body], line
     end
 
-    def parse_list
+    def read_list
       next_char # skip the (
-      AST::List.new(@line, parse_forms_until(')'))
+      with_location read_forms_until(')').to_list
     end
 
-    def parse_array
+    def read_array
       next_char # skip the [
-      AST::ArrayLiteral.new(@line, parse_forms_until(']'))
+      with_location read_forms_until(']')
     end
 
-    def parse_hash
+    def read_hash
       next_char # skip the {
-      forms = parse_forms_until('}')
+      forms = read_forms_until('}')
       syntax_error "Odd number of forms in key-value hash" if forms.count.odd?
-      AST::HashLiteral.new(@line, forms)
+      with_location hashify(forms)
     end
 
-    def parse_set
+    def read_set
       next_char # skip the {
-      AST::SetLiteral.new(@line, parse_forms_until('}'))
+      with_location read_forms_until('}').to_set
     end
 
-    def parse_string
+    def read_string
       line = @line
       next_char # skip the opening "
       string = ""
@@ -297,17 +280,17 @@ module Apricot
       while @char
         if @char == '"'
           next_char # consume the "
-          return AST::StringLiteral.new(line, string)
+          return with_location string, line
         end
 
-        string << parse_string_char
+        string << read_string_char
       end
 
       # Can only reach here if we run out of chars without getting a "
       incomplete_error "Unexpected end of program while parsing string"
     end
 
-    def parse_string_char
+    def read_string_char
       char =
         if @char == "\\"
           next_char
@@ -331,7 +314,7 @@ module Apricot
       char
     end
 
-    # Parse digits in a certain base for string character escapes
+    # Read digits in a certain base for string character escapes
     def char_escape_helper(base, regex, n)
       number = ""
 
@@ -344,20 +327,10 @@ module Apricot
       number.to_i(base).chr
     end
 
-    def delimiter_helper(c)
-      case c
-      when '(' then ')'
-      when '[' then ']'
-      when '{' then '}'
-      when '<' then '>'
-      else c
-      end
-    end
-
-    def parse_regex
+    def read_regex
       line = @line
       next_char # skip the r
-      delimiter = delimiter_helper(@char)
+      delimiter = opposite_delimiter(@char)
       next_char # skip delimiter
       regex = ""
 
@@ -365,7 +338,7 @@ module Apricot
         if @char == delimiter
           next_char # consume delimiter
           options = regex_options_helper
-          return AST::RegexLiteral.new(line, regex, options)
+          return with_location Regexp.new(regex, options), line
         elsif @char == "\\" && peek_char == delimiter
           next_char
         elsif @char == "\\" && peek_char == "\\"
@@ -393,21 +366,21 @@ module Apricot
       options
     end
 
-    def parse_quotation(double_quote)
+    def read_quotation(double_quote)
       line = @line
       next_char # skip the prefix
-      delimiter = delimiter_helper(@char)
+      delimiter = opposite_delimiter(@char)
       next_char # skip delimiter
       string = ""
 
       while @char
         if @char == delimiter
           next_char # consume delimiter
-          return AST::StringLiteral.new(line, string)
+          return with_location string, line
         end
 
         if double_quote
-          string << parse_string_char
+          string << read_string_char
         elsif @char == "\\" && (peek_char == delimiter || peek_char == "\\")
           next_char
           string << consume_char
@@ -419,7 +392,7 @@ module Apricot
       incomplete_error "Unexpected end of program while parsing quotation"
     end
 
-    def parse_symbol
+    def read_symbol
       line = @line
       next_char # skip the :
       symbol = ""
@@ -428,7 +401,7 @@ module Apricot
         next_char # skip opening "
         while @char
           break if @char == '"'
-          symbol << parse_string_char
+          symbol << read_string_char
         end
         incomplete_error "Unexpected end of program while parsing symbol" unless @char == '"'
         next_char # skip closing "
@@ -441,10 +414,10 @@ module Apricot
         syntax_error "Empty symbol name" if symbol.empty?
       end
 
-      AST::SymbolLiteral.new(line, symbol.to_sym)
+      symbol.to_sym
     end
 
-    def parse_number
+    def read_number
       number = ""
 
       while @char =~ IDENTIFIER
@@ -454,22 +427,22 @@ module Apricot
 
       case number
       when /^[+-]?\d+$/
-        AST.new_integer(@line, number.to_i)
+        number.to_i
       when /^([+-]?)(\d+)r([a-zA-Z0-9]+)$/
         sign, radix, digits = $1, $2.to_i, $3
         syntax_error "Radix out of range: #{radix}" unless 2 <= radix && radix <= 36
         syntax_error "Invalid digits for radix in number: #{number}" unless digits.downcase.chars.all? {|d| DIGITS[0..radix-1].include?(d) }
-        AST.new_integer(@line, (sign + digits).to_i(radix))
+        (sign + digits).to_i(radix)
       when /^[+-]?\d+\.?\d*(?:e[+-]?\d+)?$/
-        AST::FloatLiteral.new(@line, number.to_f)
+        number.to_f
       when /^([+-]?\d+)\/(\d+)$/
-        AST::RationalLiteral.new(@line, $1.to_i, $2.to_i)
+        Rational($1.to_i, $2.to_i)
       else
         syntax_error "Invalid number: #{number}"
       end
     end
 
-    def parse_identifier
+    def read_identifier
       identifier = ""
 
       while @char =~ IDENTIFIER
@@ -477,33 +450,33 @@ module Apricot
         next_char
       end
 
-      # Handle % identifiers in #() syntax
-      identifier =
-        if (state = @fn_state.last) && identifier[0] == '%'
-          case identifier[1..-1]
-          when '' # % is equivalent to %1
-            state.args[0] ||= Apricot.gensym('p1')
-          when '&'
-            state.rest ||= Apricot.gensym('rest')
-          when /^[1-9]\d*$/
-            n = identifier[1..-1].to_i
-            state.args[n - 1] ||= Apricot.gensym("p#{n}")
-          else
-            syntax_error "arg literal must be %, %& or %integer"
-          end
-        else
-          identifier.to_sym
-        end
-
       case identifier
-      when :true, :false, :nil
-        AST::Literal.new(@line, identifier)
+      when 'true'  then return true
+      when 'false' then return false
+      when 'nil'   then return nil
+      end
+
+      state = @fn_state.last
+
+      # Handle % identifiers in #() syntax
+      if state && identifier[0] == '%'
+        case identifier[1..-1]
+        when '' # % is equivalent to %1
+          state.args[0] ||= with_location Apricot.gensym('p1')
+        when '&'
+          state.rest ||= with_location Apricot.gensym('rest')
+        when /^[1-9]\d*$/
+          n = identifier[1..-1].to_i
+          state.args[n - 1] ||= with_location Apricot.gensym("p#{n}")
+        else
+          syntax_error "arg literal must be %, %& or %integer"
+        end
       else
-        AST::Identifier.new(@line, identifier)
+        with_location Identifier.intern(identifier)
       end
     end
 
-    def parse_pipe_identifier
+    def read_pipe_identifier
       line = @line
       next_char # skip the |
       identifier = ""
@@ -511,10 +484,10 @@ module Apricot
       while @char
         if @char == '|'
           next_char # consume the |
-          return AST::Identifier.new(line, identifier.to_sym)
+          return with_location Identifier.intern(identifier)
         end
 
-        identifier << parse_string_char
+        identifier << read_string_char
       end
 
       incomplete_error "Unexpected end of program while parsing pipe identifier"
@@ -547,6 +520,39 @@ module Apricot
 
     def incomplete_error(message)
       raise SyntaxError.new(@filename, @line, message, true)
+    end
+
+    def with_location(obj, line = @line)
+      obj.apricot_meta = {line: line}
+      obj
+    end
+
+    def cons(head, tail)
+      tail.cons(head)
+    end
+
+    def is_unquote?(form)
+      form.is_a?(List) && form.first == UNQUOTE
+    end
+
+    def is_unquote_splicing?(form)
+      form.is_a?(List) && form.first == UNQUOTE_SPLICING
+    end
+
+    def hashify(array)
+      array.each_slice(2).with_object({}) do |(key, value), hash|
+        hash[key] = value
+      end
+    end
+
+    def opposite_delimiter(c)
+      case c
+      when '(' then ')'
+      when '[' then ']'
+      when '{' then '}'
+      when '<' then '>'
+      else c
+      end
     end
   end
 end

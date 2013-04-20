@@ -38,12 +38,12 @@ module Apricot
     end
 
     def compile(file)
-      nodes = Apricot::Parser.parse_file(file)
+      nodes = Apricot::Reader.read_file(file).map {|v| AST::Node.from_value(v, 1) }
       generate(nodes, file, 1, true)
     end
 
     def eval(code, file = "(eval)", line = 1)
-      nodes = Apricot::Parser.parse_string(code, file, line)
+      nodes = Apricot::Reader.read_string(code, file, line).map {|v| AST::Node.from_value(v, line) }
       return nil if nodes.empty?
 
       nodes[0..-2].each do |node|

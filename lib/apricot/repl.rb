@@ -102,7 +102,7 @@ module Apricot
         # Otherwise treat the input as code to evaluate.
         begin
           begin
-            nodes = Apricot::Parser.parse_string(code, "(eval)", @line)
+            nodes = Apricot::Reader.read_string(code, "(eval)", @line).map {|v| AST::Node.from_value(v, @line) }
           rescue Apricot::SyntaxError => e
             # Reraise unless this is an incomplete error (meaning we can read
             # more on the next line).
