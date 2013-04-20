@@ -151,7 +151,26 @@ module Apricot
         raise NotImplementedError, "regexp bytecode"
 
       when Rational
-        raise NotImplementedError, "rational bytecode"
+        # A rational literal should only be converted to a Rational the first
+        # time it is encountered. We push a literal nil here, and then
+        # overwrite the literal value with the created Rational if it is nil,
+        # i.e. the first time only. Subsequent encounters will use the
+        # previously created Rational. This idea was copied from
+        # Rubinius::AST::RegexLiteral.
+        idx = g.add_literal(nil)
+        g.push_literal_at idx
+        g.dup
+        g.is_nil
+
+        lbl = g.new_label
+        g.gif lbl
+        g.pop
+        g.push_self
+        g.push form.numerator
+        g.push form.denominator
+        g.send :Rational, 2, true
+        g.set_literal idx
+        lbl.set!
 
       when Set
         raise NotImplementedError, "set bytecode"
