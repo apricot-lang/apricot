@@ -78,7 +78,7 @@ module Apricot::AST
       g.find_const :List
 
       if @elements.empty?
-        g.find_const :EmptyList
+        g.find_const :EMPTY_LIST
       else
         @elements.each {|e| e.quote_bytecode(g) }
         g.send :[], @elements.length

@@ -459,7 +459,7 @@ describe 'Apricot' do
     apricot("'1.2").should == 1.2
     apricot("'1/2").should == Rational(1,2)
     apricot("':a").should == :a
-    apricot("'()").should == List::EmptyList
+    apricot("'()").should == List::EMPTY_LIST
     apricot("'(1)").should == List[1]
     apricot("'[a]").should == [Identifier.intern(:a)]
     apricot("'{a 1}").should == {Identifier.intern(:a) => 1}

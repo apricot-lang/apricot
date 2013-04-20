@@ -219,7 +219,7 @@ end
 
 module Enumerable
   def to_list
-    list = Apricot::List::EmptyList
+    list = Apricot::List::EMPTY_LIST
     reverse_each {|x| list = list.cons(x) }
     list
   end
@@ -252,6 +252,6 @@ class NilClass
   end
 
   def rest
-    Apricot::List::EmptyList
+    Apricot::List::EMPTY_LIST
   end
 end

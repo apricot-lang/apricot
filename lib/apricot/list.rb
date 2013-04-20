@@ -4,18 +4,19 @@ module Apricot
     include Seq
 
     def self.[](*args)
-      list = EmptyList
+      list = EMPTY_LIST
       args.reverse_each do |arg|
         list = list.cons(arg)
       end
       list
     end
 
-    attr_reader :head, :tail
+    attr_reader :head, :tail, :count
 
     def initialize(head, tail)
       @head = head
       @tail = tail
+      @count = tail ? tail.count + 1 : 1
     end
 
     def cons(x)
@@ -91,6 +92,12 @@ module Apricot
 
     alias_method :to_s, :inspect
 
-    EmptyList = new(nil, nil)
+    class EmptyList < List
+      def initialize
+        @count = 0
+      end
+    end
+
+    EMPTY_LIST = EmptyList.new
   end
 end
