@@ -120,7 +120,7 @@ module Apricot
         raise NotImplementedError, "seq bytecode"
 
       when Symbol
-        raise NotImplementedError, "symbol bytecode"
+        g.push_literal form
 
       when Array
         raise NotImplementedError, "array bytecode"
