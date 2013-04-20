@@ -111,19 +111,26 @@ module Apricot
 
     SELF = Identifier.intern(:self)
 
-    def bytecode(g, form)
+    def bytecode(g, form, quoted = false)
       pos(g, form)
 
       case form
       when Identifier
-        if form.constant?
-          g.push_const form.const_names.first
-          form.const_names.drop(1).each {|n| g.find_const n }
-        elsif form == SELF
-          g.push_self
+        if quoted
+          g.push_const :Apricot
+          g.find_const :Identifier
+          g.push_literal form.name
+          g.send :intern, 1
         else
-          # TODO: Stop using AST stuff.
-          AST::NamespaceReference.new(form.unqualified_name, form.ns).bytecode(g)
+          if form.constant?
+            g.push_const form.const_names.first
+            form.const_names.drop(1).each {|n| g.find_const n }
+          elsif form == SELF
+            g.push_self
+          else
+            # TODO: Stop using AST stuff.
+            AST::NamespaceReference.new(form.unqualified_name, form.ns).bytecode(g)
+          end
         end
 
       when Seq
@@ -133,7 +140,7 @@ module Apricot
         g.push_literal form
 
       when Array
-        form.each {|e| bytecode(g, e) }
+        form.each {|e| bytecode(g, e, quoted) }
         g.make_array form.size
 
       when String
@@ -149,8 +156,8 @@ module Apricot
         # Add keys and values
         form.each_pair do |key, value|
           g.dup # the Hash
-          bytecode(g, key)
-          bytecode(g, value)
+          bytecode(g, key, quoted)
+          bytecode(g, value, quoted)
           g.send :[]=, 2
           g.pop # drop the return value of []=
         end
@@ -192,7 +199,7 @@ module Apricot
         g.send :new, 0 # TODO: Inline this new?
 
         form.each do |elem|
-          bytecode(g, elem)
+          bytecode(g, elem, quoted)
           g.send :add, 1
         end
 
