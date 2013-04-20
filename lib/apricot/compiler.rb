@@ -148,15 +148,29 @@ module Apricot
         g.push_unique_literal form
 
       when Regexp
-        raise NotImplementedError, "regexp bytecode"
+        # A regexp literal should only be converted to a Regexp the first time
+        # it is encountered. We push a literal nil here, and then overwrite
+        # the literal value with the created Regexp if it is nil, i.e. the
+        # first time only. Subsequent encounters will use the previously
+        # created Regexp. This idea was copied from
+        # Rubinius::AST::RegexLiteral.
+        idx = g.add_literal(nil)
+        g.push_literal_at idx
+        g.dup
+        g.is_nil
+
+        lbl = g.new_label
+        g.gif lbl
+        g.pop
+        g.push_const :Regexp
+        g.push_literal form.source
+        g.push form.options
+        g.send :new, 2
+        g.set_literal idx
+        lbl.set!
 
       when Rational
-        # A rational literal should only be converted to a Rational the first
-        # time it is encountered. We push a literal nil here, and then
-        # overwrite the literal value with the created Rational if it is nil,
-        # i.e. the first time only. Subsequent encounters will use the
-        # previously created Rational. This idea was copied from
-        # Rubinius::AST::RegexLiteral.
+        # Same idea as used above for Regexp.
         idx = g.add_literal(nil)
         g.push_literal_at idx
         g.dup
