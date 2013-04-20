@@ -131,7 +131,19 @@ module Apricot
         g.string_dup # Duplicate string to prevent mutating the literal
 
       when Hash
-        raise NotImplementedError, "hash bytecode"
+        # Create a new Hash
+        g.push_const :Hash
+        g.push form.size
+        g.send :new_from_literal, 1
+
+        # Add keys and values
+        form.each_pair do |key, value|
+          g.dup # the Hash
+          bytecode(g, key)
+          bytecode(g, value)
+          g.send :[]=, 2
+          g.pop # drop the return value of []=
+        end
 
       when Fixnum
         g.push form
