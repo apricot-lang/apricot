@@ -19,7 +19,7 @@ module Apricot
           case arg
           when AST::ArrayLiteral
             g.compile_error "Arguments in fn form must be identifiers" unless arg[0].is_a? AST::Identifier
-            g.compile_error "Arguments in fn form can have only one optional value" unless arg.elements.length == 2
+            g.compile_error "Optional argument in fn form is missing default value" unless arg.elements.length == 2
 
             optional_args << [arg[0].name, arg[1]]
           when AST::Identifier
