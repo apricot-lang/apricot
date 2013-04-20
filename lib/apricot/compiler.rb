@@ -109,12 +109,22 @@ module Apricot
       cc
     end
 
+    SELF = Identifier.intern(:self)
+
     def bytecode(g, form)
       pos(g, form)
 
       case form
       when Identifier
-        raise NotImplementedError, "identifier bytecode"
+        if form.constant?
+          g.push_const form.const_names.first
+          form.const_names.drop(1).each {|n| g.find_const n }
+        elsif form == SELF
+          g.push_self
+        else
+          # TODO: Stop using AST stuff.
+          AST::NamespaceReference.new(form.unqualified_name, form.ns).bytecode(g)
+        end
 
       when Seq
         raise NotImplementedError, "seq bytecode"
