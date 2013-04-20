@@ -549,6 +549,8 @@
 (defn =
   "Return true if all of the arguments are equal, otherwise false. (=) returns
   true."
+  {:inline (fn [x y] `(. ~x == ~y))
+   :inline-arities #{2}}
   ([x] true)
   ([x y] (. x == y))
   ([x y & more]
