@@ -178,7 +178,13 @@ module Apricot
         end
 
       when Set
-        raise NotImplementedError, "set bytecode"
+        g.push_const :Set
+        g.send :new, 0 # TODO: Inline this new?
+
+        form.each do |elem|
+          bytecode(g, elem)
+          g.send :add, 1
+        end
 
       when Bignum
         g.push_unique_literal form
