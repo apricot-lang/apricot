@@ -69,5 +69,105 @@ module Apricot
     def eval_form(form, file = "(eval)", line = 1)
       Rubinius.run_script(compile_form(form, file, line))
     end
+
+    def new_eval(form, file = "(eval)", line = 1)
+      Rubinius.run_script(new_generate([form], file, line))
+    end
+
+    def new_generate(forms, file = "(none)", line = 1, evaluate = false)
+      g = Apricot::Generator.new
+      g.name = :__top_level__
+      g.file = file.to_sym
+
+      g.scopes << AST::TopLevelScope.new
+
+      g.set_line(line)
+
+      if forms.empty?
+        g.push_nil
+      else
+        forms.each_with_index do |e, i|
+          g.pop unless i == 0
+          bytecode(g, e)
+
+          # We evaluate top level forms as we generate the bytecode for them
+          # so macros can be used immediately after their definitions.
+          eval_form(e, file) if evaluate
+        end
+      end
+
+      g.ret
+
+      scope = g.scopes.pop
+      g.local_count = scope.local_count
+      g.local_names = scope.local_names
+
+      g.close
+      g.encode
+      cc = g.package(Rubinius::CompiledCode)
+      cc.scope = Rubinius::ConstantScope.new(Object)
+      cc
+    end
+
+    def bytecode(g, form)
+      pos(g, form)
+
+      case form
+      when Identifier
+        raise NotImplementedError, "identifier bytecode"
+
+      when Seq
+        raise NotImplementedError, "seq bytecode"
+
+      when Symbol
+        raise NotImplementedError, "symbol bytecode"
+
+      when Array
+        raise NotImplementedError, "array bytecode"
+
+      when String
+        g.push_literal form
+        g.string_dup # Duplicate string to prevent mutating the literal
+
+      when Hash
+        raise NotImplementedError, "hash bytecode"
+
+      when Fixnum
+        g.push form
+
+      when true
+        g.push :true
+
+      when nil
+        g.push :nil
+
+      when false
+        g.push :false
+
+      when Float
+        g.push_unique_literal form
+
+      when Regexp
+        raise NotImplementedError, "regexp bytecode"
+
+      when Rational
+        raise NotImplementedError, "rational bytecode"
+
+      when Set
+        raise NotImplementedError, "set bytecode"
+
+      when Bignum
+        g.push_unique_literal form
+
+      else
+        g.compile_error "Can't generate bytecode for #{form} (#{form.class})"
+      end
+    end
+
+    def pos(g, form)
+      if (meta = form.apricot_meta) && (line = meta[:line])
+        g.set_line(line)
+      end
+    end
   end
 end
