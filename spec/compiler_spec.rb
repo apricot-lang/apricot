@@ -27,6 +27,11 @@ describe 'Apricot' do
     apricot(':foo').should == :foo
   end
 
+  it "doesn't mix up symbols and keywords in lists" do
+    # There once was a bug where :true would get compiled as the value true.
+    apricot('(.class :true)').should == Symbol
+  end
+
   it 'compiles strings' do
     apricot('"foo"').should == "foo"
   end
