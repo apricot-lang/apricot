@@ -5,3 +5,4 @@ rvm:
 notifications:
   webhooks:
     - http://rcmp.tenthbit.net/
+    - http://rcmp.tenthbit.net/irc.freenode.net/apricot
