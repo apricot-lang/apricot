@@ -123,7 +123,8 @@ module Apricot
         g.push_literal form
 
       when Array
-        raise NotImplementedError, "array bytecode"
+        form.each {|e| bytecode(g, e) }
+        g.make_array form.size
 
       when String
         g.push_literal form
