@@ -3,7 +3,7 @@ require 'rspec'
 
 require 'simplecov'
 
-SimpleCov.start do
+SimpleCov.configure do
   add_filter 'spec/'
   add_filter 'kernel/' # SimpleCov doesn't understand Apricot code
 
@@ -28,6 +28,7 @@ SimpleCov.start do
      'seq.rb'].any? {|f| src.filename.end_with? "apricot/#{f}" }
   end
 end
+SimpleCov.start unless ENV['TRAVIS']
 
 require 'apricot'
 include Apricot
