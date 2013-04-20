@@ -127,9 +127,11 @@ module Apricot
             form.const_names.drop(1).each {|n| g.find_const n }
           elsif form == SELF
             g.push_self
-          else
+          elsif form.qualified?
             # TODO: Stop using AST stuff.
             AST::NamespaceReference.new(form.unqualified_name, form.ns).bytecode(g)
+          else
+            g.scope.find_var(form.name).bytecode(g)
           end
         end
 
