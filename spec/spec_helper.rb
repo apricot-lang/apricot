@@ -12,6 +12,8 @@ SimpleCov.configure do
      'compiler.rb',
      'errors.rb',
      'generator.rb',
+     'scopes.rb',
+     'variables.rb',
      'reader.rb'].any? {|f| src.filename.end_with? "apricot/#{f}" }
   end
   add_group 'Special Forms', 'special_forms'
