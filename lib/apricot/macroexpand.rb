@@ -5,7 +5,7 @@ module Apricot
   end
 
   def self.macroexpand_1(form)
-    return form unless form.is_a? List
+    return form unless form.is_a? Seq
 
     callee = form.first
     return form unless callee.is_a?(Identifier) && !callee.constant?
