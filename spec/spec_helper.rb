@@ -14,7 +14,6 @@ SimpleCov.configure do
      'generator.rb',
      'reader.rb'].any? {|f| src.filename.end_with? "apricot/#{f}" }
   end
-  add_group 'AST', 'ast'
   add_group 'Special Forms', 'special_forms'
   add_group 'Runtime' do |src|
     ['boot.rb',
