@@ -58,7 +58,7 @@ module Apricot
         conditions = []
       elsif clause.first.is_a? Array
         conditions, clause = clause.first, clause.rest
-        name, conditions = conditions.first, conditions.rest
+        name = conditions.shift
         g.compile_error "Expected identifier as first form of rescue clause binding" unless name.is_a? Identifier
       else
         g.compile_error "Expected identifier or array as first form of rescue clause"

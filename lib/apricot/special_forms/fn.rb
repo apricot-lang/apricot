@@ -17,12 +17,12 @@ module Apricot
           g.compile_error "Unexpected arguments after block argument" if @block_arg
 
           case arg
-          when AST::ArrayLiteral
-            g.compile_error "Arguments in fn form must be identifiers" unless arg[0].is_a? AST::Identifier
-            g.compile_error "Optional argument in fn form is missing default value" unless arg.elements.length == 2
+          when Array
+            g.compile_error "Arguments in fn form must be identifiers" unless arg.first.is_a? Identifier
+            g.compile_error "Optional argument in fn form is missing default value" unless arg.length == 2
 
             optional_args << [arg[0].name, arg[1]]
-          when AST::Identifier
+          when Identifier
             if arg.name == :& && !@block_arg
               g.compile_error "Can't have two rest arguments in one overload" if @rest_arg
               next_is_rest = true
@@ -70,26 +70,26 @@ module Apricot
     # (fn name? [args* & rest | block] body*)
     # (fn name? ([args*] body*) ... ([args*] body*))
     SpecialForm.define(:fn) do |g, args|
-      fn_name = args.shift.name if args.first.is_a? AST::Identifier
-      doc_string = args.shift if args.first.is_a? AST::StringLiteral
+      fn_name, args = args.first.name, args.rest if args.first.is_a? Identifier
+      doc_string, args = args.first, args.rest if args.first.is_a? String
 
       overloads = []
 
       case args.first
-      when AST::List
+      when List
         # This is the multi-arity form (fn name? ([args*] body*) ... ([args*] body*))
         args.each do |overload|
           # Each overload is of the form ([args*] body*)
-          g.compile_error "Expected an arity overload (a list)" unless overload.is_a? AST::List
-          arglist, *body = overload.elements
-          g.compile_error "Argument list in overload must be an array literal" unless arglist.is_a? AST::ArrayLiteral
-          arglist = ArgList.new(arglist.elements, g)
+          g.compile_error "Expected an arity overload (a list)" unless overload.is_a? List
+          arglist, body = overload.first, overload.rest
+          g.compile_error "Argument list in overload must be an array literal" unless arglist.is_a? Array
+          arglist = ArgList.new(arglist, g)
           overloads << Overload.new(arglist, body)
         end
-      when AST::ArrayLiteral
+      when Array
         # This is the single-arity form (fn name? [args*] body*)
-        arglist, *body = args
-        arglist = ArgList.new(arglist.elements, g)
+        arglist, body = args.first, args.rest
+        arglist = ArgList.new(arglist, g)
         overloads << Overload.new(arglist, body)
       else
         # Didn't match any of the legal forms.
@@ -235,7 +235,7 @@ module Apricot
         fn.passed_arg arg_index
         fn.git next_optional
 
-        value.bytecode(fn)
+        Compiler.bytecode(fn, value)
         fn.set_local arg_index
         fn.pop
 

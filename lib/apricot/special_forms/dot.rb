@@ -17,11 +17,9 @@ module Apricot
 
     # Handle the (. receiver (method args*)) form
     if method_or_list.is_a? List
-      method = method_or_list.elements.shift
-
       g.compile_error "Invalid send expression, expecting (. receiver (method ...))" unless args.empty?
 
-      args = method_or_list.elements
+      method, args = method_or_list.first, method_or_list.rest.to_a
     else
       method = method_or_list
     end
