@@ -6,7 +6,7 @@ module Apricot
     else
       args.each_with_index do |a, i|
         g.pop unless i == 0
-        a.bytecode(g)
+        Compiler.bytecode(g, a)
       end
     end
   end

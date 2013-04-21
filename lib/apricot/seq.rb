@@ -10,7 +10,7 @@ module Apricot
     include Enumerable
 
     def rest
-      self.next || Apricot::List::EmptyList
+      self.next || Apricot::List::EMPTY_LIST
     end
 
     def each
@@ -30,6 +30,16 @@ module Apricot
 
     def empty?
       false
+    end
+
+    def last
+      s = self
+
+      while s.next
+        s = s.next
+      end
+
+      s.first
     end
 
     def to_s

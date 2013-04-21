@@ -4,7 +4,7 @@ describe Apricot::List do
   end
 
   def empty_list
-    described_class::EmptyList
+    described_class::EMPTY_LIST
   end
 
   it 'has a single instance of the empty list' do

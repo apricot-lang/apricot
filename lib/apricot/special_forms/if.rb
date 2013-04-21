@@ -1,21 +1,22 @@
 module Apricot
   # (if cond body else_body?)
   SpecialForm.define(:if) do |g, args|
-    g.compile_error "Too few arguments to if" if args.length < 2
-    g.compile_error "Too many arguments to if" if args.length > 3
+    g.compile_error "Too few arguments to if" if args.count < 2
+    g.compile_error "Too many arguments to if" if args.count > 3
 
-    cond, body, else_body = args
-    else_label, end_label = g.new_label, g.new_label
+    cond, body, else_body = *args
+    else_label = g.new_label
+    end_label = g.new_label
 
-    cond.bytecode(g)
+    Compiler.bytecode(g, cond)
     g.gif else_label
 
-    body.bytecode(g)
+    Compiler.bytecode(g, body)
     g.goto end_label
 
     else_label.set!
     if else_body
-      else_body.bytecode(g)
+      Compiler.bytecode(g, else_body)
     else
       g.push_nil
     end

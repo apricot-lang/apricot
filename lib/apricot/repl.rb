@@ -102,7 +102,7 @@ module Apricot
         # Otherwise treat the input as code to evaluate.
         begin
           begin
-            nodes = Apricot::Reader.read_string(code, "(eval)", @line).map {|v| AST::Node.from_value(v, @line) }
+            forms = Apricot::Reader.read_string(code, "(eval)", @line)
           rescue Apricot::SyntaxError => e
             # Reraise unless this is an incomplete error (meaning we can read
             # more on the next line).
@@ -131,9 +131,9 @@ module Apricot
             end
           end
 
-          nodes.each do |node|
+          forms.each do |node|
             @compiled_code =
-              Apricot::Compiler.compile_node(node, "(eval)", @line)
+              Apricot::Compiler.compile_form(node, "(eval)", @line)
 
             value = Rubinius.run_script(@compiled_code)
             puts "=> #{value.apricot_inspect}"

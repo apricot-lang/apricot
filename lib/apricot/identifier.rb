@@ -44,6 +44,16 @@ module Apricot
       @constant
     end
 
+    # Is the identifier a fn on its namespace?
+    def fn?
+      @ns.is_a?(Namespace) && @ns.fns.include?(@name)
+    end
+
+    # is the identifier a method on its module?
+    def method?
+      @ns.respond_to?(@name)
+    end
+
     def ns
       @ns || Apricot.current_namespace
     end
