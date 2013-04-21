@@ -46,17 +46,18 @@ module Apricot
 
     # Is the identifier a fn on its namespace?
     def fn?
-      ns.is_a?(Namespace) && ns.fns.include?(@name)
+      ns.is_a?(Namespace) && ns.fns.include?(@unqualified_name)
     end
 
     # is the identifier a method on its module?
     def method?
-      !ns.is_a?(Namespace) && ns.respond_to?(@name)
+      !ns.is_a?(Namespace) && ns.respond_to?(@unqualified_name)
     end
 
     # Get the metadata of the object this identifier references, or nil.
     def meta
-      ns.is_a?(Namespace) && ns.vars[@name] && ns.vars[@name].apricot_meta
+      ns.is_a?(Namespace) && ns.vars[@unqualified_name] &&
+        ns.vars[@unqualified_name].apricot_meta
     end
 
     def ns
