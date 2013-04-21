@@ -108,7 +108,7 @@ module Apricot
           if macroexpand
             form = Apricot.macroexpand(form)
 
-            if form.is_a?(List)
+            if form.is_a?(Seq)
               # Avoid recursing and macroexpanding again if expansion returns a list
               bytecode(g, form, false, false)
             else
