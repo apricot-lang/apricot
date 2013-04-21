@@ -15,7 +15,7 @@ module Apricot
     args = form.tail
 
     # Handle the (.method receiver args*) send expression form
-    if name.length > 1 && name_s != '..' && name_s.start_with?('.')
+    if name.length > 1 && name != :'..' && name_s.start_with?('.')
       raise ArgumentError, "Too few arguments to send expression, expecting (.method receiver ...)" if args.empty?
 
       dot = Identifier.intern(:'.')
@@ -24,7 +24,7 @@ module Apricot
     end
 
     # Handle the (Class. args*) shorthand new form
-    if name.length > 1 && name_s != '..' && name_s.end_with?('.')
+    if name.length > 1 && name != :'..' && name_s.end_with?('.')
       dot = Identifier.intern(:'.')
       klass = Identifier.intern(name_s[0..-2])
       new = Identifier.intern(:new)
