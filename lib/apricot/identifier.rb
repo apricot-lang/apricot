@@ -54,8 +54,13 @@ module Apricot
       !ns.is_a?(Namespace) && ns.respond_to?(@name)
     end
 
+    # Get the metadata of the object this identifier references, or nil.
+    def meta
+      ns.is_a?(Namespace) && ns.vars[@name] && ns.vars[@name].apricot_meta
+    end
+
     def ns
-      @ns || Apricot.current_namespace
+      @ns ||= Apricot.current_namespace
     end
 
     def const_names

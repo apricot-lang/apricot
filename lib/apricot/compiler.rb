@@ -120,25 +120,23 @@ module Apricot
 
           # Handle (foo ...) and (Foo/bar ...) calls
           if callee.is_a?(Identifier)
-            # meta = callee.meta(g)
+            meta = callee.meta
 
-            # # Handle inlinable function calls
-            # if meta && meta[:inline] && (!meta[:'inline-arities'] ||
-            #                              meta[:'inline-arities'].apricot_call(args.length))
-            #   # Apply the inliner macro to the arguments and compile the result.
-            #   inliner = meta[:inline]
-            #   args.map!(&:to_value)
+            # Handle inlinable function calls
+            if meta && meta[:inline] && (!meta[:'inline-arities'] ||
+                                         meta[:'inline-arities'].apricot_call(args.count))
+              begin
+                inlined_form = meta[:inline].apricot_call(*args)
+              rescue => e
+                g.compile_error "Inliner function for '#{callee.name}' raised an exception:\n  #{e}"
+              end
 
-            #   begin
-            #     inlined_form = inliner.apricot_call(*args)
-            #   rescue => e
-            #     g.compile_error "Inliner macro for '#{callee.name}' raised an exception:\n  #{e}"
-            #   end
+              bytecode(g, inlined_form)
+              return
+            end
 
-            #   Node.from_value(inlined_form, line).bytecode(g)
-            #   return
             if callee.fn? || callee.method?
-              ns_id = Apricot::Identifier.intern(callee.ns.name)
+              ns_id = Identifier.intern(callee.ns.name)
               first_name, *rest_names = ns_id.const_names
 
               g.push_const first_name
