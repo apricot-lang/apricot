@@ -4,7 +4,7 @@ module Apricot
 
     def generate(forms, file = "(none)", line = 1, evaluate = false)
       g = Apricot::Generator.new
-      g.name = :__top_level__
+      g.name = :__apricot__
       g.file = file.to_sym
 
       g.scopes << TopLevelScope.new
