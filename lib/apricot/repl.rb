@@ -131,9 +131,9 @@ module Apricot
             end
           end
 
-          forms.each do |node|
+          forms.each do |form|
             @compiled_code =
-              Apricot::Compiler.compile_form(node, "(eval)", @line)
+              Apricot::Compiler.compile_form(form, "(eval)", @line)
 
             value = Rubinius.run_script(@compiled_code)
             puts "=> #{value.apricot_inspect}"
