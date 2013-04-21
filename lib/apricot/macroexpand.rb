@@ -1,7 +1,13 @@
 module Apricot
   def self.macroexpand(form)
     ex = macroexpand_1(form)
-    ex.equal?(form) ? ex : macroexpand(ex)
+
+    until ex.equal?(form)
+      form = ex
+      ex = macroexpand_1(form)
+    end
+
+    ex
   end
 
   def self.macroexpand_1(form)
