@@ -206,7 +206,6 @@ module Apricot
         end
 
       when Rational
-        # Same idea as used above for Regexp.
         once(g) do
           g.push_self
           g.push form.numerator
