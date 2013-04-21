@@ -1,4 +1,4 @@
-(require "cinch")
+(require-ruby "cinch")
 
 (doto (Cinch::Bot.)
   (.configure | #(doto %

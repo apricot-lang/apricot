@@ -1,7 +1,4 @@
-; An example IRC bot. This does not reflect our vision for Apricot, just what
-; features we currently have working.
-
-(require "socket")
+(require-ruby "socket")
 
 (defn send [io & parts]
   (let [msg (apply str parts)]
