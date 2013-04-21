@@ -8,12 +8,15 @@ module Apricot
   # (. receiver (method args* | block))
   # (. receiver (method args* & rest | block))
   SpecialForm.define(:'.') do |g, args|
-    g.compile_error "Too few arguments to send expression, expecting (. receiver method ...)" if args.length < 2
+    g.compile_error "Too few arguments to send expression, expecting (. receiver method ...)" if args.count < 2
+
+    # TODO: Don't convert to an array, just deal with the List.
+    args = args.to_a
 
     receiver, method_or_list = args.shift(2)
 
     # Handle the (. receiver (method args*)) form
-    if method_or_list.is_a? AST::List
+    if method_or_list.is_a? List
       method = method_or_list.elements.shift
 
       g.compile_error "Invalid send expression, expecting (. receiver (method ...))" unless args.empty?
@@ -23,40 +26,40 @@ module Apricot
       method = method_or_list
     end
 
-    g.compile_error "Method in send expression must be an identifier" unless method.is_a? AST::Identifier
+    g.compile_error "Method in send expression must be an identifier" unless method.is_a? Identifier
 
     block_arg = nil
     splat_arg = nil
 
-    if args[-2].is_a?(AST::Identifier) && args[-2].name == :|
+    if args[-2].is_a?(Identifier) && args[-2].name == :|
       block_arg = args.last
       args.pop(2)
     end
 
-    if args[-2].is_a?(AST::Identifier) && args[-2].name == :&
+    if args[-2].is_a?(Identifier) && args[-2].name == :&
       splat_arg = args.last
       args.pop(2)
     end
 
     args.each do |arg|
-      next unless arg.is_a?(AST::Identifier)
+      next unless arg.is_a?(Identifier)
       g.compile_error "Incorrect use of & in send expression" if arg.name == :&
       g.compile_error "Incorrect use of | in send expression" if arg.name == :|
     end
 
-    receiver.bytecode(g)
+    Compiler.bytecode(g ,receiver)
 
     if block_arg || splat_arg
-      args.each {|a| a.bytecode(g) }
+      args.each {|a| Compiler.bytecode(g, a) }
 
       if splat_arg
-        splat_arg.bytecode(g)
-        g.cast_array unless splat_arg.is_a?(AST::ArrayLiteral)
+        Compiler.bytecode(g, splat_arg)
+        g.cast_array unless splat_arg.is_a?(Array)
       end
 
       if block_arg
         nil_block = g.new_label
-        block_arg.bytecode(g)
+        Compiler.bytecode(g, block_arg)
         g.dup
         g.is_nil
         g.git nil_block
@@ -88,7 +91,7 @@ module Apricot
       # fast path
       g.send :allocate, 0, true
       g.dup
-      args.each {|a| a.bytecode(g) }
+      args.each {|a| Compiler.bytecode(g, a) }
       g.send :initialize, args.length, true
       g.pop
 
@@ -96,13 +99,13 @@ module Apricot
 
       # slow path
       slow.set!
-      args.each {|a| a.bytecode(g) }
+      args.each {|a| Compiler.bytecode(g, a) }
       g.send :new, args.length
 
       done.set!
 
     else
-      args.each {|a| a.bytecode(g) }
+      args.each {|a| Compiler.bytecode(g, a) }
       g.send method.name, args.length
     end
   end
