@@ -16,7 +16,7 @@ module Apricot
   end)
   Core.get_var(:ns).apricot_meta = {:macro => true}
 
-  #Apricot.require "core"
+  Apricot.require "core"
 
 #  ::User = Namespace.new
   Apricot.current_namespace = Core
