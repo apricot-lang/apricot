@@ -46,12 +46,12 @@ module Apricot
 
     # Is the identifier a fn on its namespace?
     def fn?
-      @ns.is_a?(Namespace) && @ns.fns.include?(@name)
+      ns.is_a?(Namespace) && ns.fns.include?(@name)
     end
 
     # is the identifier a method on its module?
     def method?
-      @ns.respond_to?(@name)
+      !ns.is_a?(Namespace) && ns.respond_to?(@name)
     end
 
     def ns
