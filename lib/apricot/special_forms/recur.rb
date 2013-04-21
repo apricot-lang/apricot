@@ -9,11 +9,6 @@ module Apricot
     g.compile_error "No recursion target found for recur" unless target
     vars = target.variables.values
 
-    # If there is a block arg, ignore it.
-    if target.is_a?(AST::OverloadScope) && target.block_arg
-      vars.pop
-    end
-
     g.compile_error "Arity of recur does not match enclosing loop or fn" unless vars.length == args.count
 
     args.each {|arg| Compiler.bytecode(g, arg) }
