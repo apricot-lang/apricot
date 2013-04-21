@@ -32,6 +32,16 @@ module Apricot
       false
     end
 
+    def last
+      s = self
+
+      while s.next
+        s = s.next
+      end
+
+      s.first
+    end
+
     def to_s
       str = '('
       each {|x| str << x.apricot_inspect << ' ' }
