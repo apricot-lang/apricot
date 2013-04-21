@@ -14,9 +14,9 @@ module Apricot
       vars.pop
     end
 
-    g.compile_error "Arity of recur does not match enclosing loop or fn" unless vars.length == args.length
+    g.compile_error "Arity of recur does not match enclosing loop or fn" unless vars.length == args.count
 
-    args.each {|arg| arg.bytecode(g) }
+    args.each {|arg| Compiler.bytecode(g, arg) }
 
     vars.reverse_each do |var|
       g.set_local var
