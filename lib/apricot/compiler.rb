@@ -100,26 +100,25 @@ module Apricot
           callee, args = form.first, form.rest
 
           # Handle special forms such as def, let, fn, quote, etc
-          if callee.is_a?(Identifier) && special = SpecialForm[callee.name]
-            special.bytecode(g, args)
-            return
-          end
-
-          if macroexpand
-            form = Apricot.macroexpand(form)
-
-            if form.is_a?(Seq)
-              # Avoid recursing and macroexpanding again if expansion returns a list
-              bytecode(g, form, false, false)
-            else
-              bytecode(g, form)
+          if callee.is_a?(Identifier)
+            if special = SpecialForm[callee.name]
+              special.bytecode(g, args)
+              return
             end
 
-            return
-          end
+            if macroexpand
+              form = Apricot.macroexpand(form)
 
-          # Handle (foo ...) and (Foo/bar ...) calls
-          if callee.is_a?(Identifier)
+              if form.is_a?(Seq)
+                # Avoid recursing and macroexpanding again if expansion returns a list
+                bytecode(g, form, false, false)
+              else
+                bytecode(g, form)
+              end
+
+              return
+            end
+
             meta = callee.meta
 
             # Handle inlinable function calls
