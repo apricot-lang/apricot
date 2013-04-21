@@ -29,7 +29,7 @@ module Apricot
 
     g.compile_error "Bindings array for #{type} must contain an even number of forms" if bindings.length.odd?
 
-    scope = AST::LetScope.new(g.scope)
+    scope = LetScope.new(g.scope)
     g.scopes << scope
 
     bindings.each_slice(2) do |id, value|

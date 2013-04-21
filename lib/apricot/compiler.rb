@@ -7,7 +7,7 @@ module Apricot
       g.name = :__top_level__
       g.file = file.to_sym
 
-      g.scopes << AST::TopLevelScope.new
+      g.scopes << TopLevelScope.new
 
       g.set_line(line)
 
@@ -79,8 +79,7 @@ module Apricot
           elsif form == SELF
             g.push_self
           elsif form.qualified?
-            # TODO: Stop using AST stuff.
-            AST::NamespaceReference.new(form.unqualified_name, form.ns).bytecode(g)
+            NamespaceReference.new(form.unqualified_name, form.ns).bytecode(g)
           else
             g.scope.find_var(form.name).bytecode(g)
           end

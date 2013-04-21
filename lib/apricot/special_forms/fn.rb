@@ -149,7 +149,7 @@ module Apricot
       fn.local_count = 0
       fn.local_names = []
 
-      fn_scope = AST::FnScope.new(g.scope, fn_name)
+      fn_scope = FnScope.new(g.scope, fn_name)
 
       # Generate the code that selects and jumps to the correct overload based
       # on the number of arguments passed.
@@ -207,7 +207,7 @@ module Apricot
 
       overloads.each_with_index do |overload, i|
         arglist, body = overload.arglist, overload.body
-        overload_scope = AST::OverloadScope.new(fn_scope)
+        overload_scope = OverloadScope.new(fn_scope)
         fn.scopes << overload_scope
 
         # Check if there are any duplicate names in the argument list.

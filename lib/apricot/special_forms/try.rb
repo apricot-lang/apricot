@@ -83,7 +83,7 @@ module Apricot
       body.set!
 
       # Create a new scope to hold the exception
-      scope = AST::LetScope.new(g.scope)
+      scope = LetScope.new(g.scope)
       g.scopes << scope
 
       # Exception is still on the stack
