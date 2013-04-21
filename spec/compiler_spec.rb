@@ -214,7 +214,7 @@ describe 'Apricot' do
         ([x y | f] (f x y))
         ([x y & more | f]
          (if (seq more)
-           (recur (f x y) (first more) (next more))
+           (recur (f x y) (first more) (next more) f)
            (f x y))))
     CODE
 
