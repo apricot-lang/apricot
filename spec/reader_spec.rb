@@ -46,6 +46,10 @@ describe Apricot::Reader do
     read_one('#|foo"bar|').should == Identifier.intern(:'foo"bar')
   end
 
+  it 'does not read incomplete pipe identifiers' do
+    expect_syntax_error '#|foo'
+  end
+
   it 'reads constants' do
     read_one('Example', Identifier)
     @first.constant?.should be_true
@@ -84,6 +88,8 @@ describe Apricot::Reader do
 
   it 'reads fixnums' do
     read_one('123').should == 123
+    read_one('-123').should == -123
+    read_one('+123').should == 123
   end
 
   it 'reads bignums' do
@@ -142,6 +148,18 @@ describe Apricot::Reader do
     read_one('"\xAZ\082"').should == "\x0AZ\00082"
   end
 
+  it 'reads #q quotation strings' do
+    read_one('#q{foo}').should == 'foo'
+    read_one('#q{\n}').should == '\n'
+    read_one('#Q{\n}').should == "\n"
+    read_one('#q{\\\\}').should == '\\'
+    read_one('#q{\\}}').should == '}'
+  end
+
+  it 'does not read incomplete #q quotation strings' do
+    expect_syntax_error '#q{'
+  end
+
   it 'reads regexes' do
     read_one('#r!!').should == //
     read_one('#r!egex!').should == /egex/
@@ -165,6 +183,10 @@ describe Apricot::Reader do
 
   it 'does not read regexes with unknown trailing options' do
     expect_syntax_error '#r/foo/asdf'
+  end
+
+  it 'does not read incomplete regexes' do
+    expect_syntax_error '#r/foo'
   end
 
   it 'reads symbols' do
@@ -223,6 +245,13 @@ describe Apricot::Reader do
     read_one('#{1 two}').should == Set[1, Identifier.intern(:two)]
   end
 
+  it 'does not read incomplete structures' do
+    expect_syntax_error '('
+    expect_syntax_error '['
+    expect_syntax_error '{'
+    expect_syntax_error '#{'
+  end
+
   it 'reads multiple forms' do
     read('foo bar').length.should == 2
     @forms[0].should == Identifier.intern(:foo)
@@ -234,6 +263,9 @@ describe Apricot::Reader do
   end
 
   it 'reads syntax quoted forms' do
+    read_one('`1').should == 1
+    read_one('`~1').should == 1
+
     begin
       old_gensym = Apricot.instance_variable_get :@gensym
       Apricot.instance_variable_set :@gensym, 41
@@ -252,6 +284,22 @@ describe Apricot::Reader do
     ensure
       Apricot.instance_variable_set :@gensym, old_gensym
     end
+
+    read_one('`[~a]').should ==
+      List[Identifier.intern(:apply),
+        Identifier.intern(:array),
+        List[Identifier.intern(:concat),
+          List[Identifier.intern(:list),
+            Identifier.intern(:a)]]]
+  end
+
+  it 'does not read invalid unquote forms' do
+    expect_syntax_error '`~@a'
+  end
+
+  it 'does not read incomplete unquote forms' do
+    expect_syntax_error '~'
+    expect_syntax_error '~@'
   end
 
   it 'reads #() shorthand' do
@@ -272,5 +320,9 @@ describe Apricot::Reader do
     expect_syntax_error("#(%x)")
     expect_syntax_error("#(%1.1)")
     expect_syntax_error("#(%1asdf)")
+  end
+
+  it 'does not read invalid reader macros' do
+    expect_syntax_error('#x')
   end
 end
