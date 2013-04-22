@@ -35,7 +35,6 @@ evals.each do |type, *args|
   when :stdin
     Apricot::Compiler.eval(STDIN.read, "(stdin)", 1)
   when :file
-    # The code is executed as it compiles.
-    Apricot::Compiler.compile(args.first)
+    Apricot::CodeLoader.require(File.expand_path(args.first))
   end
 end
