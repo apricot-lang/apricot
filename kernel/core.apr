@@ -588,7 +588,14 @@
 (defn compare
   "Return a negative number, zero, or a positive number when x is logically
   'less than', 'equal to', or 'greater than' y, respectively."
-  [x y] (. x <=> y))
+  [x y]
+  (if (nil? x)
+    (if (nil? y)
+      0
+      -1)
+    (if (nil? y)
+      1
+      (. x <=> y))))
 
 (defn >
   "Return true if nums are in monotonically decreasing order, otherwise false."
