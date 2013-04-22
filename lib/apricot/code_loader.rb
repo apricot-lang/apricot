@@ -34,8 +34,12 @@ module Apricot
     def load_file(path)
       compiled_name = Rubinius::Compiler.compiled_name(path)
 
-      # Try to load the cached compiled bytecode.
-      if File.file? compiled_name
+      stat = File::Stat.stat path
+      compiled_stat = File::Stat.stat compiled_name
+
+      # Try to load the cached bytecode if it exists and is newer than the
+      # source file.
+      if stat && compiled_stat && stat.mtime < compiled_stat.mtime
         begin
           code = Rubinius.invoke_primitive :compiledfile_load, compiled_name,
             Rubinius::Signature, Rubinius::RUBY_LIB_VERSION
