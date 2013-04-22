@@ -37,6 +37,41 @@ describe 'Apricot' do
     bad_apr '(. "" split &)'
   end
 
+  it 'compiles shorthand send forms' do
+    apr('(.class 1)').should == Fixnum
+    apr('(.append "foo" "bar")').should == 'foobar'
+  end
+
+  it 'compiles shorthand send forms with block args' do
+    apr('(.map [1] | :to_s)').should == ['1']
+    apr('(.map [1] | #(.to_s %))').should == ['1']
+  end
+
+  it 'compiles shorthand send forms with splat args' do
+    apr('(.split "foo bar baz" & [" " 2])').should == ['foo', 'bar baz']
+  end
+
+  it 'macroexpands shorthand send forms' do
+    form = apr "'(.meth recv arg1 arg2)"
+    ex = Apricot.macroexpand(form)
+    ex.should == List[*[:'.', :recv, :meth, :arg1, :arg2].map {|x| Identifier.intern(x) }]
+  end
+
+  it 'compiles shorthand new send forms' do
+    apr('(Array. 3 1)').should == [1, 1, 1]
+  end
+
+  it 'compiles shorthand new send forms with block args' do
+    apr('(Array. 3 | :to_s)').should == ['0', '1', '2']
+    apr('(Array. 3 | #(.to_s %))').should == ['0', '1', '2']
+  end
+
+  it 'macroexpands shorthand new send forms' do
+    form = apr "'(Klass. arg1 arg2)"
+    ex = Apricot.macroexpand(form)
+    ex.should == List[*[:'.', :Klass, :new, :arg1, :arg2].map {|x| Identifier.intern(x) }]
+  end
+
   it 'compiles if forms' do
     apr('(if true 1 2)').should == 1
     apr('(if false 1 2)').should == 2

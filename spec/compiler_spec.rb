@@ -72,50 +72,6 @@ describe 'Apricot' do
     apr('(:c #{:a :b})').should == nil
   end
 
-  it 'compiles shorthand send forms' do
-    apr('(.class 1)').should == Fixnum
-    apr('(.append "foo" "bar")').should == "foobar"
-  end
-
-  it 'compiles shorthand send forms with block args' do
-    apr('(.map [1 2 3] | :to_s)').should == ['1', '2', '3']
-    apr('(.map [1 2 3] | #(. % + 1))').should == [2, 3, 4]
-  end
-
-  it 'macroexpands shorthand send forms' do
-    form = apr "'(.meth recv arg1 arg2)"
-    ex = Apricot.macroexpand(form)
-
-    dot  = Identifier.intern(:'.')
-    recv = Identifier.intern(:recv)
-    meth = Identifier.intern(:meth)
-    arg1 = Identifier.intern(:arg1)
-    arg2 = Identifier.intern(:arg2)
-    ex.should == List[dot, recv, meth, arg1, arg2]
-  end
-
-  it 'compiles shorthand new forms' do
-    apr('(Range. 1 10)').should == (1..10)
-    apr('(Array. 2 5)').should == [5, 5]
-  end
-
-  it 'compiles shorthand new forms with block args' do
-    apr('(Array. 3 | :to_s)').should == ["0", "1", "2"]
-    apr('(Array. 5 | #(* % %))').should == [0, 1, 4, 9, 16]
-  end
-
-  it 'macroexpands shorthand new forms' do
-    form = apr "'(Klass. arg1 arg2)"
-    ex = Apricot.macroexpand(form)
-
-    dot   = Identifier.intern(:'.')
-    klass = Identifier.intern(:Klass)
-    new   = Identifier.intern(:new)
-    arg1  = Identifier.intern(:arg1)
-    arg2  = Identifier.intern(:arg2)
-    ex.should == List[dot, klass, new, arg1, arg2]
-  end
-
   it 'compiles constant defs' do
     expect { Foo }.to raise_error(NameError)
     apr '(def Foo 1)'
