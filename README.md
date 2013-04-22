@@ -6,6 +6,7 @@ Try to contain your excitement, please.
 
 
 ## Install
+
 First of all, you're going to need Rubinius. I recommend installing the latest
 Rubinius with Ruby 1.9-mode default from [RVM](https://rvm.io/).
 
@@ -19,6 +20,7 @@ To use Apricot you must be running Rubinius in Ruby 1.9 mode.
 
 
 ## The REPL
+
 Apricot provides an awesome read-eval-print-loop with line editing, history,
 tab-completion, and some interesting commands like `!bytecode`. To enter the
 REPL just run `apricot`.
@@ -51,6 +53,7 @@ comp
 
 
 ## Hello World
+
 So you want to put your program in a file and not type it into the REPL? Sure:
 
 ``` sh
@@ -62,6 +65,7 @@ Hello, world!
 
 
 ## Development
+
 If you want to hack on Apricot, first install Rubinius as explained above.
 When you `cd` to the Apricot git repo, RVM should automatically switch to
 Rubinius thanks to the `.ruby-version` file. Now install and run Bundler:
@@ -77,6 +81,7 @@ session with Apricot loaded.
 
 
 ## Contact / Bug Reports
+
 If you have any questions don't hesitate to email us or visit us in `#apricot`
 on [freenode](http://freenode.net/) (we are `curtism` and `tsion`). And we'd
 really appreciate it if you opened bug reports on the GitHub [issue
