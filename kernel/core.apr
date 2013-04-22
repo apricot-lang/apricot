@@ -25,8 +25,8 @@
                      {})
           arglists (if (.is_a? (.first body) Array)
                      (list (.first body))
-                     (.to_list
-                       (.map body | #(if (.is_a? % Apricot::List)
+                     (.to_seq
+                       (.map body | #(if (.is_a? % Apricot::Seq)
                                        (.first %)))))
           f (Apricot/gensym)]
       (list 'let [f (concat (list 'fn name) body)]

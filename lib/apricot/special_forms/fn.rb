@@ -76,11 +76,11 @@ module Apricot
       overloads = []
 
       case args.first
-      when List
+      when Seq
         # This is the multi-arity form (fn name? ([args*] body*) ... ([args*] body*))
         args.each do |overload|
           # Each overload is of the form ([args*] body*)
-          g.compile_error "Expected an arity overload (a list)" unless overload.is_a? List
+          g.compile_error "Expected an arity overload (a list)" unless overload.is_a? Seq
           arglist, body = overload.first, overload.rest
           g.compile_error "Argument list in overload must be an array literal" unless arglist.is_a? Array
           arglist = ArgList.new(arglist, g)

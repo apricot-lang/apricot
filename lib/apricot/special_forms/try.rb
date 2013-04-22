@@ -8,9 +8,9 @@ module Apricot
     args.each do |arg|
       g.compile_error "Unexpected form after ensure clause" if ensure_clause
 
-      if arg.is_a?(List) && arg.first == Identifier.intern(:rescue)
+      if arg.is_a?(Seq) && arg.first == Identifier.intern(:rescue)
         rescue_clauses << arg.rest
-      elsif arg.is_a?(List) && arg.first == Identifier.intern(:ensure)
+      elsif arg.is_a?(Seq) && arg.first == Identifier.intern(:ensure)
         ensure_clause = arg.rest
       else
         g.compile_error "Unexpected form after rescue clause" unless rescue_clauses.empty?

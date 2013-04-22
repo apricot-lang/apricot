@@ -169,7 +169,7 @@ module Apricot
 
     def syntax_quote(form, gensyms)
       case form
-      when List
+      when Seq
         if is_unquote? form
           form.rest.first
         elsif is_unquote_splicing? form
@@ -532,11 +532,11 @@ module Apricot
     end
 
     def is_unquote?(form)
-      form.is_a?(List) && form.first == UNQUOTE
+      form.is_a?(Seq) && form.first == UNQUOTE
     end
 
     def is_unquote_splicing?(form)
-      form.is_a?(List) && form.first == UNQUOTE_SPLICING
+      form.is_a?(Seq) && form.first == UNQUOTE_SPLICING
     end
 
     def hashify(array)
