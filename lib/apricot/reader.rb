@@ -180,7 +180,7 @@ module Apricot
       when Array
         syntax_quote_coll(:array, form, gensyms)
       when Set
-        syntax_quote_coll(:set, form, gensyms)
+        syntax_quote_coll(:'hash-set', form, gensyms)
       when Hash
         syntax_quote_coll(:hash, form, gensyms)
       when Identifier
