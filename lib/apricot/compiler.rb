@@ -3,7 +3,7 @@ module Apricot
     module_function
 
     def generate(forms, file = "(none)", line = 1, evaluate = false)
-      g = Apricot::Generator.new
+      g = Generator.new
       g.name = :__apricot__
       g.file = file.to_sym
 
@@ -38,7 +38,7 @@ module Apricot
     end
 
     def compile(file)
-      generate(Apricot::Reader.read_file(file), file, 1, true)
+      generate(Reader.read_file(file), file, 1, true)
     end
 
     def compile_form(form, file = "(eval)", line = 1)
@@ -50,7 +50,7 @@ module Apricot
     end
 
     def eval(code, file = "(eval)", line = 1)
-      forms = Apricot::Reader.read_string(code, file,line)
+      forms = Reader.read_string(code, file,line)
 
       forms[0..-2].each do |node|
         new_eval(node, file, line)

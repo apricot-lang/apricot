@@ -90,7 +90,7 @@ module Apricot
         # be parsed as keywords or numbers
         str = @name.to_s.gsub(/(\\.)|\|/) { $1 || '\|' }
         "#|#{str}|"
-      when /\A#{Apricot::Reader::IDENTIFIER}+\z/
+      when /\A#{Reader::IDENTIFIER}+\z/
         @name.to_s
       else
         str = @name.to_s.inspect[1..-2]

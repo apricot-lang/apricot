@@ -27,7 +27,7 @@ module Apricot
         g.compile_error "Unable to resolve name #{@name} in namespace #{@ns}"
       end
 
-      ns_id = Apricot::Identifier.intern(@ns.name)
+      ns_id = Identifier.intern(@ns.name)
       g.push_const ns_id.const_names.first
       ns_id.const_names.drop(1).each {|n| g.find_const(n) }
 

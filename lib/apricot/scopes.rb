@@ -113,7 +113,7 @@ module Apricot
 
     # Create a new local on the current level.
     def new_local(name)
-      name = name.name if name.is_a? Apricot::Identifier
+      name = name.name if name.is_a? Identifier
       @variables[name] = store_new_local(name)
     end
 
@@ -140,7 +140,7 @@ module Apricot
     # Create a new local on the current level, with storage on the nearest
     # enclosing real scope.
     def new_local(name)
-      name = name.name if name.is_a? Apricot::Identifier
+      name = name.name if name.is_a? Identifier
       @variables[name] = @parent.store_new_local(name)
     end
 
