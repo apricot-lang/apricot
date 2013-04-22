@@ -225,22 +225,22 @@ module Apricot
         next_optional = fn.new_label
 
         arglist.optional_args.each_with_index do |(name, value), i|
-        # Calculate the position of this optional arg, off the end of the
-        # required args
-        arg_index = arglist.num_required + i
+          # Calculate the position of this optional arg, off the end of the
+          # required args
+          arg_index = arglist.num_required + i
 
-        # Allocate a slot for this optional argument
-        overload_scope.new_local(name)
+          # Allocate a slot for this optional argument
+          overload_scope.new_local(name)
 
-        fn.passed_arg arg_index
-        fn.git next_optional
+          fn.passed_arg arg_index
+          fn.git next_optional
 
-        Compiler.bytecode(fn, value)
-        fn.set_local arg_index
-        fn.pop
+          Compiler.bytecode(fn, value)
+          fn.set_local arg_index
+          fn.pop
 
-        next_optional.set!
-        next_optional = fn.new_label
+          next_optional.set!
+          next_optional = fn.new_label
         end
 
         if arglist.rest_arg
