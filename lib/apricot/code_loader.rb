@@ -17,7 +17,7 @@ module Apricot
       full_path = find_source(path)
       raise LoadError, "no such file to load -- #{path}" unless full_path
 
-      Compiler.compile_and_eval_file(full_path)
+      load_file full_path
       true
     end
 
@@ -28,9 +28,19 @@ module Apricot
       if loaded? full_path
         false
       else
-        Compiler.compile_and_eval_file(full_path)
+        load_file full_path
         $LOADED_FEATURES << full_path
         true
+      end
+    end
+
+    def load_file(path)
+      compiled_name = Rubinius::Compiler.compiled_name(path)
+
+      if File.file? compiled_name
+        Rubinius::CodeLoader.load_compiled_file compiled_name
+      else
+        Compiler.compile_and_eval_file path
       end
     end
 

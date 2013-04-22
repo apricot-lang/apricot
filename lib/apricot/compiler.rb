@@ -38,7 +38,31 @@ module Apricot
     end
 
     def compile_and_eval_file(file)
-      generate(Reader.read_file(file), file, 1, true)
+      cc = generate(Reader.read_file(file), file, 1, true)
+
+      if Rubinius::CodeLoader.save_compiled?
+        compiled_name = Rubinius::Compiler.compiled_name(file)
+
+        dir = File.dirname(compiled_name)
+
+        unless File.directory?(dir)
+          parts = []
+
+          until dir == "/" or dir == "."
+            parts << dir
+            dir = File.dirname(dir)
+          end
+
+          parts.reverse_each do |d|
+            Dir.mkdir d unless File.directory?(d)
+          end
+        end
+
+        Rubinius::CompiledFile.dump cc, compiled_name,
+          Rubinius::Signature, Rubinius::RUBY_LIB_VERSION
+      end
+
+      cc
     end
 
     def compile_form(form, file = "(eval)", line = 1)
