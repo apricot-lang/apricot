@@ -34,11 +34,23 @@ module Apricot
     def load_file(path)
       compiled_name = Rubinius::Compiler.compiled_name(path)
 
+      # Try to load the cached compiled bytecode.
       if File.file? compiled_name
-        Rubinius::CodeLoader.load_compiled_file compiled_name
-      else
-        Compiler.compile_and_eval_file path
+        begin
+          code = Rubinius.invoke_primitive :compiledfile_load, compiled_name,
+            Rubinius::Signature, Rubinius::RUBY_LIB_VERSION
+          usable = true
+        rescue Rubinius::Internal
+          usable = false
+        end
+
+        if usable
+          Rubinius.run_script code
+          return
+        end
       end
+
+      Compiler.compile_and_eval_file path
     end
 
     def find_source(path)
