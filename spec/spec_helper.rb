@@ -33,3 +33,14 @@ SimpleCov.start unless ENV['TRAVIS']
 
 require 'apricot'
 include Apricot
+
+# Common spec helper functions
+module CompilerSpec
+  def apr(code)
+    Apricot::Compiler.eval code
+  end
+
+  def bad_apr(code)
+    expect { apr(code) }.to raise_error(CompileError)
+  end
+end
