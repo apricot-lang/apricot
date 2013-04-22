@@ -182,7 +182,7 @@ module Apricot
       when Set
         syntax_quote_coll(:'hash-set', form, gensyms)
       when Hash
-        syntax_quote_coll(:hash, form, gensyms)
+        syntax_quote_coll(:hash, form.to_a.flatten(1), gensyms)
       when Identifier
         name = form.name
 
