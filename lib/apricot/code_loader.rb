@@ -8,9 +8,6 @@ module Apricot
   end
 
   module CodeLoader
-    LOADED_FILES = Set.new
-    LOCK = Object.new
-
     module_function
 
     def load(path)
