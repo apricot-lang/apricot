@@ -83,14 +83,15 @@ describe 'Apricot' do
   end
 
   it 'compiles arity-overloaded fn forms' do
-    apr('((fn ([] 0)))') == 0
-    apr('((fn ([x] x)) 42)') == 42
-    apr('((fn ([[x 42]] x)))') == 42
-    apr('((fn ([& rest] rest)) 1 2 3)') == [1, 2, 3]
-    apr('((fn ([] 0) ([x] x)))') == 0
-    apr('((fn ([] 0) ([x] x)) 42)') == 42
-    apr('((fn ([x] x) ([x y] y)) 42)') == 42
-    apr('((fn ([x] x) ([x y] y)) 42 13)') == 13
+    apr('((fn ([] 0)))').should == 0
+    apr('((fn ([x] x)) 42)').should == 42
+    apr('((fn ([[x 42]] x)))').should == 42
+    apr('((fn ([& rest] rest)) 1 2 3)').should == [1, 2, 3]
+    apr('((fn ([] 0) ([x] x)))').should == 0
+    apr('((fn ([] 0) ([x] x)) 42)').should == 42
+    apr('((fn ([x] x) ([x y] y)) 42)').should == 42
+    apr('((fn ([x] x) ([x y] y)) 42 13)').should == 13
+    apr('((fn ([x] x) ([x y & z] z)) 1 2 3 4)').should == [3, 4]
 
     add_fn = apr <<-CODE
       (fn
@@ -145,6 +146,7 @@ describe 'Apricot' do
     bad_apr '(fn ([x & rest] 1) ([x y] 2))'
     bad_apr '(fn ([x & rest] 1) ([x [o 1]] 2))'
     bad_apr '(fn ([x [o 1] & rest] 1) ([x] 2))'
+    bad_apr '(fn ([[x 1] [y 2]] 3) ([x & y] 4))'
   end
 
   it 'compiles fn forms with self-reference' do
