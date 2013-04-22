@@ -23,37 +23,6 @@ module Apricot
       List.new(x, self)
     end
 
-    def each
-      list = self
-      until list.empty?
-        yield list.head
-        list = list.tail
-      end
-    end
-
-    def ==(other)
-      return true if self.equal? other
-      return false unless other.is_a? List
-
-      list = self
-
-      until list.empty?
-        return false if other.empty? || list.head != other.head
-
-        list = list.tail
-        other = other.tail
-      end
-
-      other.empty?
-    end
-
-    alias_method :eql?, :==
-
-    def hash
-      hashes = map {|x| x.hash }
-      hashes.reduce(hashes.size) {|acc,hash| acc ^ hash }
-    end
-
     def empty?
       !@tail
     end

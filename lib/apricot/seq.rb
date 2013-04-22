@@ -8,6 +8,7 @@ module Apricot
   #   if there are no more items.
   module Seq
     include Enumerable
+    include Comparable
 
     def rest
       self.next || List::EMPTY_LIST
@@ -40,6 +41,33 @@ module Apricot
       end
 
       s.first
+    end
+
+    def <=>(other)
+      return unless other.is_a?(Seq) || other.nil?
+      s, o = self, other
+
+      while s && o
+        comp = s.first <=> o.first
+        return comp unless comp == 0
+        s = s.next
+        o = o.next
+      end
+
+      if s
+        1
+      elsif o
+        -1
+      else
+        0
+      end
+    end
+
+    alias_method :eql?, :==
+
+    def hash
+      hashes = map {|x| x.hash }
+      hashes.reduce(hashes.size) {|acc,hash| acc ^ hash }
     end
 
     def to_s
