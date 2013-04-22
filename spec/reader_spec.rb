@@ -291,6 +291,22 @@ describe Apricot::Reader do
         List[Identifier.intern(:concat),
           List[Identifier.intern(:list),
             Identifier.intern(:a)]]]
+
+    read_one('`{:a ~b}').should ==
+      List[Identifier.intern(:apply),
+        Identifier.intern(:hash),
+        List[Identifier.intern(:concat),
+          List[Identifier.intern(:list),
+            :a],
+            List[Identifier.intern(:list),
+              Identifier.intern(:b)]]]
+
+    read_one('`#{~a}').should ==
+      List[Identifier.intern(:apply),
+        Identifier.intern(:'hash-set'),
+        List[Identifier.intern(:concat),
+          List[Identifier.intern(:list),
+            Identifier.intern(:a)]]]
   end
 
   it 'does not read invalid unquote forms' do
