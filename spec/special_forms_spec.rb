@@ -29,12 +29,12 @@ describe 'Apricot' do
   end
 
   it 'does not compile invalid send forms' do
-    bad_apr('(.)')
-    bad_apr('(. 1)')
-    bad_apr('(. 1 ())')
-    bad_apr('(. 1 1)')
-    bad_apr('(. [1] map |)')
-    bad_apr('(. "" split &)')
+    bad_apr '(.)'
+    bad_apr '(. 1)'
+    bad_apr '(. 1 ())'
+    bad_apr '(. 1 1)'
+    bad_apr '(. [1] map |)'
+    bad_apr '(. "" split &)'
   end
 
   it 'compiles if forms' do
@@ -45,9 +45,9 @@ describe 'Apricot' do
   end
 
   it 'does not compile invalid if forms' do
-    bad_apr('(if)')
-    bad_apr('(if true)')
-    bad_apr('(if true 1 2 3)')
+    bad_apr '(if)'
+    bad_apr '(if true)'
+    bad_apr '(if true 1 2 3)'
   end
 
   it 'compiles let forms' do
@@ -65,10 +65,10 @@ describe 'Apricot' do
   end
 
   it 'does not compile invalid let forms' do
-    bad_apr('(let)')
-    bad_apr('(let 1)')
-    bad_apr('(let [a 1 b])')
-    bad_apr('(let [1 2])')
+    bad_apr '(let)'
+    bad_apr '(let 1)'
+    bad_apr '(let [a 1 b])'
+    bad_apr '(let [1 2])'
   end
 
   it 'compiles loop forms' do
@@ -78,10 +78,10 @@ describe 'Apricot' do
   end
 
   it 'does not compile invalid loop forms' do
-    bad_apr('(loop)')
-    bad_apr('(loop 1)')
-    bad_apr('(loop [a 1 b])')
-    bad_apr('(loop [1 2])')
+    bad_apr '(loop)'
+    bad_apr '(loop 1)'
+    bad_apr '(loop [a 1 b])'
+    bad_apr '(loop [1 2])'
   end
 
   it 'compiles quote forms' do
@@ -89,16 +89,16 @@ describe 'Apricot' do
   end
 
   it 'does not compile invalid quote forms' do
-    bad_apr('(quote)')
-    bad_apr('(quote 1 2)')
+    bad_apr '(quote)'
+    bad_apr '(quote 1 2)'
   end
 
   it 'does not compile invalid recur forms' do
-    bad_apr('(recur)')
-    bad_apr('(loop [] (recur 1))')
-    bad_apr('(fn [[x 1]] (recur))')
-    bad_apr('(fn [x & y] (recur 1))')
-    bad_apr('(fn [x & y] (recur 1 2 3))')
+    bad_apr '(recur)'
+    bad_apr '(loop [] (recur 1))'
+    bad_apr '(fn [[x 1]] (recur))'
+    bad_apr '(fn [x & y] (recur 1))'
+    bad_apr '(fn [x & y] (recur 1 2 3))'
   end
 
   it 'compiles try forms' do
@@ -109,8 +109,8 @@ describe 'Apricot' do
     apr('(try (Kernel/raise "") 1 (rescue [e] 2))').should == 2
     apr('(try (Kernel/raise ArgumentError) 1 (rescue [e TypeError] 2) (rescue [e ArgumentError] 3) (rescue e 4))').should == 3
     apr('(try (Kernel/raise "") 1 (rescue e e))').should be_a(RuntimeError)
-    expect { apr('(try (Kernel/raise ""))') }.to raise_error(RuntimeError)
-    expect { apr('(try (Kernel/raise ArgumentError) 1 (rescue [e TypeError] 2))') }.to raise_error(ArgumentError)
+    expect { apr '(try (Kernel/raise ""))' }.to raise_error(RuntimeError)
+    expect { apr '(try (Kernel/raise ArgumentError) 1 (rescue [e TypeError] 2))' }.to raise_error(ArgumentError)
   end
 
   it 'compiles try forms with ensure clauses' do
@@ -141,9 +141,9 @@ describe 'Apricot' do
   end
 
   it 'does not compile invalid try forms' do
-    bad_apr('(try (ensure) 1)')
-    bad_apr('(try (rescue e e) 1)')
-    bad_apr('(try (rescue 1 2))')
-    bad_apr('(try (rescue [1] 2))')
+    bad_apr '(try (ensure) 1)'
+    bad_apr '(try (rescue e e) 1)'
+    bad_apr '(try (rescue 1 2))'
+    bad_apr '(try (rescue [1] 2))'
   end
 end
