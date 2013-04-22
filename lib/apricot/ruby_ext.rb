@@ -71,6 +71,10 @@ class Array
     def count
       @array.length - @offset
     end
+
+    def to_a
+      @array[@offset..-1]
+    end
   end
 end
 
