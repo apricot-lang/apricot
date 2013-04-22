@@ -17,7 +17,7 @@ module Apricot
       full_path = find_source(path)
       raise LoadError, "no such file to load -- #{path}" unless full_path
 
-      Compiler.compile(full_path)
+      Compiler.compile_and_eval_file(full_path)
       true
     end
 
@@ -28,7 +28,7 @@ module Apricot
       if loaded? full_path
         false
       else
-        Compiler.compile(full_path)
+        Compiler.compile_and_eval_file(full_path)
         $LOADED_FEATURES << full_path
         true
       end

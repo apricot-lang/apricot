@@ -37,7 +37,7 @@ module Apricot
       cc
     end
 
-    def compile(file)
+    def compile_and_eval_file(file)
       generate(Reader.read_file(file), file, 1, true)
     end
 
