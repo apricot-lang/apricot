@@ -227,7 +227,7 @@ module Apricot
       skip_whitespace
 
       unless @char
-        syntax = (unquote == UNQUOTE ? '~' : '~@')
+        syntax = (unquote_type == UNQUOTE ? '~' : '~@')
         incomplete_error "Unexpected end of program after #{syntax}, expected a form"
       end
 
