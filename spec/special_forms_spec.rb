@@ -1,6 +1,25 @@
 describe 'Apricot' do
   include CompilerSpec
 
+  it 'compiles def forms' do
+    apr('(def A 1)')
+    A.should == 1
+
+    B = Module.new
+    apr('(def B::C 1)')
+    B::C.should == 1
+
+    apr('(def a 1)')
+    Apricot.current_namespace.get_var(:a).should == 1
+  end
+
+  it 'does not compile invalid def forms' do
+    bad_apr '(def)'
+    bad_apr '(def A 1 2)'
+    bad_apr '(def 1 2)'
+    bad_apr '(def self 1)'
+  end
+
   it 'compiles do forms' do
     apr('(do)').should == nil
     apr('(do 1 2 3)').should == 3
