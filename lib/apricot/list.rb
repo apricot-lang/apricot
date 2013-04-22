@@ -15,16 +15,12 @@ module Apricot
 
     def initialize(head, tail)
       @head = head
-      @tail = tail
+      @tail = tail || EMPTY_LIST
       @count = tail ? tail.count + 1 : 1
     end
 
     def cons(x)
       List.new(x, self)
-    end
-
-    def empty?
-      !@tail
     end
 
     def initialize_copy(other)
@@ -39,7 +35,7 @@ module Apricot
     end
 
     def first
-      empty? ? nil : @head
+      @head
     end
 
     def next
@@ -47,7 +43,7 @@ module Apricot
     end
 
     def to_seq
-      empty? ? nil : self
+      self
     end
 
     def inspect
@@ -64,6 +60,21 @@ module Apricot
     class EmptyList < List
       def initialize
         @count = 0
+      end
+
+      def each
+      end
+
+      def empty?
+        true
+      end
+
+      def first
+        nil
+      end
+
+      def next
+        nil
       end
     end
 
