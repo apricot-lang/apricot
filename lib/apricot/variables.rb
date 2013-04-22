@@ -17,9 +17,9 @@ module Apricot
   end
 
   class NamespaceReference
-    def initialize(name, ns = nil)
+    def initialize(name, ns)
       @name = name
-      @ns = ns || Apricot.current_namespace
+      @ns = ns
     end
 
     def bytecode(g)
