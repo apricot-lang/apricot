@@ -38,8 +38,8 @@ module Apricot
     end
 
     # Handle defined macros
-    if callee.ns.is_a?(Namespace) && callee.ns.vars.include?(callee.unqualified_name)
-      potential_macro = callee.ns.get_var(callee.unqualified_name)
+    if callee.qualifier.is_a?(Namespace) && callee.qualifier.vars.include?(callee.unqualified_name)
+      potential_macro = callee.qualifier.get_var(callee.unqualified_name)
       meta = potential_macro.apricot_meta
 
       if meta && meta[:macro]

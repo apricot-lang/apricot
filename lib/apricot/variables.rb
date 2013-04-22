@@ -16,40 +16,50 @@ module Apricot
     end
   end
 
-  class NamespaceReference
-    def initialize(name, ns)
+  class QualifiedReference
+    def initialize(name, qualifier)
+      unless qualifier.is_a? Module # Namespaces are Modules as well.
+        raise ArgumentError, "qualifier for #{self.class} must be a Namespace or Module"
+      end
+
       @name = name
-      @ns = ns
+      @qualifier = qualifier
+      @on_namespace = qualifier.is_a? Namespace
     end
 
     def bytecode(g)
-      if @ns.is_a?(Namespace) && !@ns.has_var?(@name)
-        g.compile_error "Unable to resolve name #{@name} in namespace #{@ns}"
+      if @qualifier.is_a?(Namespace) && !@qualifier.has_var?(@name)
+        g.compile_error "Unable to resolve name #{@name} in namespace #{@qualifier}"
       end
 
-      ns_id = Identifier.intern(@ns.name)
+      ns_id = Identifier.intern(@qualifier.name)
       g.push_const ns_id.const_names.first
       ns_id.const_names.drop(1).each {|n| g.find_const(n) }
 
       g.push_literal @name
 
-      if @ns.is_a? Namespace
+      if on_namespace?
         g.send :get_var, 1
-      else # @ns is a regular Ruby module
+      else # @qualifier is a regular Ruby module
         g.send :method, 1
       end
     end
 
+    def on_namespace?
+      @on_namespace
+    end
+
     def meta
-      @ns.is_a?(Namespace) && @ns.vars[@name] && @ns.vars[@name].apricot_meta
+      on_namespace? && @qualifier.vars[@name] &&
+        @qualifier.vars[@name].apricot_meta
     end
 
     def fn?
-      @ns.is_a?(Namespace) && @ns.fns.include?(@name)
+      on_namespace? && @qualifier.fns.include?(@name)
     end
 
     def method?
-      !@ns.is_a?(Namespace) && @ns.respond_to?(@name)
+      !on_namespace? && @qualifier.respond_to?(@name)
     end
   end
 end

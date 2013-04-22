@@ -33,7 +33,7 @@ module Apricot
     # at the top level, so look up the variable on the current namespace.
     def find_var(name, depth = nil)
       # Ignore depth, it has no bearing on namespace lookups.
-      NamespaceReference.new(name, Apricot.current_namespace)
+      QualifiedReference.new(name, Apricot.current_namespace)
     end
 
     # A (recur) is looking for a recursion target. Since this is the top

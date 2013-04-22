@@ -79,7 +79,7 @@ module Apricot
           elsif form == SELF
             g.push_self
           elsif form.qualified?
-            NamespaceReference.new(form.unqualified_name, form.ns).bytecode(g)
+            QualifiedReference.new(form.unqualified_name, form.qualifier).bytecode(g)
           else
             g.scope.find_var(form.name).bytecode(g)
           end
@@ -135,8 +135,8 @@ module Apricot
             end
 
             if callee.fn? || callee.method?
-              ns_id = Identifier.intern(callee.ns.name)
-              first_name, *rest_names = ns_id.const_names
+              qualifier_id = Identifier.intern(callee.qualifier.name)
+              first_name, *rest_names = qualifier_id.const_names
 
               g.push_const first_name
               rest_names.each {|n| g.find_const(n) }

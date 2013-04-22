@@ -19,10 +19,10 @@ module Apricot
         @const_names = @name.to_s.split('::').map(&:to_sym)
       elsif @name =~ /\A(.+?)\/(.+)\z/
         @qualified = true
-        ns_id = Identifier.intern($1)
-        raise 'namespace in identifier must be a constant' unless ns_id.constant?
+        qualifier_id = Identifier.intern($1)
+        raise 'Qualifier in qualified identifier must be a constant' unless qualifier_id.constant?
 
-        @ns = ns_id.const_names.reduce(Object) do |mod, name|
+        @qualifier = qualifier_id.const_names.reduce(Object) do |mod, name|
           mod.const_get(name)
         end
 
@@ -36,32 +36,28 @@ module Apricot
       @qualified
     end
 
-    def unqualified_name
-      @unqualified_name
-    end
-
     def constant?
       @constant
     end
 
-    # Is the identifier a fn on its namespace?
+    # Does the identifier reference a fn on a namespace?
     def fn?
-      ns.is_a?(Namespace) && ns.fns.include?(@unqualified_name)
+      qualifier.is_a?(Namespace) && qualifier.fns.include?(@unqualified_name)
     end
 
-    # is the identifier a method on its module?
+    # Does the identifier reference a method on a module?
     def method?
-      !ns.is_a?(Namespace) && ns.respond_to?(@unqualified_name)
+      !qualifier.is_a?(Namespace) && qualifier.respond_to?(@unqualified_name)
     end
 
     # Get the metadata of the object this identifier references, or nil.
     def meta
-      ns.is_a?(Namespace) && ns.vars[@unqualified_name] &&
-        ns.vars[@unqualified_name].apricot_meta
+      qualifier.is_a?(Namespace) && qualifier.vars[@unqualified_name] &&
+        qualifier.vars[@unqualified_name].apricot_meta
     end
 
-    def ns
-      @ns ||= Apricot.current_namespace
+    def qualifier
+      @qualifier ||= Apricot.current_namespace
     end
 
     def const_names
