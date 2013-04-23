@@ -266,46 +266,51 @@ describe Apricot::Reader do
     read_one('`1').should == 1
     read_one('`~1').should == 1
 
+    apply = Identifier.intern(:apply)
+    concat = Identifier.intern(:concat)
+    list = Identifier.intern(:list)
+    quote = Identifier.intern(:quote)
+
     begin
       old_gensym = Apricot.instance_variable_get :@gensym
       Apricot.instance_variable_set :@gensym, 41
 
       read_one("`(foo ~bar ~@baz quux#)").should ==
-        List[Identifier.intern(:concat),
-          List[Identifier.intern(:list),
-            List[Identifier.intern(:quote),
+        List[concat,
+          List[list,
+            List[quote,
               Identifier.intern(:foo)]],
-          List[Identifier.intern(:list),
+          List[list,
             Identifier.intern(:bar)],
           Identifier.intern(:baz),
-          List[Identifier.intern(:list),
-            List[Identifier.intern(:quote),
+          List[list,
+            List[quote,
               Identifier.intern(:'quux#__42')]]]
     ensure
       Apricot.instance_variable_set :@gensym, old_gensym
     end
 
     read_one('`[~a]').should ==
-      List[Identifier.intern(:apply),
+      List[apply,
         Identifier.intern(:array),
-        List[Identifier.intern(:concat),
-          List[Identifier.intern(:list),
+        List[concat,
+          List[list,
             Identifier.intern(:a)]]]
 
     read_one('`{:a ~b}').should ==
-      List[Identifier.intern(:apply),
+      List[apply,
         Identifier.intern(:hash),
-        List[Identifier.intern(:concat),
-          List[Identifier.intern(:list),
+        List[concat,
+          List[list,
             :a],
-            List[Identifier.intern(:list),
+            List[list,
               Identifier.intern(:b)]]]
 
     read_one('`#{~a}').should ==
-      List[Identifier.intern(:apply),
+      List[apply,
         Identifier.intern(:'hash-set'),
-        List[Identifier.intern(:concat),
-          List[Identifier.intern(:list),
+        List[concat,
+          List[list,
             Identifier.intern(:a)]]]
   end
 
