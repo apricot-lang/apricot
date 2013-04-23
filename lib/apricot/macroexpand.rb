@@ -18,7 +18,7 @@ module Apricot
 
     name = callee.name
     name_s = name.to_s
-    args = form.tail
+    args = form.rest
 
     # Handle the (.method receiver args*) send expression form
     if name.length > 1 && name != :'..' && name_s.start_with?('.')
@@ -26,7 +26,7 @@ module Apricot
 
       dot = Identifier.intern(:'.')
       method = Identifier.intern(name_s[1..-1])
-      return List[dot, args.first, method, *args.tail]
+      return List[dot, args.first, method, *args.rest]
     end
 
     # Handle the (Class. args*) shorthand new form
