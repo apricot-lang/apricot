@@ -152,19 +152,21 @@ module Apricot
     end
 
     def read_quote
+      line = @line
       next_char # skip the '
       skip_whitespace
       incomplete_error "Unexpected end of program after quote ('), expected a form" unless @char
 
-      with_location List[QUOTE, read_form]
+      with_location List[QUOTE, read_form], line
     end
 
     def read_syntax_quote
+      line = @line
       next_char # skip the `
       skip_whitespace
       incomplete_error "Unexpected end of program after syntax quote (`), expected a form" unless @char
 
-      with_location syntax_quote(read_form, {})
+      with_location syntax_quote(read_form, {}), line
     end
 
     def syntax_quote(form, gensyms)
@@ -216,6 +218,7 @@ module Apricot
     end
 
     def read_unquote
+      line = @line
       unquote_type = UNQUOTE
       next_char # skip the ~
 
@@ -231,7 +234,7 @@ module Apricot
         incomplete_error "Unexpected end of program after #{syntax}, expected a form"
       end
 
-      with_location List[unquote_type, read_form]
+      with_location List[unquote_type, read_form], line
     end
 
     def read_fn
@@ -251,25 +254,29 @@ module Apricot
     end
 
     def read_list
+      line = @line
       next_char # skip the (
-      with_location read_forms_until(')').to_list
+      with_location read_forms_until(')').to_list, line
     end
 
     def read_array
+      line = @line
       next_char # skip the [
-      with_location read_forms_until(']')
+      with_location read_forms_until(']'), line
     end
 
     def read_hash
+      line = @line
       next_char # skip the {
       forms = read_forms_until('}')
       syntax_error "Odd number of forms in key-value hash" if forms.count.odd?
-      with_location hashify(forms)
+      with_location hashify(forms), line
     end
 
     def read_set
+      line = @line
       next_char # skip the {
-      with_location read_forms_until('}').to_set
+      with_location read_forms_until('}').to_set, line
     end
 
     def read_string
@@ -443,6 +450,7 @@ module Apricot
     end
 
     def read_identifier
+      line = @line
       identifier = ""
 
       while @char =~ IDENTIFIER
@@ -462,17 +470,17 @@ module Apricot
       if state && identifier[0] == '%'
         case identifier[1..-1]
         when '' # % is equivalent to %1
-          state.args[0] ||= with_location Apricot.gensym('p1')
+          state.args[0] ||= with_location Apricot.gensym('p1'), line
         when '&'
-          state.rest ||= with_location Apricot.gensym('rest')
+          state.rest ||= with_location Apricot.gensym('rest'), line
         when /^[1-9]\d*$/
           n = identifier[1..-1].to_i
-          state.args[n - 1] ||= with_location Apricot.gensym("p#{n}")
+          state.args[n - 1] ||= with_location Apricot.gensym("p#{n}"), line
         else
           syntax_error "arg literal must be %, %& or %integer"
         end
       else
-        with_location Identifier.intern(identifier)
+        with_location Identifier.intern(identifier), line
       end
     end
 
@@ -484,7 +492,7 @@ module Apricot
       while @char
         if @char == '|'
           next_char # consume the |
-          return with_location Identifier.intern(identifier)
+          return with_location Identifier.intern(identifier), line
         end
 
         identifier << read_string_char
@@ -522,7 +530,7 @@ module Apricot
       raise SyntaxError.new(@filename, @line, message, true)
     end
 
-    def with_location(obj, line = @line)
+    def with_location(obj, line)
       obj.apricot_meta = {line: line}
       obj
     end
