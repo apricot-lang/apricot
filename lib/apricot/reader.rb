@@ -177,7 +177,7 @@ module Apricot
         elsif is_unquote_splicing? form
           syntax_error "splicing unquote (~@) not in list"
         else
-          cons(CONCAT, syntax_quote_list(form, gensyms))
+          syntax_quote_list(form, gensyms)
         end
       when Array
         syntax_quote_coll(:array, form, gensyms)
@@ -201,12 +201,12 @@ module Apricot
 
     def syntax_quote_coll(creator_name, elements, gensyms)
       creator = Identifier.intern(creator_name)
-      list = cons(CONCAT, syntax_quote_list(elements, gensyms))
+      list = syntax_quote_list(elements, gensyms)
       List[APPLY, creator, list]
     end
 
     def syntax_quote_list(elements, gensyms)
-      elements.map do |form|
+      parts = elements.map do |form|
         if is_unquote? form
           List[LIST, form.rest.first]
         elsif is_unquote_splicing? form
@@ -214,7 +214,9 @@ module Apricot
         else
           List[LIST, syntax_quote(form, gensyms)]
         end
-      end.to_list
+      end
+
+      Cons.new(CONCAT, parts)
     end
 
     def read_unquote
