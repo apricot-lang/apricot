@@ -43,6 +43,10 @@ module Apricot
       s.first
     end
 
+    def cons(x)
+      Cons.new(x, self)
+    end
+
     def <=>(other)
       return unless other.is_a?(Seq) || other.nil?
       s, o = self, other
