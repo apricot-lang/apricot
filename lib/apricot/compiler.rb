@@ -76,8 +76,8 @@ module Apricot
     def eval(code, file = "(eval)", line = 1)
       forms = Reader.read_string(code, file,line)
 
-      forms[0..-2].each do |node|
-        new_eval(node, file, line)
+      forms[0..-2].each do |form|
+        eval_form(form, file, line)
       end
 
       # Return the result of the last form in the program.
