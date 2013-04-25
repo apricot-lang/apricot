@@ -76,6 +76,8 @@ module Apricot
     def eval(code, file = "(eval)", line = 1)
       forms = Reader.read_string(code, file,line)
 
+      return nil if forms.empty?
+
       forms[0..-2].each do |form|
         eval_form(form, file, line)
       end
