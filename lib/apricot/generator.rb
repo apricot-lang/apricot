@@ -1,7 +1,10 @@
 module Apricot
   class Generator < Rubinius::Generator
-    def scopes
-      @scopes ||= []
+    attr_reader :scopes
+
+    def initialize
+      @scopes = []
+      super
     end
 
     def scope
