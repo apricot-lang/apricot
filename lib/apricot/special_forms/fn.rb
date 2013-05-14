@@ -261,6 +261,7 @@ module Apricot
           fn.pop
         end
 
+        fn.tail_position = true
         SpecialForm[:do].bytecode(fn, body)
         fn.ret
 

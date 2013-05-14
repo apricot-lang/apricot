@@ -4,6 +4,7 @@ module Apricot
   SpecialForm.define(:loop) do |g, args|
     # loop and let share a lot of code. See special_forms.rb for the shared
     # definition.
+    g.tail_position = true
     let(g, args, :loop)
   end
 end

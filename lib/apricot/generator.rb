@@ -1,10 +1,14 @@
 module Apricot
   class Generator < Rubinius::Generator
     attr_reader :scopes
+    attr_accessor :tail_position
+
+    alias_method :tail_position?, :tail_position
 
     def initialize
-      @scopes = []
       super
+      @scopes = []
+      @tail_position = false
     end
 
     def scope

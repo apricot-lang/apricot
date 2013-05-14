@@ -156,6 +156,7 @@ module Apricot
                 g.compile_error "Inliner function for '#{callee.name}' raised an exception:\n  #{e}"
               end
 
+              g.tail_position = false
               bytecode(g, inlined_form)
               return
             end
@@ -174,6 +175,7 @@ module Apricot
           end
 
           # Handle everything else
+          g.tail_position = false
           bytecode(g, callee)
           args.each {|arg| bytecode(g, arg) }
           g.send :apricot_call, args.count

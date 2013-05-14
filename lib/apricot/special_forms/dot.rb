@@ -10,6 +10,8 @@ module Apricot
   SpecialForm.define(:'.') do |g, args|
     g.compile_error "Too few arguments to send expression, expecting (. receiver method ...)" if args.count < 2
 
+    g.tail_position = false
+
     # TODO: Don't convert to an array, just deal with the List.
     args = args.to_a
 

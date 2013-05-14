@@ -8,12 +8,17 @@ module Apricot
     else_label = g.new_label
     end_label = g.new_label
 
+    tail_position = g.tail_position?
+
+    g.tail_position = false
     Compiler.bytecode(g, cond)
     g.gif else_label
 
+    g.tail_position = tail_position
     Compiler.bytecode(g, body)
     g.goto end_label
 
+    g.tail_position = tail_position
     else_label.set!
     if else_body
       Compiler.bytecode(g, else_body)
