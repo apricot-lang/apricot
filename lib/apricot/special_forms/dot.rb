@@ -45,7 +45,7 @@ module Apricot
       g.compile_error "Incorrect use of | in send expression" if arg.name == :|
     end
 
-    Compiler.bytecode(g ,receiver)
+    Compiler.bytecode(g, receiver)
 
     if block_arg || splat_arg
       args.each {|a| Compiler.bytecode(g, a) }
