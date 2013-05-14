@@ -270,23 +270,23 @@ module Apricot
 
         # Pop the overload scope
         fn.scopes.pop
-        end
-
-        fn.close
-
-        # Use the maximum total args
-        fn.total_args = overloads.last.arglist.num_total
-        # Use the minimum required args
-        fn.required_args = overloads.first.arglist.num_required
-
-        # If there is a rest arg, it will appear after all the required and
-        # optional arguments.
-        fn.splat_index = overloads.last.arglist.num_total if overloads.last.arglist.rest_arg
-
-        g.push_const :Kernel
-        g.create_block fn
-        g.send_with_block :lambda, 0
-        g.set_local fn_scope.self_reference.slot if fn_name
       end
+
+      fn.close
+
+      # Use the maximum total args
+      fn.total_args = overloads.last.arglist.num_total
+      # Use the minimum required args
+      fn.required_args = overloads.first.arglist.num_required
+
+      # If there is a rest arg, it will appear after all the required and
+      # optional arguments.
+      fn.splat_index = overloads.last.arglist.num_total if overloads.last.arglist.rest_arg
+
+      g.push_const :Kernel
+      g.create_block fn
+      g.send_with_block :lambda, 0
+      g.set_local fn_scope.self_reference.slot if fn_name
     end
   end
+end
