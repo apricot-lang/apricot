@@ -191,6 +191,8 @@
   ([x & args]
    (.reduce args (.apricot_str x) | #(.concat %1 (.apricot_str %2)))))
 
+(def format Kernel/format)
+
 (defn print
   "Print the object(s) to standard output."
   [& args] (Kernel/print (apply str args)))
