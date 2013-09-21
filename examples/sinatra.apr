@@ -1,0 +1,9 @@
+(require-ruby "sinatra")
+
+(defmacro get [route & body]
+  `(.send MAIN :get ~route | (fn ~@body)))
+
+(get "/hello/:name" [name]
+  (str "Hello " name))
+
+(.run! Sinatra::Application)
