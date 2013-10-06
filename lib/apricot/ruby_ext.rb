@@ -1,5 +1,9 @@
 class Object
-  attr_accessor :apricot_meta
+  attr_reader :apricot_meta
+
+  def apricot_meta=(meta)
+    @apricot_meta = meta unless frozen?
+  end
 
   def apricot_inspect
     inspect
