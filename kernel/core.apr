@@ -157,7 +157,7 @@
   "Return a new identifier with a unique name. If a prefix string is supplied,
   the name is prefix__# where # is some unique number. If prefix is not
   supplied, the prefix is 'g'."
-  [[prefix "g"]]
+  [? (prefix "g")]
   (identifier (.gensym Apricot prefix)))
 
 (defn require-ruby
@@ -826,7 +826,7 @@
 
   If test is true, evaluate then with var bound to the value of test,
   otherwise yield else."
-  [bindings then [else nil]]
+  [bindings then ? (else nil)]
   `(let [temp# ~(bindings 1)]
      (if temp#
        (let [~(bindings 0) temp#]
@@ -894,7 +894,7 @@
 (defn read
   "Read the next object from io, which must be an instance of IO. The default
   io is stdin."
-  [[io STDIN]]
+  [? (io STDIN)]
   (.read_one (Apricot::Reader. io)))
 
 (defn read-string
@@ -965,7 +965,7 @@
   "Sets *ns* to the namespace named by name (unevaluated), creating it if
   needed. Optionally takes a uses clause like (:use Foo Bar Baz) to important
   vars from other namespaces."
-  [ns-sym [uses nil]]
+  [ns-sym ? (uses nil)]
   `(do
      (in-ns '~ns-sym)
      ~(if (not= ns-sym 'Apricot::Core)

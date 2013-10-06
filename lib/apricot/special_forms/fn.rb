@@ -5,48 +5,97 @@ module Apricot
         :num_required, :num_optional, :num_total
 
       def initialize(args, g)
+        state = :required
+
         @required_args = []
         @optional_args = []
         @rest_arg = nil
         @block_arg = nil
 
-        next_is_rest = false
-        next_is_block = false
-
         args.each do |arg|
-          g.compile_error "Unexpected arguments after block argument" if @block_arg
+          # Check if we got one of the special identifiers which moves us to a
+          # different part of the argument list. If so, move to the new state
+          # and skip to the next argument. Also check that the current state
+          # is allowed to move to the new state (the arguments must come in a
+          # strict order: required, optional, rest, block).
+          if arg.is_a? Identifier
+            case arg.name
+            # '?' starts the optional arguments section.
+            when :'?'
+              case state
+              when :required
+                state = :start_optional
+                next
+              else
+                g.compile_error "Unexpected '?' in argument list"
+              end
 
-          case arg
-          when Array
-            g.compile_error "Arguments in fn form must be identifiers" unless arg.first.is_a? Identifier
-            g.compile_error "Optional argument in fn form is missing default value" unless arg.length == 2
+            # '&' precedes the rest argument.
+            when :&
+              case state
+              when :required, :optional
+                state = :rest
+                next
+              else
+                g.compile_error "Unexpected '&' in argument list"
+              end
 
-            optional_args << [arg[0].name, arg[1]]
-          when Identifier
-            if arg.name == :& && !@block_arg
-              g.compile_error "Can't have two rest arguments in one overload" if @rest_arg
-              next_is_rest = true
-            elsif arg.name == :|
-              g.compile_error "Can't have two block arguments in one overload" if @block_arg
-              next_is_block = true
-            elsif next_is_rest
-              @rest_arg = arg.name
-              next_is_rest = false
-            elsif next_is_block
-              @block_arg = arg.name
-              next_is_block = false
-            else
-              g.compile_error "Unexpected arguments after rest argument" if @rest_arg
-              g.compile_error "Optional arguments in fn form must be last" if @optional_args.any?
-              @required_args << arg.name
+            # '|' precedes the block argument.
+            when :|
+              case state
+              when :required, :optional, :after_rest
+                state = :block
+                next
+              else
+                g.compile_error "Unexpected '|' in argument list"
+              end
             end
-          else
-            g.compile_error "Arguments in fn form must be identifiers or 2-element arrays"
+          end
+
+          # Deal with the argument based on the current state.
+          case state
+          when :required
+            g.compile_error "Required argument in argument list must be an identifier" unless arg.is_a? Identifier
+            @required_args << arg.name
+
+          when :optional, :start_optional
+            unless arg.is_a?(Seq) && arg.count == 2 && arg.first.is_a?(Identifier)
+              g.compile_error "Optional argument in argument list must be of the form (name default)"
+            end
+
+            state = :optional
+            @optional_args << [arg.first.name, arg.rest.first]
+
+          when :rest
+            g.compile_error "Rest argument in argument list must be an identifier" unless arg.is_a? Identifier
+            @rest_arg = arg.name
+            state = :after_rest
+
+          when :block
+            g.compile_error "Block argument in argument list must be an identifier" unless arg.is_a? Identifier
+            @block_arg = arg.name
+            state = :after_block
+
+          when :after_rest
+            g.compile_error "Unexpected argument after rest argument"
+
+          when :after_block
+            g.compile_error "Unexpected arguments after block argument"
           end
         end
 
-        g.compile_error "Expected identifier following & in argument list" if next_is_rest
-        g.compile_error "Expected identifier following | in argument list" if next_is_block
+        # Check if we finished in the middle of things without getting an
+        # argument where we expected one.
+        case state
+        when :start_optional
+          g.compile_error "Expected optional arguments after '?' in argument list"
+
+        when :rest
+          g.compile_error "Expected rest argument after '&' in argument list"
+
+        when :block
+          g.compile_error "Expected block argument after '|' in argument list"
+        end
 
         @num_required = @required_args.length
         @num_optional = @optional_args.length

@@ -9,13 +9,13 @@ describe 'Apricot' do
   end
 
   it 'compiles fn forms with optional arguments' do
-    apr('((fn [[x 42]] x))').should == 42
-    apr('((fn [[x 42]] x) 0)').should == 0
-    apr('((fn [x [y 2]] [x y]) 1)').should == [1, 2]
-    apr('((fn [x [y 2]] [x y]) 3 4)').should == [3, 4]
-    apr('((fn [[x 1] [y 2]] [x y]))').should == [1, 2]
-    apr('((fn [[x 1] [y 2]] [x y]) 3)').should == [3, 2]
-    apr('((fn [[x 1] [y 2]] [x y]) 3 4)').should == [3, 4]
+    apr('((fn [? (x 42)] x))').should == 42
+    apr('((fn [? (x 42)] x) 0)').should == 0
+    apr('((fn [x ? (y 2)] [x y]) 1)').should == [1, 2]
+    apr('((fn [x ? (y 2)] [x y]) 3 4)').should == [3, 4]
+    apr('((fn [? (x 1) (y 2)] [x y]))').should == [1, 2]
+    apr('((fn [? (x 1) (y 2)] [x y]) 3)').should == [3, 2]
+    apr('((fn [? (x 1) (y 2)] [x y]) 3 4)').should == [3, 4]
   end
 
   it 'compiles fn forms with splat arguments' do
@@ -27,9 +27,9 @@ describe 'Apricot' do
   end
 
   it 'compiles fn forms with optional and splat arguments' do
-    apr('((fn [x [y 2] & z] [x y z]) 1)').should == [1, 2, []]
-    apr('((fn [x [y 2] & z] [x y z]) 1 3)').should == [1, 3, []]
-    apr('((fn [x [y 2] & z] [x y z]) 1 3 4 5)').should == [1, 3, [4, 5]]
+    apr('((fn [x ? (y 2) & z] [x y z]) 1)').should == [1, 2, []]
+    apr('((fn [x ? (y 2) & z] [x y z]) 1 3)').should == [1, 3, []]
+    apr('((fn [x ? (y 2) & z] [x y z]) 1 3 4 5)').should == [1, 3, [4, 5]]
   end
 
   it 'compiles fn forms with block arguments' do
@@ -59,19 +59,26 @@ describe 'Apricot' do
   it 'does not compile invalid fn forms' do
     bad_apr '(fn :foo)'
     bad_apr '(fn [1])'
-    bad_apr '(fn [[x 1] y])'
-    bad_apr '(fn [[1 1]])'
-    bad_apr '(fn [[x]])'
+    bad_apr '(fn [?])'
+    bad_apr '(fn [? (x 1) y])'
+    bad_apr '(fn [? (1 1)])'
+    bad_apr '(fn [? (x)])'
     bad_apr '(fn [&])'
+    bad_apr '(fn [? &])'
+    bad_apr '(fn [& ?])'
+    bad_apr '(fn [& rest ? (opt 1)])'
     bad_apr '(fn [& x y])'
     bad_apr '(fn [x x])'
     bad_apr '(fn [x & rest1 & rest2])'
     bad_apr '(fn [a b x c d x e f])'
-    bad_apr '(fn [a x b [x 1]])'
+    bad_apr '(fn [a x b ? (x 1)])'
     bad_apr '(fn [a b x c d & x])'
-    bad_apr '(fn [a b c [x 1] [y 2] [x 3]])'
-    bad_apr '(fn [a b [x 1] & x])'
+    bad_apr '(fn [a b c ? (x 1) (y 2) (x 3)])'
+    bad_apr '(fn [a b ? (x 1) & x])'
     bad_apr '(fn [|])'
+    bad_apr '(fn [? |])'
+    bad_apr '(fn [| ?])'
+    bad_apr '(fn [| block ? (opt 1)])'
     bad_apr '(fn [| &])'
     bad_apr '(fn [| & a])'
     bad_apr '(fn [| a &])'
@@ -85,7 +92,7 @@ describe 'Apricot' do
   it 'compiles arity-overloaded fn forms' do
     apr('((fn ([] 0)))').should == 0
     apr('((fn ([x] x)) 42)').should == 42
-    apr('((fn ([[x 42]] x)))').should == 42
+    apr('((fn ([? (x 42)] x)))').should == 42
     apr('((fn ([& rest] rest)) 1 2 3)').should == [1, 2, 3]
     apr('((fn ([] 0) ([x] x)))').should == 0
     apr('((fn ([] 0) ([x] x)) 42)').should == 42
@@ -136,17 +143,17 @@ describe 'Apricot' do
   it 'does not compile invalid arity-overloaded fn forms' do
     bad_apr '(fn ([] 1) :foo)'
     bad_apr '(fn ([] 1) ([] 2))'
-    bad_apr '(fn ([[o 1]] 1) ([] 2))'
-    bad_apr '(fn ([] 1) ([[o 2]] 2))'
-    bad_apr '(fn ([[o 1]] 1) ([[o 2]] 2))'
-    bad_apr '(fn ([x [o 1]] 1) ([x] 2))'
-    bad_apr '(fn ([x [o 1]] 1) ([[o 2]] 2))'
-    bad_apr '(fn ([x y z [o 1]] 1) ([x y z & rest] 2))'
-    bad_apr '(fn ([x [o 1] [p 2] [q 3]] 1) ([x y z] 2))'
+    bad_apr '(fn ([? (o 1)] 1) ([] 2))'
+    bad_apr '(fn ([] 1) ([? (o 2)] 2))'
+    bad_apr '(fn ([? (o 1)] 1) ([? (o 2)] 2))'
+    bad_apr '(fn ([x ? (o 1)] 1) ([x] 2))'
+    bad_apr '(fn ([x ? (o 1)] 1) ([? (o 2)] 2))'
+    bad_apr '(fn ([x y z ? (o 1)] 1) ([x y z & rest] 2))'
+    bad_apr '(fn ([x ? (o 1) (p 2) (q 3)] 1) ([x y z] 2))'
     bad_apr '(fn ([x & rest] 1) ([x y] 2))'
-    bad_apr '(fn ([x & rest] 1) ([x [o 1]] 2))'
-    bad_apr '(fn ([x [o 1] & rest] 1) ([x] 2))'
-    bad_apr '(fn ([[x 1] [y 2]] 3) ([x & y] 4))'
+    bad_apr '(fn ([x & rest] 1) ([x ? (o 1)] 2))'
+    bad_apr '(fn ([x ? (o 1) & rest] 1) ([x] 2))'
+    bad_apr '(fn ([? (x 1) (y 2)] 3) ([x & y] 4))'
   end
 
   it 'compiles fn forms with self-reference' do
@@ -180,7 +187,7 @@ describe 'Apricot' do
 
   it 'compiles recur forms in fns with optional arguments' do
     apr(<<-CODE).should == 150
-      ((fn [x y [mult 10]]
+      ((fn [x y ? (mult 10)]
          (if (. x > 0)
            (recur (. x - 1) (. y + x) mult)
            (* y mult)))
@@ -188,7 +195,7 @@ describe 'Apricot' do
     CODE
 
     apr(<<-CODE).should == 300
-      ((fn [x y [mult 10]]
+      ((fn [x y ? (mult 10)]
          (if (. x > 0)
            (recur (. x - 1) (. y + x) mult)
            (* y mult)))
