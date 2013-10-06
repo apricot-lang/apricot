@@ -1,5 +1,5 @@
 module Apricot
-  class Generator < Rubinius::Generator
+  class Generator < Rubinius::ToolSet::Runtime::Generator
     attr_reader :scopes
     attr_accessor :tail_position
 

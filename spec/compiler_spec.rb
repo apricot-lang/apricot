@@ -53,7 +53,7 @@ describe 'Apricot' do
 
   it 'compiles constants' do
     apr('Array').should == Array
-    apr('Rubinius::Compiler').should == Rubinius::Compiler
+    apr('Enumerable::Enumerator').should == Enumerable::Enumerator
   end
 
   it 'compiles call forms with data structures' do

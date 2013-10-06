@@ -41,7 +41,7 @@ module Apricot
       cc = generate(Reader.read_file(file), file, 1, true)
 
       if Rubinius::CodeLoader.save_compiled?
-        compiled_name = Rubinius::Compiler.compiled_name(file)
+        compiled_name = Rubinius::ToolSet::Runtime::Compiler.compiled_name(file)
 
         dir = File.dirname(compiled_name)
 
@@ -58,7 +58,7 @@ module Apricot
           end
         end
 
-        Rubinius::CompiledFile.dump cc, compiled_name,
+        Rubinius::ToolSet::Runtime::CompiledFile.dump cc, compiled_name,
           Rubinius::Signature, Rubinius::RUBY_LIB_VERSION
       end
 

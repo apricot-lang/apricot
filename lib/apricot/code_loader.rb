@@ -32,7 +32,7 @@ module Apricot
     end
 
     def load_file(path)
-      compiled_name = Rubinius::Compiler.compiled_name(path)
+      compiled_name = Rubinius::ToolSet::Runtime::Compiler.compiled_name(path)
 
       stat = File::Stat.stat path
       compiled_stat = File::Stat.stat compiled_name

@@ -1,5 +1,5 @@
-unless RUBY_VERSION.start_with?("1.9") && RUBY_ENGINE == "rbx" && Rubinius::VERSION.start_with?("2.0")
-  $stderr.puts "Apricot must be run on Rubinius 2.0 in Ruby 1.9 mode."
+unless RUBY_VERSION.start_with?("2") && RUBY_ENGINE == "rbx" && Rubinius::VERSION.start_with?("2")
+  $stderr.puts "Apricot must be run on the stable Rubinius 2.0.0 release or newer."
   exit 1
 end
 
