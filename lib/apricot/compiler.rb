@@ -34,6 +34,13 @@ module Apricot
       g.encode
       cc = g.package(Rubinius::CompiledCode)
       cc.scope = Rubinius::ConstantScope.new(Object)
+
+      # We must mark the bytecode as depending on all currently loaded files,
+      # since if it uses macros from a file, and that file is changed, this
+      # bytecode may also need updating.
+      cc.add_metadata :dependencies,
+        CodeLoader::LOADED_APR_FILES.join(File::PATH_SEPARATOR)
+
       cc
     end
 

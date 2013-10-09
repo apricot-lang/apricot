@@ -10,6 +10,8 @@ module Apricot
   module CodeLoader
     module_function
 
+    LOADED_APR_FILES = []
+
     def load(path)
       full_path = find_source(path)
       raise LoadError, "no such file to load -- #{path}" unless full_path
@@ -27,23 +29,41 @@ module Apricot
       else
         load_file full_path
         $LOADED_FEATURES << full_path
+        LOADED_APR_FILES << full_path
         true
       end
+    end
+
+    # Check if the second file is newer than the first.
+    def file_newer?(path, compiled_name)
+      stat = File::Stat.stat(path)
+      compiled_stat = File::Stat.stat(compiled_name)
+
+      stat && compiled_stat && stat.mtime < compiled_stat.mtime
+    end
+
+    # Check that none of the dependencies of the compiled code have changed
+    # since it was compiled.
+    def dependencies_unchanged?(compiled_code, path)
+      deps = compiled_code.get_metadata(:dependencies)
+      return false unless deps.is_a?(String)
+      dep_paths = deps.split(File::PATH_SEPARATOR)
+      dep_paths.all? {|dep| file_newer?(dep, path) }
     end
 
     def load_file(path)
       compiled_name = Rubinius::ToolSet::Runtime::Compiler.compiled_name(path)
 
-      stat = File::Stat.stat path
-      compiled_stat = File::Stat.stat compiled_name
-
       # Try to load the cached bytecode if it exists and is newer than the
-      # source file.
-      if stat && compiled_stat && stat.mtime < compiled_stat.mtime
+      # source file and dependencies.
+      if file_newer?(path, compiled_name)
         begin
+          compiled_name = Rubinius::ToolSet::Runtime::Compiler.compiled_name(path)
+
           code = Rubinius.invoke_primitive :compiledfile_load, compiled_name,
             Rubinius::Signature, Rubinius::RUBY_LIB_VERSION
-          usable = true
+
+          usable = dependencies_unchanged?(code, compiled_name)
         rescue Rubinius::Internal
           usable = false
         end
@@ -96,9 +116,8 @@ module Apricot
 
     # Returns true if the path exists, is a regular file, and is readable.
     def loadable?(path)
-      @stat = File::Stat.stat path
-      return false unless @stat
-      @stat.file? and @stat.readable?
+      stat = File::Stat.stat path
+      stat && stat.file? && stat.readable?
     end
 
     def loaded?(path)
