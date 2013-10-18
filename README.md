@@ -7,16 +7,14 @@ Try to contain your excitement, please.
 
 ## Install
 
-First of all, you're going to need Rubinius. I recommend installing the latest
-Rubinius with Ruby 1.9-mode default from [RVM](https://rvm.io/).
+First of all, you're going to need Rubinius. If you're using
+[RVM](https://rvm.io/):
 
 ``` sh
-$ rvm install rbx-head --1.9
+$ rvm install rbx
 $ rvm use rbx
 $ gem install apricot
 ```
-
-To use Apricot you must be running Rubinius in Ruby 1.9 mode.
 
 
 ## The REPL
