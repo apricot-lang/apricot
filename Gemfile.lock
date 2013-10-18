@@ -10,6 +10,7 @@ GEM
     diff-lcs (1.2.4)
     ffi2-generators (0.1.1)
     minitest (4.7.5)
+    multi_json (1.8.1)
     psych (2.0.1)
     racc (1.4.9)
     rake (10.1.0)
@@ -21,6 +22,7 @@ GEM
     rspec-expectations (2.14.3)
       diff-lcs (>= 1.1.3, < 2.0)
     rspec-mocks (2.14.3)
+    rubinius-coverage (2.0.3)
     rubysl (2.0.7)
       minitest (~> 4.5)
       psych (~> 2.0)
@@ -234,6 +236,10 @@ GEM
     rubysl-xmlrpc (2.0.0)
     rubysl-yaml (2.0.0)
     rubysl-zlib (2.0.0)
+    simplecov (0.7.1)
+      multi_json (~> 1.0)
+      simplecov-html (~> 0.7.1)
+    simplecov-html (0.7.1)
 
 PLATFORMS
   ruby
@@ -242,3 +248,5 @@ DEPENDENCIES
   apricot!
   rake (~> 10.1.0)
   rspec (~> 2.14.0)
+  rubinius-coverage (~> 2.0.3)
+  simplecov (~> 0.7.0)
