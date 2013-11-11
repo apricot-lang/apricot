@@ -32,7 +32,6 @@ module Apricot
     def initialize(io, filename = '(none)', line = 1)
       @filename = filename
       @io = io
-      @location = 0
       @line = line
 
       @fn_state = []
@@ -512,7 +511,6 @@ module Apricot
       @line += 1 if @char == "\n"
       @char = @io.getc
       return nil unless @char
-      @location += 1
       @char
     end
 
