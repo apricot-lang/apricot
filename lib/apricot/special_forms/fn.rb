@@ -273,10 +273,10 @@ module Apricot
 
         next_optional = fn.new_label
 
-        arglist.optional_args.each_with_index do |(name, value), i|
+        arglist.optional_args.each_with_index do |(name, value), j|
           # Calculate the position of this optional arg, off the end of the
           # required args
-          arg_index = arglist.num_required + i
+          arg_index = arglist.num_required + j
 
           # Allocate a slot for this optional argument
           overload_scope.new_local(name)
