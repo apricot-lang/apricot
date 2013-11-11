@@ -402,7 +402,6 @@ module Apricot
     end
 
     def read_symbol
-      line = @line
       next_char # skip the :
       symbol = ""
 
