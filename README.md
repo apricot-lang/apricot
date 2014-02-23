@@ -81,7 +81,7 @@ session with Apricot loaded.
 ## Contact / Bug Reports
 
 If you have any questions don't hesitate to email us or visit us in `#apricot`
-on [freenode](http://freenode.net/) (we are `curtism` and `tsion`). And we'd
+on [freenode](http://freenode.net/) (we are `curtism` and `scott`). And we'd
 really appreciate it if you opened bug reports on the GitHub [issue
 tracker](https://github.com/programble/apricot/issues)!
 
