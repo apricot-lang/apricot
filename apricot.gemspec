@@ -5,7 +5,7 @@ Gem::Specification.new do |s|
   s.name        = "apricot"
   s.version     = Apricot::VERSION
   s.authors     = ["Curtis McEnroe", "Scott Olson"]
-  s.email       = ["programble@gmail.com", "scott@scott-olson.org"]
+  s.email       = ["programble@gmail.com", "scott@solson.me"]
   s.homepage    = "https://github.com/apricot-lang/apricot"
   s.license     = "ISC"
   s.summary     = "A Clojure-like programming language on Rubinius"
