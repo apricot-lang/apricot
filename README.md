@@ -88,9 +88,8 @@ tracker](https://github.com/programble/apricot/issues)!
 
 ## License
 
-Copyright (c) 2012-2013, Curtis McEnroe \<programble@gmail.com>
-
-Copyright (c) 2012-2013, Scott Olson \<scott@scott-olson.org>
+Copyright (c) 2012-2013, Curtis McEnroe \<curtis@cmcenroe.me>  
+Copyright (c) 2012-2013, Scott Olson \<scott@solson.me>
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
