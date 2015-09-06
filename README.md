@@ -1,8 +1,6 @@
 # Apricot [![Gem Version](https://badge.fury.io/rb/apricot.png)](http://badge.fury.io/rb/apricot) [![Build Status](https://secure.travis-ci.org/apricot-lang/apricot.png?branch=master)](http://travis-ci.org/apricot-lang/apricot) [![Dependency Status](https://gemnasium.com/apricot-lang/apricot.png?travis)](https://gemnasium.com/apricot-lang/apricot)
 
-A Clojure-like Lisp on [Rubinius](http://rubini.us/).
-
-Try to contain your excitement, please.
+Apricot is a programming language inspired by Clojure and Lisp that runs on the [Rubinius](http://rubini.us/) VM. Apricot code is compiled to Rubinius bytecode which allows it to call Ruby functions directly (and vice versa).
 
 
 ## Install
