@@ -17,4 +17,4 @@
         (send irc "JOIN " channel)
         (send irc "PRIVMSG " channel " :It works!")))))
 
-(run-bot "apribot" "apr" "Apribot" "#apricot" "irc.freenode.net")
+(run-bot "apribot" "apr" "Apribot" "#apricot" "irc.example.com")

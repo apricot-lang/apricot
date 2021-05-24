@@ -1,4 +1,4 @@
-# Apricot [![Gem Version](https://badge.fury.io/rb/apricot.png)](http://badge.fury.io/rb/apricot) [![Build Status](https://secure.travis-ci.org/apricot-lang/apricot.png?branch=master)](http://travis-ci.org/apricot-lang/apricot) [![Dependency Status](https://gemnasium.com/apricot-lang/apricot.png?travis)](https://gemnasium.com/apricot-lang/apricot)
+# Apricot
 
 Apricot is a programming language inspired by Clojure and Lisp that runs on the [Rubinius](http://rubini.us/) VM. Apricot code is compiled to Rubinius bytecode which allows it to call Ruby functions directly (and vice versa).
 
@@ -76,17 +76,9 @@ You're all set. Run the tests with `rake` and run the bleeding edge REPL with
 session with Apricot loaded.
 
 
-## Contact / Bug Reports
-
-If you have any questions don't hesitate to email us or visit us in `#apricot`
-on [freenode](http://freenode.net/) (we are `curtism` and `scott`). And we'd
-really appreciate it if you opened bug reports on the GitHub [issue
-tracker](https://github.com/programble/apricot/issues)!
-
-
 ## License
 
-Copyright (c) 2012-2013, Curtis McEnroe \<curtis@cmcenroe.me>  
+Copyright (c) 2012-2013, C. McEnroe \<june@causal.agency>  
 Copyright (c) 2012-2013, Scott Olson \<scott@solson.me>
 
 Permission to use, copy, modify, and/or distribute this software for any

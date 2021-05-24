@@ -2,7 +2,7 @@
 
 (doto (Cinch::Bot.)
   (.configure | #(doto %
-                   (.server= "irc.freenode.net")
+                   (.server= "irc.example.com")
                    (.nick= "apribot")
                    (.channels= ["#apricot"])))
 
